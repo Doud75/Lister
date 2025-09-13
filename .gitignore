@@ -1,1 +1,58 @@
+# Fichier .gitignore pour le monorepo SvelteKit + Go
+
+### Fichiers d'environnement #############################
+# Ne jamais commiter les variables d'environnement.
+# Le fichier .env.example est versionné pour servir de modèle.
 .env
+.env.*
+!.env.example
+
+### Dépendances et Fichiers de Build #####################
+# Ignorer les dépendances locales et les artefacts de build.
+
+# Pour le frontend (Node.js / SvelteKit)
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/build/
+frontend/.output/
+frontend/.vercel/
+frontend/.netlify/
+
+# Pour le backend (Go)
+# Les binaires compilés. Le nom 'backend' peut varier selon le nom du module Go.
+backend/backend
+backend/main
+
+### Fichiers de l'IDE #####################################
+# Fichiers de configuration spécifiques aux éditeurs de code.
+
+# JetBrains (GoLand, WebStorm, etc.)
+.idea/
+*.iml
+
+# Visual Studio Code
+.vscode/
+
+### Fichiers Système #####################################
+# Fichiers générés par les systèmes d'exploitation.
+.DS_Store
+Thumbs.db
+
+### Fichiers de Log et de Cache ##########################
+# Logs, fichiers temporaires, caches de build.
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Cache de Vite
+frontend/vite.config.js.timestamp-*
+frontend/vite.config.ts.timestamp-*
+
+### Docker ################################################
+# Données persistantes de Docker, à ne pas commiter.
+# (Note: Le nom du volume est 'postgres-data' dans ton docker-compose.yml)
+# Cette ligne est souvent optionnelle car les volumes sont gérés hors du projet,
+# mais c'est une bonne pratique de l'ajouter.
+postgres-data/
