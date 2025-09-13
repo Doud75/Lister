@@ -102,3 +102,22 @@ func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(item)
 }
+
+func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) {
+	setlistIDStr := r.PathValue("id")
+	setlistID, _ := strconv.Atoi(setlistIDStr)
+
+	var payload service.UpdateOrderPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.SetlistService.UpdateOrder(r.Context(), setlistID, payload); err != nil {
+		writeError(w, "Failed to update setlist order", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Order updated successfully"})
+}

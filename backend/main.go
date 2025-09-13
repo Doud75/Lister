@@ -32,6 +32,10 @@ func main() {
 	songService := service.SongService{SongRepo: songRepo}
 	songHandler := handler.SongHandler{SongService: songService}
 
+	interludeRepo := repository.InterludeRepository{DB: dbPool}
+	interludeService := service.InterludeService{InterludeRepo: interludeRepo}
+	interludeHandler := handler.InterludeHandler{InterludeService: interludeService}
+
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret)
 
 	mux := http.NewServeMux()
@@ -46,9 +50,13 @@ func main() {
 	mux.Handle("GET /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlists)))
 	mux.Handle("GET /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlistDetails)))
 	mux.Handle("POST /api/setlist/{id}/items", authMiddleware(http.HandlerFunc(setlistHandler.AddItem)))
+	mux.Handle("PUT /api/setlist/{id}/items/order", authMiddleware(http.HandlerFunc(setlistHandler.UpdateItemOrder)))
 
 	mux.Handle("POST /api/song", authMiddleware(http.HandlerFunc(songHandler.CreateSong)))
 	mux.Handle("GET /api/song", authMiddleware(http.HandlerFunc(songHandler.GetSongs)))
+
+	mux.Handle("POST /api/interlude", authMiddleware(http.HandlerFunc(interludeHandler.CreateInterlude)))
+	mux.Handle("GET /api/interlude", authMiddleware(http.HandlerFunc(interludeHandler.GetInterludes)))
 
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

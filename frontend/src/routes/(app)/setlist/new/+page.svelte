@@ -4,7 +4,7 @@
     import { enhance } from '$app/forms';
 
     let { form } = $props();
-    let isLoading = false;
+    let isLoading = $state(false);
 </script>
 
 <div class="container mx-auto max-w-2xl px-4 sm:px-6">

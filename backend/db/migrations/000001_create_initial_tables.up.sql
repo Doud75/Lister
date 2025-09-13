@@ -67,7 +67,7 @@ CREATE TABLE setlist_items (
             OR
         (item_type = 'interlude' AND interlude_id IS NOT NULL AND song_id IS NULL)
     ),
-   CONSTRAINT unique_position_in_setlist UNIQUE (setlist_id, position)
+    CONSTRAINT unique_position_in_setlist UNIQUE (setlist_id, position) DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE INDEX idx_songs_band_id_title ON songs(band_id, title);

@@ -1,11 +1,31 @@
 <script lang="ts">
     import { page } from '$app/stores';
+    import { formatDuration } from '$lib/utils/utils';
+    import { dndzone } from 'svelte-dnd-action';
+    import { enhance } from '$app/forms';
 
     let { data } = $props();
-    const { setlistDetails } = data;
     const setlistId = $page.params.id;
 
-    function formatDuration(seconds: number | null | undefined): string {
+    let items = $state(data.setlistDetails.items);
+
+    const totalDurationSeconds = $derived(
+        items.reduce((total, item) => {
+            const duration = item.item_type === 'song' ? item.duration_seconds?.Int32 ?? 0 : 0;
+            return total + duration;
+        }, 0)
+    );
+
+    function handleDndConsider(e: CustomEvent) {
+        items = e.detail.items;
+    }
+
+    function handleDndFinalize(e: CustomEvent) {
+        items = e.detail.items;
+        document.getElementById('order-form')?.requestSubmit();
+    }
+
+    function formatItemDuration(seconds: number | null | undefined): string {
         if (seconds === null || seconds === undefined) return '-';
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
@@ -20,17 +40,19 @@
                 <div class="flex items-center gap-3">
 					<span
                             class="block h-5 w-5 flex-shrink-0 rounded-full"
-                            style="background-color: {setlistDetails.color};"
+                            style="background-color: {data.setlistDetails.color};"
                     ></span>
                     <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        {setlistDetails.name}
+                        {data.setlistDetails.name}
                     </h1>
                 </div>
-                <a
-                        href="/"
-                        class="mt-2 inline-block text-sm text-indigo-500 hover:underline dark:text-indigo-400"
-                >&larr; Back to Dashboard</a
-                >
+                <div class="mt-2 flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                    <a href="/" class="hover:underline">&larr; Back to Dashboard</a>
+                    <span>&bull;</span>
+                    <span
+                    >Total Duration: <span class="font-semibold">{formatDuration(totalDurationSeconds)}</span></span
+                    >
+                </div>
             </div>
             <a
                     href="/setlist/{setlistId}/add"
@@ -42,49 +64,50 @@
     </header>
 
     <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
-        {#if setlistDetails.items && setlistDetails.items.length > 0}
-            <ul class="divide-y divide-slate-200 dark:divide-slate-700">
-                {#each setlistDetails.items as item (item.id)}
-                    <li class="flex items-center justify-between py-4">
-                        <div class="flex items-center gap-4">
-                            <span class="w-8 text-lg font-bold text-slate-400 dark:text-slate-500">{item.position + 1}.</span>
-                            <div>
-                                <p class="font-semibold text-slate-800 dark:text-slate-100">
-                                    {item.title.String}
-                                </p>
-                                {#if item.item_type === 'song'}
-                                    <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                                        <span>Duration: {formatDuration(item.duration_seconds.Int32)}</span>
-                                        {#if item.tempo.Valid}
-                                            <span class="hidden sm:inline">&bull;</span>
-                                            <span>Tempo: {item.tempo.Int32} BPM</span>
-                                        {/if}
-                                    </div>
-                                {/if}
-                                {#if item.notes.Valid && item.notes.String}
-                                    <p class="mt-1 text-sm italic text-slate-600 dark:text-slate-300">
-                                        "{item.notes.String}"
-                                    </p>
-                                {/if}
+        {#if items && items.length > 0}
+            <form id="order-form" method="POST" action="?/updateOrder" use:enhance>
+                <input type="hidden" name="itemIds" value={JSON.stringify(items.map((item) => item.id))} />
+
+                <ul
+                        class="divide-y divide-slate-200 dark:divide-slate-700"
+                        use:dndzone={{ items: items, flipDurationMs: 300 }}
+                        onconsider={handleDndConsider}
+                        onfinalize={handleDndFinalize}
+                >
+                    {#each items as item (item.id)}
+                        <li class="flex items-center justify-between py-3">
+                            <div class="flex flex-grow items-center gap-4">
+                                <div
+                                        class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
+                                        aria-label="Drag to reorder"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"/>
+                                    </svg>
+                                </div>
+
+                                <span class="w-8 text-lg font-bold text-slate-400 dark:text-slate-500">{items.findIndex(i => i.id === item.id) + 1}.</span>
+                                <div>
+                                    <p class="font-semibold text-slate-800 dark:text-slate-100">{item.title.String}</p>
+                                    {#if item.item_type === 'song'}
+                                        <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <span>Duration: {formatItemDuration(item.duration_seconds.Int32)}</span>
+                                            {#if item.tempo.Valid}
+                                                <span class="hidden sm:inline">&bull;</span>
+                                                <span>Tempo: {item.tempo.Int32} BPM</span>
+                                            {/if}
+                                        </div>
+                                    {/if}
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                {/each}
-            </ul>
+                        </li>
+                    {/each}
+                </ul>
+            </form>
         {:else}
             <div class="py-12 text-center">
-                <svg
-                        class="mx-auto h-12 w-12 text-slate-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                >
-                    <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z"
-                    />
+                <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
                 </svg>
                 <h3 class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
                     This setlist is empty

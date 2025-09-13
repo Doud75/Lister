@@ -127,3 +127,25 @@ func (r SetlistRepository) AddItemToSetlist(ctx context.Context, item model.Setl
 
 	return item, err
 }
+
+func (r SetlistRepository) UpdateItemOrder(ctx context.Context, setlistID int, itemIDs []int) error {
+	tx, err := r.DB.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, "SET CONSTRAINTS unique_position_in_setlist DEFERRED"); err != nil {
+		return err
+	}
+
+	query := `UPDATE setlist_items SET position = $1 WHERE id = $2 AND setlist_id = $3`
+
+	for i, id := range itemIDs {
+		if _, err := tx.Exec(ctx, query, i, id, setlistID); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit(ctx)
+}
