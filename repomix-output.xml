@@ -1,0 +1,3256 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+backend/
+  .idea/
+    inspectionProfiles/
+      Project_Default.xml
+    .gitignore
+    backend.iml
+    modules.xml
+  api/
+    handler/
+      info_handler.go
+      setlist_handler.go
+      song_handler.go
+      user_handler.go
+    middleware/
+      auth.go
+    model/
+      band.go
+      interlude.go
+      setlist_item.go
+      setlist.go
+      song.go
+      user.go
+    repository/
+      info_repository.go
+      setlist_repository.go
+      song_repository.go
+      user_repository.go
+    service/
+      setlist_service.go
+      song_service.go
+      user_service.go
+  auth/
+    jwt.go
+    password.go
+  config/
+    config.go
+  db/
+    migrations/
+      000001_create_initial_tables.down.sql
+      000001_create_initial_tables.up.sql
+    database.go
+  Dockerfile
+  go.mod
+  main.go
+  README.md
+frontend/
+  .idea/
+    inspectionProfiles/
+      Project_Default.xml
+    .gitignore
+    frontend.iml
+    modules.xml
+  src/
+    lib/
+      assets/
+        favicon.svg
+      components/
+        ui/
+          Button.svelte
+          Input.svelte
+        PWABadge.svelte
+      index.ts
+    routes/
+      (app)/
+        setlist/
+          [id]/
+            add/
+              +page.server.ts
+              +page.svelte
+            +page.svelte
+            +page.ts
+          new/
+            +page.server.ts
+            +page.svelte
+        song/
+          new/
+            +page.server.ts
+            +page.svelte
+        +layout.svelte
+        +page.svelte
+        +page.ts
+      (auth)/
+        join/
+          +page.server.ts
+          +page.svelte
+        login/
+          +page.server.ts
+          +page.svelte
+        signup/
+          +page.server.ts
+          +page.svelte
+        +layout.svelte
+      api/
+        [...slug]/
+          +server.ts
+      logout/
+        +server.ts
+      +layout.server.ts
+      +layout.svelte
+      +layout.ts
+    app.css
+    app.d.ts
+    app.html
+    hooks.server.ts
+  static/
+    favicon/
+      site.webmanifest
+    robots.txt
+  .gitignore
+  .npmrc
+  .prettierignore
+  .prettierrc
+  Dockerfile
+  eslint.config.js
+  package.json
+  README.md
+  svelte.config.js
+  tsconfig.json
+  vite.config.ts
+.env.example
+.gitignore
+docker-compose.yml
+Makefile
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="backend/.idea/inspectionProfiles/Project_Default.xml">
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="myValues">
+        <value>
+          <list size="1">
+            <item index="0" class="java.lang.String" itemvalue="value" />
+          </list>
+        </value>
+      </option>
+      <option name="myCustomValuesEnabled" value="true" />
+    </inspection_tool>
+    <inspection_tool class="LanguageDetectionInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="2">
+            <item index="0" class="java.lang.String" itemvalue="cssselect2" />
+            <item index="1" class="java.lang.String" itemvalue="tinycss2" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
+</file>
+
+<file path="backend/.idea/.gitignore">
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+</file>
+
+<file path="backend/.idea/backend.iml">
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="Go" enabled="true" />
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
+</file>
+
+<file path="backend/.idea/modules.xml">
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/backend.iml" filepath="$PROJECT_DIR$/.idea/backend.iml" />
+    </modules>
+  </component>
+</project>
+</file>
+
+<file path="backend/api/handler/info_handler.go">
+package handler
+
+import (
+	"encoding/json"
+	"net/http"
+	"setlist/api/middleware"
+	"setlist/api/repository"
+)
+
+type InfoHandler struct {
+	InfoRepo repository.InfoRepository
+}
+
+func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	bandID, ok2 := r.Context().Value(middleware.BandIDKey).(int)
+	if !ok || !ok2 {
+		writeError(w, "Could not identify user from token", http.StatusInternalServerError)
+		return
+	}
+
+	user, err := h.InfoRepo.GetUserByID(r.Context(), userID)
+	if err != nil {
+		writeError(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	band, err := h.InfoRepo.GetBandByID(r.Context(), bandID)
+	if err != nil {
+		writeError(w, "Band not found", http.StatusNotFound)
+		return
+	}
+
+	response := map[string]string{
+		"username":  user.Username,
+		"band_name": band.Name,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+</file>
+
+<file path="backend/api/handler/setlist_handler.go">
+package handler
+
+import (
+	"encoding/json"
+	"net/http"
+	"setlist/api/middleware"
+	"setlist/api/model"
+	"setlist/api/service"
+	"strconv"
+)
+
+type SetlistHandler struct {
+	SetlistService service.SetlistService
+}
+
+func (h SetlistHandler) CreateSetlist(w http.ResponseWriter, r *http.Request) {
+	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
+	if !ok {
+		writeError(w, "Could not identify band from token", http.StatusInternalServerError)
+		return
+	}
+
+	var payload service.CreateSetlistPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	setlist, err := h.SetlistService.Create(r.Context(), payload, bandID)
+	if err != nil {
+		writeError(w, "Failed to create setlist", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(setlist)
+}
+
+func (h SetlistHandler) GetSetlists(w http.ResponseWriter, r *http.Request) {
+	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
+	if !ok {
+		writeError(w, "Could not identify band from token", http.StatusInternalServerError)
+		return
+	}
+
+	setlists, err := h.SetlistService.GetAllForBand(r.Context(), bandID)
+	if err != nil {
+		writeError(w, "Failed to retrieve setlists", http.StatusInternalServerError)
+		return
+	}
+
+	if setlists == nil {
+		setlists = make([]model.Setlist, 0)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(setlists)
+}
+
+func (h SetlistHandler) GetSetlistDetails(w http.ResponseWriter, r *http.Request) {
+	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
+	if !ok {
+		writeError(w, "Could not identify band from token", http.StatusInternalServerError)
+		return
+	}
+
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		writeError(w, "Invalid setlist ID", http.StatusBadRequest)
+		return
+	}
+
+	details, err := h.SetlistService.GetDetails(r.Context(), id, bandID)
+	if err != nil {
+		writeError(w, "Setlist not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(details)
+}
+
+func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) {
+	setlistIDStr := r.PathValue("id")
+	setlistID, _ := strconv.Atoi(setlistIDStr)
+
+	var payload service.AddItemPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	item, err := h.SetlistService.AddItem(r.Context(), setlistID, payload)
+	if err != nil {
+		writeError(w, "Failed to add item to setlist", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(item)
+}
+</file>
+
+<file path="backend/api/handler/song_handler.go">
+package handler
+
+import (
+	"encoding/json"
+	"net/http"
+	"setlist/api/middleware"
+	"setlist/api/service"
+)
+
+type SongHandler struct {
+	SongService service.SongService
+}
+
+func (h SongHandler) CreateSong(w http.ResponseWriter, r *http.Request) {
+	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+
+	var payload service.CreateSongPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	createdSong, err := h.SongService.Create(r.Context(), payload, bandID)
+	if err != nil {
+		writeError(w, "Failed to create song", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdSong)
+}
+
+func (h SongHandler) GetSongs(w http.ResponseWriter, r *http.Request) {
+	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+	songs, err := h.SongService.GetAllForBand(r.Context(), bandID)
+	if err != nil {
+		writeError(w, "Failed to retrieve songs", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(songs)
+}
+</file>
+
+<file path="backend/api/handler/user_handler.go">
+package handler
+
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"setlist/api/repository"
+	"setlist/api/service"
+)
+
+type UserHandler struct {
+	UserService service.UserService
+}
+
+func writeError(w http.ResponseWriter, message string, status int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]string{"error": message})
+}
+
+func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
+	var payload service.AuthPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.UserService.Signup(r.Context(), payload)
+	if err != nil {
+		if errors.Is(err, repository.ErrDuplicateBand) || errors.Is(err, repository.ErrDuplicateUsername) {
+			writeError(w, err.Error(), http.StatusConflict)
+			return
+		}
+		writeError(w, "Failed to register user", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
+}
+
+func (h UserHandler) Join(w http.ResponseWriter, r *http.Request) {
+	var payload service.AuthPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.UserService.Join(r.Context(), payload)
+	if err != nil {
+		if err.Error() == "band not found" {
+			writeError(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		if errors.Is(err, repository.ErrDuplicateUsername) {
+			writeError(w, err.Error(), http.StatusConflict)
+			return
+		}
+		writeError(w, "Failed to join band", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
+}
+
+func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var payload service.LoginPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.UserService.Login(r.Context(), payload)
+	if err != nil {
+		writeError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
+}
+</file>
+
+<file path="backend/api/middleware/auth.go">
+package middleware
+
+import (
+	"context"
+	"net/http"
+	"setlist/auth"
+	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+type ContextKey string
+
+const (
+	UserIDKey ContextKey = "userID"
+	BandIDKey ContextKey = "bandID"
+)
+
+func JWTAuth(jwtSecret string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authHeader := r.Header.Get("Authorization")
+			if authHeader == "" {
+				http.Error(w, "Missing authorization header", http.StatusUnauthorized)
+				return
+			}
+
+			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+			if tokenString == authHeader {
+				http.Error(w, "Invalid token format", http.StatusUnauthorized)
+				return
+			}
+
+			claims := &auth.JWTClaims{}
+			token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+				return []byte(jwtSecret), nil
+			})
+
+			if err != nil || !token.Valid {
+				http.Error(w, "Invalid token", http.StatusUnauthorized)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
+			ctx = context.WithValue(ctx, BandIDKey, claims.BandID)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+</file>
+
+<file path="backend/api/model/band.go">
+package model
+
+import "time"
+
+type Band struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+}
+</file>
+
+<file path="backend/api/model/interlude.go">
+package model
+
+import (
+	"database/sql"
+	"time"
+)
+
+type Interlude struct {
+	ID              int            `json:"id"`
+	BandID          int            `json:"band_id"`
+	Title           string         `json:"title"`
+	Speaker         sql.NullString `json:"speaker"`
+	Script          sql.NullString `json:"script"`
+	DurationSeconds sql.NullInt32  `json:"duration_seconds"`
+	CreatedAt       time.Time      `json:"created_at"`
+}
+</file>
+
+<file path="backend/api/model/setlist_item.go">
+package model
+
+import "database/sql"
+
+type SetlistItem struct {
+	ID                        int            `json:"id"`
+	SetlistID                 int            `json:"setlist_id"`
+	Position                  int            `json:"position"`
+	ItemType                  string         `json:"item_type"`
+	SongID                    sql.NullInt32  `json:"song_id,omitempty"`
+	InterludeID               sql.NullInt32  `json:"interlude_id,omitempty"`
+	Notes                     sql.NullString `json:"notes"`
+	TransitionDurationSeconds int            `json:"transition_duration_seconds"`
+	Title                     sql.NullString `json:"title,omitempty"`
+	DurationSeconds           sql.NullInt32  `json:"duration_seconds,omitempty"`
+	Tempo                     sql.NullInt32  `json:"tempo,omitempty"`
+}
+</file>
+
+<file path="backend/api/model/setlist.go">
+package model
+
+import "time"
+
+type Setlist struct {
+	ID        int       `json:"id"`
+	BandID    int       `json:"band_id"`
+	Name      string    `json:"name"`
+	Color     string    `json:"color"`
+	CreatedAt time.Time `json:"created_at"`
+}
+</file>
+
+<file path="backend/api/model/song.go">
+package model
+
+import (
+	"database/sql"
+	"encoding/json"
+	"time"
+)
+
+type Song struct {
+	ID              int             `json:"id"`
+	BandID          int             `json:"band_id"`
+	Title           string          `json:"title"`
+	DurationSeconds sql.NullInt32   `json:"duration_seconds"`
+	Tempo           sql.NullInt32   `json:"tempo"`
+	SongKey         sql.NullString  `json:"song_key"`
+	Lyrics          sql.NullString  `json:"lyrics"`
+	Chords          sql.NullString  `json:"chords"`
+	AlbumName       sql.NullString  `json:"album_name"`
+	Instrumentation json.RawMessage `json:"instrumentation"`
+	Notes           sql.NullString  `json:"notes"`
+	Links           json.RawMessage `json:"links"`
+	CreatedAt       time.Time       `json:"created_at"`
+}
+</file>
+
+<file path="backend/api/model/user.go">
+package model
+
+import "time"
+
+type User struct {
+	ID           int       `json:"id"`
+	BandID       int       `json:"band_id"`
+	Username     string    `json:"username"`
+	PasswordHash string    `json:"-"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+</file>
+
+<file path="backend/api/repository/info_repository.go">
+package repository
+
+import (
+	"context"
+	"setlist/api/model"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type InfoRepository struct {
+	DB *pgxpool.Pool
+}
+
+func (r InfoRepository) GetBandByID(ctx context.Context, id int) (model.Band, error) {
+	var band model.Band
+	err := r.DB.QueryRow(ctx, `SELECT id, name FROM bands WHERE id = $1`, id).Scan(&band.ID, &band.Name)
+	return band, err
+}
+
+func (r InfoRepository) GetUserByID(ctx context.Context, id int) (model.User, error) {
+	var user model.User
+	err := r.DB.QueryRow(ctx, `SELECT id, username FROM users WHERE id = $1`, id).Scan(&user.ID, &user.Username)
+	return user, err
+}
+</file>
+
+<file path="backend/api/repository/setlist_repository.go">
+package repository
+
+import (
+	"context"
+	"database/sql"
+	"setlist/api/model"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type SetlistRepository struct {
+	DB *pgxpool.Pool
+}
+
+func (r SetlistRepository) CreateSetlist(ctx context.Context, name, color string, bandID int) (model.Setlist, error) {
+	var setlist model.Setlist
+	query := `
+		INSERT INTO setlists (name, color, band_id)
+		VALUES ($1, $2, $3)
+		RETURNING id, band_id, name, color, created_at
+	`
+	err := r.DB.QueryRow(ctx, query, name, color, bandID).Scan(
+		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt,
+	)
+	return setlist, err
+}
+
+func (r SetlistRepository) GetSetlistsByBandID(ctx context.Context, bandID int) ([]model.Setlist, error) {
+	setlists := make([]model.Setlist, 0)
+	query := `
+		SELECT id, band_id, name, color, created_at
+		FROM setlists
+		WHERE band_id = $1
+		ORDER BY created_at DESC
+	`
+	rows, err := r.DB.Query(ctx, query, bandID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var setlist model.Setlist
+		if err := rows.Scan(&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt); err != nil {
+			return setlists, err
+		}
+		setlists = append(setlists, setlist)
+	}
+
+	if err := rows.Err(); err != nil {
+		return setlists, err
+	}
+
+	return setlists, nil
+}
+
+func (r SetlistRepository) GetSetlistByID(ctx context.Context, id int, bandID int) (model.Setlist, error) {
+	var setlist model.Setlist
+	query := `SELECT id, band_id, name, color, created_at FROM setlists WHERE id = $1 AND band_id = $2`
+	err := r.DB.QueryRow(ctx, query, id, bandID).Scan(&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt)
+	return setlist, err
+}
+
+func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setlistID int) ([]model.SetlistItem, error) {
+	items := make([]model.SetlistItem, 0)
+	query := `
+		SELECT
+			si.id, si.setlist_id, si.position, si.item_type,
+			si.song_id, si.interlude_id, si.notes, si.transition_duration_seconds,
+			COALESCE(s.title, i.title) as title,
+			COALESCE(s.duration_seconds, i.duration_seconds) as duration_seconds,
+			s.tempo
+		FROM setlist_items si
+		LEFT JOIN songs s ON si.song_id = s.id
+		LEFT JOIN interludes i ON si.interlude_id = i.id
+		WHERE si.setlist_id = $1
+		ORDER BY si.position ASC
+	`
+	rows, err := r.DB.Query(ctx, query, setlistID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item model.SetlistItem
+		err := rows.Scan(
+			&item.ID, &item.SetlistID, &item.Position, &item.ItemType,
+			&item.SongID, &item.InterludeID, &item.Notes, &item.TransitionDurationSeconds,
+			&item.Title, &item.DurationSeconds, &item.Tempo, // <- Ces champs viennent du modèle corrigé
+		)
+		if err != nil {
+			return items, err
+		}
+		items = append(items, item)
+	}
+	if err := rows.Err(); err != nil {
+		return items, err
+	}
+	return items, nil
+}
+
+func (r SetlistRepository) AddItemToSetlist(ctx context.Context, item model.SetlistItem) (model.SetlistItem, error) {
+	var maxPosition sql.NullInt32
+	posQuery := `SELECT MAX(position) FROM setlist_items WHERE setlist_id = $1`
+	r.DB.QueryRow(ctx, posQuery, item.SetlistID).Scan(&maxPosition)
+
+	nextPos := 0
+	if maxPosition.Valid {
+		nextPos = int(maxPosition.Int32) + 1
+	}
+	item.Position = nextPos
+
+	insertQuery := `INSERT INTO setlist_items (setlist_id, position, item_type, song_id, interlude_id, notes, transition_duration_seconds)
+					VALUES ($1, $2, $3, $4, $5, $6, $7)
+					RETURNING id`
+
+	err := r.DB.QueryRow(ctx, insertQuery,
+		item.SetlistID,
+		item.Position,
+		item.ItemType,
+		item.SongID,
+		item.InterludeID,
+		item.Notes,
+		item.TransitionDurationSeconds,
+	).Scan(&item.ID)
+
+	return item, err
+}
+</file>
+
+<file path="backend/api/repository/song_repository.go">
+package repository
+
+import (
+	"context"
+	"setlist/api/model"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type SongRepository struct {
+	DB *pgxpool.Pool
+}
+
+func (r SongRepository) CreateSong(ctx context.Context, song model.Song) (model.Song, error) {
+	query := `
+		INSERT INTO songs (band_id, title, duration_seconds, tempo, song_key, lyrics)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id, created_at
+	`
+	err := r.DB.QueryRow(ctx, query,
+		song.BandID,
+		song.Title,
+		song.DurationSeconds,
+		song.Tempo,
+		song.SongKey,
+		song.Lyrics,
+	).Scan(&song.ID, &song.CreatedAt)
+
+	return song, err
+}
+
+func (r SongRepository) GetAllSongsByBandID(ctx context.Context, bandID int) ([]model.Song, error) {
+	songs := make([]model.Song, 0)
+	query := `SELECT id, title FROM songs WHERE band_id = $1 ORDER BY title ASC`
+
+	rows, err := r.DB.Query(ctx, query, bandID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var song model.Song
+		if err := rows.Scan(&song.ID, &song.Title); err != nil {
+			return nil, err
+		}
+		songs = append(songs, song)
+	}
+	return songs, rows.Err()
+}
+</file>
+
+<file path="backend/api/repository/user_repository.go">
+package repository
+
+import (
+	"context"
+	"errors"
+	"setlist/api/model"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+var (
+	ErrDuplicateBand     = errors.New("band with this name already exists")
+	ErrDuplicateUsername = errors.New("username already exists")
+)
+
+type UserRepository struct {
+	DB *pgxpool.Pool
+}
+
+func (r *UserRepository) CreateBandAndUser(ctx context.Context, bandName, username, passwordHash string) (model.User, error) {
+	tx, err := r.DB.Begin(ctx)
+	if err != nil {
+		return model.User{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	var bandID int
+	bandQuery := `INSERT INTO bands (name) VALUES ($1) RETURNING id`
+	err = tx.QueryRow(ctx, bandQuery, bandName).Scan(&bandID)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return model.User{}, ErrDuplicateBand
+		}
+		return model.User{}, err
+	}
+
+	var user model.User
+	userQuery := `INSERT INTO users (band_id, username, password_hash) VALUES ($1, $2, $3) RETURNING id, band_id, username, created_at`
+	err = tx.QueryRow(ctx, userQuery, bandID, username, passwordHash).Scan(&user.ID, &user.BandID, &user.Username, &user.CreatedAt)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return model.User{}, ErrDuplicateUsername
+		}
+		return model.User{}, err
+	}
+
+	return user, tx.Commit(ctx)
+}
+
+func (r *UserRepository) CreateUserForExistingBand(ctx context.Context, bandName, username, passwordHash string) (model.User, error) {
+	tx, err := r.DB.Begin(ctx)
+	if err != nil {
+		return model.User{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	var band model.Band
+	bandQuery := `SELECT id, name FROM bands WHERE name = $1`
+	err = tx.QueryRow(ctx, bandQuery, bandName).Scan(&band.ID, &band.Name)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.User{}, errors.New("band not found")
+		}
+		return model.User{}, err
+	}
+
+	var user model.User
+	userQuery := `INSERT INTO users (band_id, username, password_hash) VALUES ($1, $2, $3) RETURNING id, band_id, username, created_at`
+	err = tx.QueryRow(ctx, userQuery, band.ID, username, passwordHash).Scan(&user.ID, &user.BandID, &user.Username, &user.CreatedAt)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return model.User{}, ErrDuplicateUsername
+		}
+		return model.User{}, err
+	}
+
+	return user, tx.Commit(ctx)
+}
+
+func (r *UserRepository) FindUserByUsername(ctx context.Context, username string) (model.User, error) {
+	var user model.User
+	query := `SELECT id, band_id, password_hash, username FROM users WHERE username = $1`
+	err := r.DB.QueryRow(ctx, query, username).Scan(&user.ID, &user.BandID, &user.PasswordHash, &user.Username)
+	if err != nil {
+		return model.User{}, err
+	}
+	return user, nil
+}
+</file>
+
+<file path="backend/api/service/setlist_service.go">
+package service
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"regexp"
+	"setlist/api/model"
+	"setlist/api/repository"
+)
+
+type SetlistService struct {
+	SetlistRepo repository.SetlistRepository
+}
+
+type CreateSetlistPayload struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
+type SetlistDetails struct {
+	model.Setlist
+	Items []model.SetlistItem `json:"items"`
+}
+
+type AddItemPayload struct {
+	ItemType string `json:"item_type"`
+	ItemID   int    `json:"item_id"`
+	Notes    string `json:"notes"`
+}
+
+var hexColorRegex = regexp.MustCompile(`^#(?:[0-9a-fA-F]{3}){1,2}$`)
+
+func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload, bandID int) (model.Setlist, error) {
+	if payload.Name == "" {
+		return model.Setlist{}, errors.New("setlist name cannot be empty")
+	}
+
+	if payload.Color == "" {
+		return model.Setlist{}, errors.New("color cannot be empty")
+	}
+
+	if !hexColorRegex.MatchString(payload.Color) {
+		return model.Setlist{}, fmt.Errorf("invalid color format: %s (must be hex like #RRGGBB or #RGB)", payload.Color)
+	}
+
+	return s.SetlistRepo.CreateSetlist(ctx, payload.Name, payload.Color, bandID)
+}
+
+func (s SetlistService) GetAllForBand(ctx context.Context, bandID int) ([]model.Setlist, error) {
+	return s.SetlistRepo.GetSetlistsByBandID(ctx, bandID)
+}
+
+func (s SetlistService) GetDetails(ctx context.Context, id int, bandID int) (SetlistDetails, error) {
+	setlist, err := s.SetlistRepo.GetSetlistByID(ctx, id, bandID)
+	if err != nil {
+		return SetlistDetails{}, err
+	}
+
+	items, err := s.SetlistRepo.GetSetlistItemsBySetlistID(ctx, id)
+	if err != nil {
+		return SetlistDetails{}, err
+	}
+
+	return SetlistDetails{
+		Setlist: setlist,
+		Items:   items,
+	}, nil
+}
+
+func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddItemPayload) (model.SetlistItem, error) {
+	item := model.SetlistItem{
+		SetlistID: setlistID,
+		ItemType:  payload.ItemType,
+		Notes:     sql.NullString{String: payload.Notes, Valid: payload.Notes != ""},
+	}
+
+	if payload.ItemType == "song" {
+		item.SongID = sql.NullInt32{Int32: int32(payload.ItemID), Valid: true}
+	} else if payload.ItemType == "interlude" {
+		item.InterludeID = sql.NullInt32{Int32: int32(payload.ItemID), Valid: true}
+	} else {
+		return model.SetlistItem{}, errors.New("invalid item type")
+	}
+
+	return s.SetlistRepo.AddItemToSetlist(ctx, item)
+}
+</file>
+
+<file path="backend/api/service/song_service.go">
+package service
+
+import (
+	"context"
+	"database/sql"
+	"setlist/api/model"
+	"setlist/api/repository"
+)
+
+type CreateSongPayload struct {
+	Title           string  `json:"title"`
+	DurationSeconds *int    `json:"duration_seconds"`
+	Tempo           *int    `json:"tempo"`
+	SongKey         *string `json:"song_key"`
+	Lyrics          *string `json:"lyrics"`
+}
+
+type SongService struct {
+	SongRepo repository.SongRepository
+}
+
+func (s SongService) Create(ctx context.Context, payload CreateSongPayload, bandID int) (model.Song, error) {
+	song := model.Song{
+		BandID: bandID,
+		Title:  payload.Title,
+	}
+
+	if payload.DurationSeconds != nil {
+		song.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}
+	}
+	if payload.Tempo != nil {
+		song.Tempo = sql.NullInt32{Int32: int32(*payload.Tempo), Valid: true}
+	}
+	if payload.SongKey != nil {
+		song.SongKey = sql.NullString{String: *payload.SongKey, Valid: true}
+	}
+	if payload.Lyrics != nil {
+		song.Lyrics = sql.NullString{String: *payload.Lyrics, Valid: true}
+	}
+
+	return s.SongRepo.CreateSong(ctx, song)
+}
+
+func (s SongService) GetAllForBand(ctx context.Context, bandID int) ([]model.Song, error) {
+	return s.SongRepo.GetAllSongsByBandID(ctx, bandID)
+}
+</file>
+
+<file path="backend/api/service/user_service.go">
+package service
+
+import (
+	"context"
+	"errors"
+	"setlist/api/repository"
+	"setlist/auth"
+)
+
+type UserService struct {
+	UserRepo  repository.UserRepository
+	JWTSecret string
+}
+
+type AuthPayload struct {
+	BandName string `json:"band_name"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginPayload struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (s UserService) Signup(ctx context.Context, payload AuthPayload) (string, error) {
+	hashedPassword, err := auth.HashPassword(payload.Password)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := s.UserRepo.CreateBandAndUser(ctx, payload.BandName, payload.Username, hashedPassword)
+	if err != nil {
+		return "", err
+	}
+
+	return auth.GenerateJWT(s.JWTSecret, user.ID, user.BandID)
+}
+
+func (s UserService) Join(ctx context.Context, payload AuthPayload) (string, error) {
+	hashedPassword, err := auth.HashPassword(payload.Password)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := s.UserRepo.CreateUserForExistingBand(ctx, payload.BandName, payload.Username, hashedPassword)
+	if err != nil {
+		return "", err
+	}
+
+	return auth.GenerateJWT(s.JWTSecret, user.ID, user.BandID)
+}
+
+func (s UserService) Login(ctx context.Context, payload LoginPayload) (string, error) {
+	user, err := s.UserRepo.FindUserByUsername(ctx, payload.Username)
+	if err != nil {
+		return "", errors.New("invalid credentials")
+	}
+
+	if !auth.CheckPasswordHash(payload.Password, user.PasswordHash) {
+		return "", errors.New("invalid credentials")
+	}
+
+	return auth.GenerateJWT(s.JWTSecret, user.ID, user.BandID)
+}
+</file>
+
+<file path="backend/auth/jwt.go">
+package auth
+
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+type JWTClaims struct {
+	UserID int `json:"user_id"`
+	BandID int `json:"band_id"`
+	jwt.RegisteredClaims
+}
+
+func GenerateJWT(secretKey string, userID, bandID int) (string, error) {
+	claims := JWTClaims{
+		UserID: userID,
+		BandID: bandID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secretKey))
+}
+</file>
+
+<file path="backend/auth/password.go">
+package auth
+
+import "golang.org/x/crypto/bcrypt"
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+</file>
+
+<file path="backend/config/config.go">
+package config
+
+import (
+	"log"
+	"os"
+)
+
+type Config struct {
+	DatabaseURL string
+	JWTSecret   string
+}
+
+func Load() Config {
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET environment variable is not set")
+	}
+
+	return Config{
+		DatabaseURL: dbURL,
+		JWTSecret:   jwtSecret,
+	}
+}
+</file>
+
+<file path="backend/db/migrations/000001_create_initial_tables.down.sql">
+DROP TABLE IF EXISTS setlist_items;
+DROP TABLE IF EXISTS setlists;
+DROP TABLE IF EXISTS songs;
+DROP TABLE IF EXISTS interludes;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS bands;
+</file>
+
+<file path="backend/db/migrations/000001_create_initial_tables.up.sql">
+CREATE TABLE bands (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    band_id INT REFERENCES bands(id) ON DELETE CASCADE,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ... (CREATE TABLE bands et CREATE TABLE users restent avant) ...
+
+-- Supprime l'ancienne définition de la table `songs` si elle existe dans ce fichier
+-- CREATE TABLE songs (...);
+
+-- Voici la nouvelle définition complète :
+CREATE TABLE songs (
+    id SERIAL PRIMARY KEY,
+    band_id INT NOT NULL REFERENCES bands(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    duration_seconds INT,
+    tempo INT,
+    song_key VARCHAR(10),
+    lyrics TEXT,
+    chords TEXT,
+    album_name VARCHAR(255),
+    instrumentation JSONB,
+    notes TEXT,
+    links JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE interludes (
+    id SERIAL PRIMARY KEY,
+    band_id INT REFERENCES bands(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    speaker VARCHAR(100),
+    script TEXT,
+    duration_seconds INT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE setlists (
+    id SERIAL PRIMARY KEY,
+    band_id INT REFERENCES bands(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    color VARCHAR(7) DEFAULT '#FFFFFF',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE setlist_items (
+    id SERIAL PRIMARY KEY,
+    setlist_id INT NOT NULL REFERENCES setlists(id) ON DELETE CASCADE,
+    position INT NOT NULL,
+    item_type VARCHAR(20) NOT NULL CHECK (item_type IN ('song', 'interlude')),
+    song_id INT REFERENCES songs(id) ON DELETE CASCADE,
+    interlude_id INT REFERENCES interludes(id) ON DELETE CASCADE,
+    notes TEXT,
+    transition_duration_seconds INT DEFAULT 0,
+    CONSTRAINT chk_item_is_defined CHECK (
+        (item_type = 'song' AND song_id IS NOT NULL AND interlude_id IS NULL)
+            OR
+        (item_type = 'interlude' AND interlude_id IS NOT NULL AND song_id IS NULL)
+    ),
+   CONSTRAINT unique_position_in_setlist UNIQUE (setlist_id, position)
+);
+
+CREATE INDEX idx_songs_band_id_title ON songs(band_id, title);
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_songs_updated_at
+    BEFORE UPDATE ON songs
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+</file>
+
+<file path="backend/db/database.go">
+package db
+
+import (
+	"context"
+	"log"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+func NewConnection(databaseURL string) *pgxpool.Pool {
+	pool, err := pgxpool.New(context.Background(), databaseURL)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v\n", err)
+	}
+
+	err = pool.Ping(context.Background())
+	if err != nil {
+		log.Fatalf("Database ping failed: %v\n", err)
+	}
+
+	log.Println("Successfully connected to the database!")
+	return pool
+}
+</file>
+
+<file path="backend/Dockerfile">
+FROM golang:1.25.0-bookworm AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /main .
+
+FROM alpine:latest
+
+WORKDIR /root/
+
+COPY --from=builder /main .
+
+EXPOSE 8089
+
+CMD ["./main"]
+</file>
+
+<file path="backend/go.mod">
+module setlist
+
+go 1.25.0
+
+require (
+	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/pgx/v5 v5.7.6 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	golang.org/x/crypto v0.42.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
+)
+</file>
+
+<file path="backend/main.go">
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"setlist/api/handler"
+	"setlist/api/middleware"
+	"setlist/api/repository"
+	"setlist/api/service"
+	"setlist/config"
+	"setlist/db"
+)
+
+func main() {
+	cfg := config.Load()
+	dbPool := db.NewConnection(cfg.DatabaseURL)
+	defer dbPool.Close()
+
+	userRepo := repository.UserRepository{DB: dbPool}
+	userService := service.UserService{UserRepo: userRepo, JWTSecret: cfg.JWTSecret}
+	userHandler := handler.UserHandler{UserService: userService}
+
+	infoRepo := repository.InfoRepository{DB: dbPool}
+	infoHandler := handler.InfoHandler{InfoRepo: infoRepo}
+
+	setlistRepo := repository.SetlistRepository{DB: dbPool}
+	setlistService := service.SetlistService{SetlistRepo: setlistRepo}
+	setlistHandler := handler.SetlistHandler{SetlistService: setlistService}
+
+	songRepo := repository.SongRepository{DB: dbPool}
+	songService := service.SongService{SongRepo: songRepo}
+	songHandler := handler.SongHandler{SongService: songService}
+
+	authMiddleware := middleware.JWTAuth(cfg.JWTSecret)
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("POST /api/auth/signup", userHandler.Signup)
+	mux.HandleFunc("POST /api/auth/join", userHandler.Join)
+	mux.HandleFunc("POST /api/auth/login", userHandler.Login)
+
+	mux.Handle("GET /api/user/info", authMiddleware(http.HandlerFunc(infoHandler.GetCurrentUserInfo)))
+
+	mux.Handle("POST /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.CreateSetlist)))
+	mux.Handle("GET /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlists)))
+	mux.Handle("GET /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlistDetails)))
+	mux.Handle("POST /api/setlist/{id}/items", authMiddleware(http.HandlerFunc(setlistHandler.AddItem)))
+
+	mux.Handle("POST /api/song", authMiddleware(http.HandlerFunc(songHandler.CreateSong)))
+	mux.Handle("GET /api/song", authMiddleware(http.HandlerFunc(songHandler.GetSongs)))
+
+	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status": "ok"}`))
+	})
+
+	port := "8089"
+	fmt.Printf("Backend server starting on port %s\n", port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
+		log.Fatalf("Could not start server: %s\n", err)
+	}
+}
+</file>
+
+<file path="backend/README.md">
+# Backend - Setlist PWA API
+
+Ce service est l'API en Go pour l'application Setlist PWA. Il gère l'authentification des utilisateurs, la gestion des groupes (bands), et toutes les données relatives aux chansons et aux setlists.
+
+## Stack Technique
+
+- **Langage** : Go 1.21+ (sans framework web)
+- **Base de données** : PostgreSQL
+- **Driver DB** : `pgx/v5` (pool de connexions)
+- **Migrations** : `golang-migrate/migrate`
+- **Authentification** : JWT (JSON Web Tokens)
+- **Containerisation** : Docker
+
+---
+
+## Prérequis
+
+Avant de commencer, assurez-vous d'avoir installé :
+- [Go](https://go.dev/doc/install) (version 1.21 ou supérieure)
+- [Docker](https://docs.docker.com/get-docker/) et [Docker Compose](https://docs.docker.com/compose/install/)
+- L'outil de migration :
+  ```bash
+  go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+  ```
+  *(Si la commande `migrate` n'est pas trouvée, assurez-vous que `$(go env GOPATH)/bin` est dans votre `$PATH`)*
+
+---
+
+## Démarrage Rapide (avec Docker)
+
+Toutes les commandes sont à lancer depuis la **racine du projet** (`setlist-pwa/`), pas depuis le dossier `backend`.
+
+### 1. Configuration (Première fois uniquement)
+
+Copiez le fichier d'exemple pour les variables d'environnement.
+```bash
+cp .env.example .env
+```
+Personnalisez les valeurs dans `.env` si nécessaire (surtout `JWT_SECRET`).
+
+### 2. Lancer la Base de Données et les Migrations (Première fois uniquement)
+
+```bash
+# 1. Démarre uniquement le conteneur de la base de données
+make db-up
+
+# 2. Applique les schémas de table à la base de données
+make migrate-up
+```
+
+### 3. Lancer le Projet Complet
+
+Pour démarrer tous les services (backend, frontend, db) :
+```bash
+make up
+```
+L'API sera accessible à l'adresse `http://localhost:8089`.
+
+---
+
+## Commandes Utiles (`Makefile`)
+
+- `make up`: Démarre tous les services en mode détaché.
+- `make down`: Arrête et supprime tous les conteneurs.
+- `make logs`: Affiche les logs de tous les services en temps réel.
+- `make shell-back`: Ouvre un terminal `sh` à l'intérieur du conteneur du backend.
+
+## Gestion de la Base de Données
+
+- **Créer une nouvelle migration** :
+  ```bash
+  make migrate-create name=le_nom_de_la_migration
+  ```
+- **Appliquer les migrations** : `make migrate-up`
+- **Annuler la dernière migration** : `make migrate-down`
+- **Se connecter à la base de données** :
+  ```bash
+  make db-connect
+  ```
+
+---
+
+## Endpoints de l'API
+
+### Authentification
+
+- `POST /api/auth/signup` : Crée un nouveau groupe (band) et son premier utilisateur.
+  ```json
+  {
+    "band_name": "Mon Super Groupe",
+    "username": "mon_user",
+    "password": "mon_password"
+  }
+  ```
+
+- `POST /api/auth/join` : Crée un nouvel utilisateur et le rattache à un groupe existant.
+  ```json
+  {
+    "band_name": "Mon Super Groupe",
+    "username": "autre_user",
+    "password": "autre_password"
+  }
+  ```
+
+- `POST /api/auth/login` : Connecte un utilisateur et retourne un token JWT.
+  ```json
+  {
+    "username": "mon_user",
+    "password": "mon_password"
+  }
+  ```
+</file>
+
+<file path="frontend/.idea/inspectionProfiles/Project_Default.xml">
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+  </profile>
+</component>
+</file>
+
+<file path="frontend/.idea/.gitignore">
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+</file>
+
+<file path="frontend/.idea/frontend.iml">
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/temp" />
+      <excludeFolder url="file://$MODULE_DIR$/tmp" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
+</file>
+
+<file path="frontend/.idea/modules.xml">
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/frontend.iml" filepath="$PROJECT_DIR$/.idea/frontend.iml" />
+    </modules>
+  </component>
+</project>
+</file>
+
+<file path="frontend/src/lib/assets/favicon.svg">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512" viewBox="0 0 512 512"><image width="512" height="512" xlink:href="data:image/png;base64,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QsjcuXOfffZZtC+n3V0JCQkJCT+gS+iOHTt+/etfg98mgIP/DgC9P6cfN33O7DmhEn55RRaSkAgNrx2k11ESucuUaJ+w7wY45x07dly8ePHQoUMdmwAGNXcAeJbsueeemzN7jnT+kZCQkMgRNE3buXPnzTffDJ6bAF83UJTfb731VgCglIZKHSxlfwkJCYmEgLEV7GkXUWS/9957P/jgg6qcXeLZL3cGgMqfd95555///CfUFWZaQkJCQiItoCVg27Ztf/3rX6G8CXCG+PTLH/anP/2pra1N0zTXgHFVF7kdAOAd80fuD5oUQWI9eZXxum6PeeJ+3atM2LZJSDQRkA7ffffdmzdvtoeJptbH1T2Iq6q6fv36f/zjHxDsOFlISAYgISEhES8wY/CqVaseeugh8KDkLgwAyz344INr1661An9WZQtw3iWjA0lISEhkEH/7298AwPU0gMsljCF35513QoCDZKFBOFqfJSQkJCRiBZ7leu6551588UXXs1zU9YZnn3128eLFVtaXIKK9187AtazUw+YbYfX1QcoEubcRyLwUEu0NhAPhqqZwzu+++25w8890NwLfc889AFAzp4yEhISERJaBUv/jjz+OpuCqX20MAM2/n3322cyZMyGk+VfcKBAKpJ5s8xISEhISUYJzThWyatWq559/Hhw+/TY6jRR/zpw5n3zySfDs8hISEhISmYVCFQCYO3cuOMy6Ys6wkpkYD39h0ZIgb483bX335BA11LhEmoHzh2aK6spltFqJJoXbfGaMA8CcOXNaW1s7dOiAll38qbID4JwrivLRRx89++yzEN/pX07kOQAJCQmJxIAU/91333355ZfBTtsrDAD1P08//fSWLVvCBv+RkJCQkMgs0Pz75JNPgldGMNT/oJ7I9chANJDnACQkJCQShOWjP2/ePCif9EJQq4SiKJs3b164cCGI/j91+2UTXvm3+icZWi6HCOunHzbmTxb6lbW2SUiEhds6xRxhALB06dIVK1ZYf4LFAPDvJUuWrFmzBuI4ACwhISEhkR4URdm5c2eVibeyAwAAdBTFDULdsX387rKCVksJS0JCQiJBIGWeP38+CEr+0v/QRLBo0SJoTPyX8eAkJCQkMgiU+hcsWLB9+3brmBcFPCpG6eeff/7KK69ALQfQ6qD/Mg5o06M+nXgsMX+o8HG93pgeX9oDJJoD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LLBShJAShj9q75XkCEpISEg0JUo7AFcq38QChX/XRA163G1gQjxx0UWdlsXhOuOEZBuWx44w8bj1r3j2wsseE5mW18tGEkcOW6EMAQXQB5zYDxGI8YUayIvXyOJtfOHXbHmstMUxtcLd5W6yEnJaVB0lSVRExuj/0VGEdqQCkhCRbpTvdgtCCKYgNXTmMf5pJRiRKEFRFEVRGGNBHMTzvohqZAQTv+S9q6kjseTDAZEwD0C/Mp8nRtKUzOaNIIQQohimaRomAKiq2qtXr379+vXo0UPTFAAgFL2YCGecMcY5x0BJSIZw8uB3sY+KopDSPqLk6aQoCqUUdxaKQq1fsQb81/L9s4YI76WEAinVKZYP7kNlmqZhGIwx4KXWMs4Mw4DyBFBVVVVVSik65lYtCsEpsfQ+q96sSJRFSb/q3ypBvuou61drhIvF4pYtW9atW7du3bpt27bhdU3TCCH43WtyZjliQs1ooCB3AFlChqhVTKi1QrK1fiKEoii6rgNA586djjtu+pQpU4YPP3K//fbr3LlzKP9U/5AtEo2Ac67r+vr165cuXTp//vyZM2e+9957AFAoFBhnkczNDG67VVextGpWhWq0nJFewKGuGkzKhfVPMC4TAwBW1n43qu7LdnwYYfoR4haxM6rWc45hR6E6LnxU4+NRD6WUMabreq9evb75zW+ed955++yzT9WdwXl/mMVVkobxvmClralGXOtyNBuc5V1bWIp2U6nKTyZ11O/iPObaA9f2eI8kVJUnhBQKhf79+5944oknnnjiz3/+88cee+ymm25auHAhABQKBdM0nePABSsVRtf32+NmhvpbwxjxDkBS/8aA+t+szJIE0NwThlKK2o9zzz336quvHjBgAACgcplSS/2CciGJKpW5RW1Rm4LXAtwlFgvyUsIRXHvz4qi/0fLWyKO+qGPHjqeeeuqpp5561113XXHFFatXr25pacFtXDOBRpjAvbkXc+PAiVVzlJIcSeJA2oPkB6/4P+J1r76UtcDJdVBVVcMwunbt+s9//vMvf/nLgAEDUDmO6m9U05ebWWksaRgJd7NpYA0gGoE554ZhcM7POuuspUuXHnvssW1tbU59nbhvjT0aleUCxEO8X59WKYoizwFkCYRVPhKRwmSJetdQqhSLxb59+y5YsODkk09G0o90P+2RkAgEtFcTQnRd33XXXefM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FpVnGK8fOADQMknjnONzyxOnhl57+/btFgNI2tnDTnSQPZumyTmXXs/ZhKJQShXTNFOIRIFIME5UznYAzWewjRyMMwBYtmwZAPifB84svGV8ApyFOgaItH7lypWbNm1KsUeEEEVRdF1H7yxK6W677TZo0KD+/ft36tSppaVFVVVVVSmlzo7jsT4vd21KKRACDlVM1dZAGBFiu7eSf5QJsbspsslSFG+3AW8k1kiQoNyci+0J8sZ5kPLYL13XKaFUoaqqomfw9u3b16xZ8/7777/55psbNmwwTQYAqqpyzpvbozp9BpDihithdpLM43C+vvnmmzt37uzYsWMe3d1ckvNVwscHzdSKX3B2vfXmW4ZhKIqSSkZcRVEMw2CMqao6efLk6dOnjxs3btCgQZ06dUq4JRI1sWHDhkWLFs2aNevRRx9du3YtAGiaVtqx5QoBV33KDCB3w5qLzlJK165d++GHHw4ePDiPDCByvL3sbQBAGTzJ56J0aRhGoVA499xzL7zwQkzViUDp0opRUfcjqq5gfYRU7QDE5DyVslBRo4VTdTYyqQJ3NpTlNmj7q4QD60/cpfXu3fsLX/jCF77whSuvvPKuu+763e9+t3r1avwpR2drgr+d0NFAm4maBJuIkfVXdD+3EFk+gLJ/N+egqkpra+uLL744ePBgxljMkUGjqZx61CNe5Z6/IHAsbT7sqqICwOJFiwGAMeZypl1QlfBAFsYAIBwACFDcjU2fPv36668fMmQIAJimaZompRS1PfG9mmDrNN78zHmExZV33XXX73//++eee+4vfvGL3/zmN4ZhaJpiGCaQZM8HYOwkToOb70OR6Drfeipb6bwD87MnwEHxEc8//zw0pqv1BhM+2QU6wX766aevvvoqJBsRmpAS9f/Vr341a9asIUOGFItFwzAIIV66foksAIV91P4butGzZ89f/epXzz777B57DtR1U9XSUJnwgFaQehBoIlZFUEGtgpzBYZHYiOFedeHChTt27KCURsKq7SyfCp8kUJ/AgSR40aJFGzduFMfBOXs5D+IfH7y5hJkMAP70p9v+7//+zzRNXdeR7lf1yB+Nj1h89TcfnIOjqApjTNf1cePGvfD8C4ceNlQvGpqqpd1SP4QiMpx7Z3KQ9D2/4Jyrqvr+++8vWrQIYpF887EDwF3zU089Bck6RCGhv/76a88773xd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60cfffS8efP69euHPCDWJzYneDkud1akKi5kDJVo9yiRewbA5A6gESDBHDly5AsvvHDggQfquq5pWqxPDGQDaEDbBFC2B3zwwQcnnPCFd955t9Ci6bre7uZHQxm4aPkwHq86xeF+b9g2SEhEBS/bgIj2MPdqhXSuLk4Ienz+z//8zz/+8Y+WlpZgVl+kzZ5U2eMUL95FIJktPNoD9t133+eff+HYaVOLbbqiKFIXFAZRSNxySy6RMORuIBgopRjm8+tf//qjjz4amPrXhuu4c+v/PCkdLvKAnj17zZn9xLe+dYGhm5xzaRauB6HtAUTq6yXSgbQHBAA6+5umefnll//5z38GAJOZkavKuQDrCvBEVEAWTNNQFBUAbrzxt9/73vehrPNqF7uBRlRAQSBVQBJZgJfCp73NvWAqIDT5Kopy2223ff3rX2eMhZSMa6iAoKwFEuk8IRysoBEJ++YjC6KUPvnkE2edffYn6z7VCpqhN1HIoKj08u1twUhI2AgZq7uWRNHAOsWjXrvvvvt99903duxY0zRRFySWYcI40ADiNy8NHAcAxTOKp1indV8yw1W2dUydeuxLixcfffRYvag7uy0hIdH+YE9p3rzASM6GYUybNu2ll14aO3YsRkxIngyWdwDBYj5HCMMoqmqBc/a/3/vu7393M5QTyyTc/+jR7ncA9U1ir51oU54e9xkiznnVr84rTYXczvO6249qHwC44oorfv7zn0PZT9K1cNgdQDB1faVU0iogAbxsEiB33333t7/97S1btjRDBOl2zwAanFGEpDgnE4XY05q9boQH+IYIThsh3SUzhzDr1PL2GThw4B133DF16lQAYIz55PVtYgYAAMA5Z4wpivLOO++cffbZS5cuRQMIY449YNYIYoD2cKGMWIIAAU64Q++W5LtwipmJPTqzwDGRQxEEVWMl/hkNp8nyevdqVYCkLgAwY8aMP/7xj7vuuquo9glL6EX45wYoNc32UirHiVJ2DSSE4LgcdNBBixYtuvjii9EjqrkPDDPOGS+9teCHtqMFtyPtIckE5FDUjSr/wiafWiHdWymlaPjcdddd//rXvz700ENI/dMLjVNiAJzzrGy3MZsYAMyePfu73/3ue++9h7yxYhXIskTgvwPAH32tG+1H7yEhYQHJn/vkD0Jbk6QDde0AUMBFjf9Xv/rVa6+9tm/fvqje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"></image><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>
+</file>
+
+<file path="frontend/src/lib/components/ui/Button.svelte">
+<script lang="ts">
+    let {
+        type = 'submit',
+        isLoading = false,
+        disabled = false,
+        variant = 'primary',
+        autoWidth = false,
+        onclick,
+        children
+    } = $props<{
+        type?: 'submit' | 'button' | 'reset';
+        isLoading?: boolean;
+        disabled?: boolean;
+        variant?: 'primary' | 'secondary';
+        autoWidth?: boolean;
+        onclick?: (event: MouseEvent) => void;
+        children: any;
+    }>();
+
+    const baseClasses = "flex justify-center rounded-md px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
+
+    const variants = {
+        primary: 'bg-indigo-600 text-white hover:bg-indigo-500 focus:ring-indigo-500',
+        secondary: 'bg-teal-600 text-white hover:bg-teal-500 focus:ring-teal-500'
+    };
+</script>
+
+<button {type} disabled={isLoading || disabled} {onclick} class="{baseClasses} {variants[variant]} {autoWidth ? 'w-auto' : 'w-full'}">
+    {#if isLoading}
+        <svg class="h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    {:else}
+        {@render children()}
+    {/if}
+</button>
+</file>
+
+<file path="frontend/src/lib/components/ui/Input.svelte">
+<script lang="ts">
+    let {
+        id,
+        label,
+        name,
+        type = 'text',
+        placeholder = '',
+        required = false,
+        value = $bindable()
+    } = $props<{
+        id: string;
+        label: string;
+        name: string;
+        type?: 'text' | 'password' | 'email' | 'number';
+        placeholder?: string;
+        required?: boolean;
+        value?: string;
+    }>();
+</script>
+
+<div>
+    <label for={id} class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">{label}</label>
+    <div class="mt-2">
+        <input {id} name={id} {type} {required} {placeholder} bind:value class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500" />
+    </div>
+</div>
+</file>
+
+<file path="frontend/src/lib/components/PWABadge.svelte">
+<script lang="ts">
+    import { onMount } from 'svelte';
+    import { registerSW } from 'virtual:pwa-register';
+
+    let offlineReady = false;
+    let needRefresh = false;
+    let updateServiceWorker: (reloadPage?: boolean) => Promise<void>;
+
+    onMount(() => {
+        updateServiceWorker = registerSW({
+            onOfflineReady() {
+                offlineReady = true;
+            },
+            onNeedRefresh() {
+                needRefresh = true;
+            },
+            onRegistered(r: ServiceWorkerRegistration | undefined) {
+                console.log('Service Worker registered:', r);
+            },
+            onRegisterError(error: unknown) {
+                console.log('Service Worker registration error:', error);
+            }
+        });
+    });
+
+    function handleRefresh() {
+        if (needRefresh) {
+            updateServiceWorker(true);
+        }
+    }
+
+    function close() {
+        offlineReady = false;
+        needRefresh = false;
+    }
+</script>
+
+{#if offlineReady || needRefresh}
+    <div class="pwa-toast" role="alert">
+        <div class="message">
+            {#if needRefresh}
+                <span>New content available, click on reload button to update.</span>
+            {/if}
+        </div>
+        {#if needRefresh}
+            <button onclick={handleRefresh}>Reload</button>
+        {/if}
+        <button onclick={close}>Close</button>
+    </div>
+{/if}
+
+<style>
+    .pwa-toast {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        background: #222;
+        color: white;
+        padding: 12px;
+        border-radius: 4px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    button {
+        border: 1px solid white;
+        background: transparent;
+        color: white;
+        border-radius: 2px;
+        padding: 4px 8px;
+        cursor: pointer;
+    }
+</style>
+</file>
+
+<file path="frontend/src/lib/index.ts">
+// place files you want to import through the `$lib` alias in this folder.
+</file>
+
+<file path="frontend/src/routes/(app)/setlist/[id]/add/+page.server.ts">
+import { error, fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
+
+// La fonction 'load' s'exécute sur le serveur avant le rendu de la page.
+export const load: PageServerLoad = async ({ fetch, params }) => {
+    const { id } = params;
+
+    const fetchSetlistInfo = async () => {
+        const res = await fetch(`/api/setlist/${id}`);
+        if (!res.ok) throw error(res.status, 'Setlist not found');
+        return res.json();
+    };
+
+    const fetchSongs = async () => {
+        const res = await fetch('/api/song');
+        if (!res.ok) throw error(res.status, 'Failed to fetch song library');
+        return res.json();
+    };
+
+    try {
+        const [setlist, songs] = await Promise.all([fetchSetlistInfo(), fetchSongs()]);
+        return { setlist, songs };
+    } catch (err: any) {
+        throw error(err.status || 500, err.body?.message || 'Could not load required data.');
+    }
+};
+
+export const actions: Actions = {
+    addSong: async ({ request, params, fetch }) => {
+        const data = await request.formData();
+        const songId = data.get('songId');
+
+        const response = await fetch(`/api/setlist/${params.id}/items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                item_type: 'song',
+                item_id: Number(songId)
+            })
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            return fail(response.status, { error: result.error || 'Failed to add song.' });
+        }
+
+        return { success: true, addedSongId: songId };
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(app)/setlist/[id]/add/+page.svelte">
+<script lang="ts">
+    import { enhance } from '$app/forms';
+    import Button from '$lib/components/ui/Button.svelte';
+    import type { PageData } from './$types';
+    import { navigating } from '$app/stores';
+
+    let { data, form } = $props<{ data: PageData, form?: { success?: boolean, addedSongId?: string, error?: string } }>();
+    const { setlist, songs } = data;
+</script>
+
+<div class="container mx-auto px-4 sm:px-6">
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Add to "{setlist.name}"
+        </h1>
+        <a href="/setlist/{setlist.id}" class="mt-2 inline-block text-sm text-indigo-500 hover:underline dark:text-indigo-400">
+            &larr; Back to setlist
+        </a>
+    </header>
+
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Song Library</h2>
+            {#if form?.error}
+                <p class="mt-2 text-sm text-red-500">{form.error}</p>
+            {/if}
+            <div class="mt-4 max-h-[60vh] overflow-y-auto space-y-2">
+                {#if songs.length > 0}
+                    {#each songs as song (song.id)}
+                        <form method="POST" action="?/addSong" use:enhance>
+                            <input type="hidden" name="songId" value={song.id} />
+                            <!-- CORRECTION ICI: Ajout des classes dark:text-slate-200 -->
+                            <button type="submit" disabled={$navigating?.type === 'form'} class="flex w-full items-center justify-between rounded-md p-3 text-left text-slate-800 transition-colors hover:bg-slate-100 disabled:opacity-50 dark:text-slate-200 dark:hover:bg-slate-700">
+                                <span>{song.title}</span>
+                                {#if form?.success && form?.addedSongId == song.id.toString()}
+                                    <span class="text-lg text-green-500">✓</span>
+                                {:else}
+                                    <span class="text-xl text-slate-400">+</span>
+                                {/if}
+                            </button>
+                        </form>
+                    {/each}
+                {:else}
+                    <div class="p-4 text-center">
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Your song library is empty.</p>
+                        <a href="/song/new?redirectTo=/setlist/{setlist.id}/add" class="mt-2 inline-block text-sm font-semibold text-indigo-500 hover:underline dark:text-indigo-400">
+                            Create your first song
+                        </a>
+                    </div>
+                {/if}
+            </div>
+        </div>
+
+        <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">
+                Or Create a New Song
+            </h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                This will add it to your library and you can then add it to the setlist.
+            </p>
+            <div class="mt-6">
+                <a href="/song/new?redirectTo=/setlist/{setlist.id}/add">
+                    <Button>Create New Song</Button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</file>
+
+<file path="frontend/src/routes/(app)/setlist/[id]/+page.svelte">
+<script lang="ts">
+    import { page } from '$app/stores';
+
+    let { data } = $props();
+    const { setlistDetails } = data;
+    const setlistId = $page.params.id;
+
+    function formatDuration(seconds: number | null | undefined): string {
+        if (seconds === null || seconds === undefined) return '-';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+</script>
+
+<div class="container mx-auto px-4 sm:px-6">
+    <header class="mb-8">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+					<span
+                            class="block h-5 w-5 flex-shrink-0 rounded-full"
+                            style="background-color: {setlistDetails.color};"
+                    ></span>
+                    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                        {setlistDetails.name}
+                    </h1>
+                </div>
+                <a
+                        href="/"
+                        class="mt-2 inline-block text-sm text-indigo-500 hover:underline dark:text-indigo-400"
+                >&larr; Back to Dashboard</a
+                >
+            </div>
+            <a
+                    href="/setlist/{setlistId}/add"
+                    class="flex w-auto justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
+            >
+                + Add Item
+            </a>
+        </div>
+    </header>
+
+    <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+        {#if setlistDetails.items && setlistDetails.items.length > 0}
+            <ul class="divide-y divide-slate-200 dark:divide-slate-700">
+                {#each setlistDetails.items as item (item.id)}
+                    <li class="flex items-center justify-between py-4">
+                        <div class="flex items-center gap-4">
+                            <span class="w-8 text-lg font-bold text-slate-400 dark:text-slate-500">{item.position + 1}.</span>
+                            <div>
+                                <p class="font-semibold text-slate-800 dark:text-slate-100">
+                                    {item.title.String}
+                                </p>
+                                {#if item.item_type === 'song'}
+                                    <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                        <span>Duration: {formatDuration(item.duration_seconds.Int32)}</span>
+                                        {#if item.tempo.Valid}
+                                            <span class="hidden sm:inline">&bull;</span>
+                                            <span>Tempo: {item.tempo.Int32} BPM</span>
+                                        {/if}
+                                    </div>
+                                {/if}
+                                {#if item.notes.Valid && item.notes.String}
+                                    <p class="mt-1 text-sm italic text-slate-600 dark:text-slate-300">
+                                        "{item.notes.String}"
+                                    </p>
+                                {/if}
+                            </div>
+                        </div>
+                    </li>
+                {/each}
+            </ul>
+        {:else}
+            <div class="py-12 text-center">
+                <svg
+                        class="mx-auto h-12 w-12 text-slate-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                >
+                    <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z"
+                    />
+                </svg>
+                <h3 class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                    This setlist is empty
+                </h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Get started by adding your first item.
+                </p>
+            </div>
+        {/if}
+    </div>
+</div>
+</file>
+
+<file path="frontend/src/routes/(app)/setlist/[id]/+page.ts">
+import { error } from '@sveltejs/kit';
+import type { PageLoad } from './$types';
+
+export const load: PageLoad = async ({ fetch, params }) => {
+    const { id } = params;
+
+    try {
+        const res = await fetch(`/api/setlist/${id}`);
+        if (!res.ok) {
+            throw error(res.status, 'Setlist not found');
+        }
+        const setlistDetails = await res.json();
+        return {
+            setlistDetails
+        };
+    } catch (err: any) {
+        throw error(err.status || 500, err.body?.message || 'Could not load setlist.');
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(app)/setlist/new/+page.server.ts">
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
+
+export const actions: Actions = {
+    default: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const name = data.get('name');
+        const color = data.get('color');
+
+        const response = await fetch('/api/setlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, color })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return fail(response.status, { error: result.error });
+        }
+
+        throw redirect(303, `/setlist/${result.id}`);
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(app)/setlist/new/+page.svelte">
+<script lang="ts">
+    import Button from '$lib/components/ui/Button.svelte';
+    import Input from '$lib/components/ui/Input.svelte';
+    import { enhance } from '$app/forms';
+
+    let { form } = $props();
+    let isLoading = false;
+</script>
+
+<div class="container mx-auto max-w-2xl px-4 sm:px-6">
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Create a New Setlist
+        </h1>
+        <button class="flex w-auto justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500">
+            + Add Song
+        </button>
+    </header>
+
+    <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+        <form class="space-y-6" method="POST" use:enhance={() => {
+				isLoading = true;
+				return async ({ update }) => {
+					await update();
+					isLoading = false;
+				};
+		}}>
+            <Input label="Setlist Name" id="name" name="name" placeholder="e.g., Summer Tour 2024" required />
+
+            <div>
+                <label for="color" class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
+                    Label Color
+                </label>
+                <div class="mt-2 flex items-center gap-4">
+                    <input
+                            type="color"
+                            id="color"
+                            name="color"
+                            value="#3b82f6"
+                            class="h-10 w-16 cursor-pointer rounded-md border-0 bg-transparent p-0"
+                    />
+                </div>
+            </div>
+
+            {#if form?.error}
+                <p class="text-sm text-red-500">{form.error}</p>
+            {/if}
+
+            <div class="flex items-center justify-between gap-4 pt-4">
+                <a href="/" class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    Cancel
+                </a>
+                <Button isLoading={isLoading} autoWidth>
+                    {#if isLoading}
+                        Creating...
+                    {:else}
+                        Create Setlist
+                    {/if}
+                </Button>
+            </div>
+        </form>
+    </div>
+</div>
+</file>
+
+<file path="frontend/src/routes/(app)/song/new/+page.server.ts">
+import { fail } from '@sveltejs/kit';
+import type { Actions } from './$types';
+
+export const actions: Actions = {
+    default: async ({ request, fetch, url }) => {
+        const data = await request.formData();
+
+        const payload = {
+            title: data.get('title'),
+            duration_seconds: Number(data.get('duration_seconds')) || null,
+            tempo: Number(data.get('tempo')) || null,
+            song_key: data.get('song_key') || null
+        };
+
+        const response = await fetch('/api/song', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            return fail(response.status, { error: result.error });
+        }
+
+        const redirectTo = url.searchParams.get('redirectTo') || '/';
+        return { success: true, redirectTo: redirectTo };
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(app)/song/new/+page.svelte">
+<script lang="ts">
+    import Button from '$lib/components/ui/Button.svelte';
+    import Input from '$lib/components/ui/Input.svelte';
+    import { enhance } from '$app/forms';
+    import { navigating } from '$app/stores';
+    import { goto } from '$app/navigation';
+
+    type FormState = {
+        error?: string;
+        success?: boolean;
+        redirectTo?: string
+    } | undefined;
+
+    let { form } = $props<{ form: FormState }>();
+
+    $effect(() => {
+        if (form?.success && form?.redirectTo) {
+            goto(form.redirectTo);
+        }
+    });
+</script>
+
+<div class="container mx-auto max-w-2xl px-4 sm:px-6">
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Add a New Song to Your Library</h1>
+    <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
+        This will add the song to your global library.
+    </p>
+
+    <form method="POST" use:enhance class="mt-8 space-y-6 rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+        <Input label="Song Title" id="title" name="title" required />
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <Input label="Duration (seconds)" id="duration_seconds" name="duration_seconds" type="number" />
+            <Input label="Tempo (BPM)" id="tempo" name="tempo" type="number" />
+            <Input label="Key" id="song_key" name="song_key" placeholder="e.g., Am" />
+        </div>
+
+        {#if form?.error}
+            <p class="text-sm text-red-500">{form.error}</p>
+        {/if}
+
+        <div class="flex items-center justify-between gap-4 pt-4">
+            <a href="/" class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                Cancel
+            </a>
+            <Button isLoading={$navigating?.type === 'form'} autoWidth>Create Song</Button>
+        </div>
+    </form>
+</div>
+</file>
+
+<file path="frontend/src/routes/(app)/+layout.svelte">
+<script lang="ts">
+    let { children } = $props();
+</script>
+
+<div class="min-h-screen bg-slate-100 dark:bg-slate-900">
+    <header class="bg-white shadow-sm dark:bg-slate-800">
+        <nav class="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
+            <div class="flex items-center gap-4">
+                <a href="/" class="flex-shrink-0" aria-label="Go to Dashboard">
+                    <svg class="h-8 w-auto text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
+                    </svg>
+                </a>
+                <div class="hidden md:block">
+                    <a href="/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">Dashboard</a>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <a href="/logout" class="rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    Logout
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="py-10">
+        {@render children?.()}
+    </main>
+</div>
+</file>
+
+<file path="frontend/src/routes/(app)/+page.svelte">
+<script lang="ts">
+    let { data } = $props<{
+        data: {
+            userInfo: { username: string; band_name: string };
+            setlists: Array<{ id: number; name: string; color: string; created_at: string }>;
+        };
+    }>();
+</script>
+
+<div class="container mx-auto px-4 sm:px-6">
+    <header class="mb-8">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    {data.userInfo.band_name}
+                </h1>
+                <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
+                    Welcome back, <span class="font-semibold">{data.userInfo.username}</span>!
+                </p>
+            </div>
+            <a href="/setlist/new" class="flex w-auto justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500">
+                + Create New Setlist
+            </a>
+        </div>
+    </header>
+
+    <div class="space-y-8">
+        <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Your Setlists</h2>
+
+            {#if data.setlists.length > 0}
+                <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {#each data.setlists as setlist (setlist.id)}
+                        <a href="/setlist/{setlist.id}" class="group block">
+                            <div class="h-full rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-md dark:border-slate-700 dark:bg-slate-800/50 dark:group-hover:border-slate-600">
+                                <div class="flex items-start gap-4">
+                                    <span class="mt-1 block h-4 w-4 flex-shrink-0 rounded-full" style="background-color: {setlist.color};"></span>
+                                    <div>
+                                        <h3 class="font-semibold text-slate-900 dark:text-white">{setlist.name}</h3>
+                                        <p class="text-sm text-slate-500 dark:text-slate-400">
+                                            Created: {new Date(setlist.created_at).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {/each}
+                </div>
+            {:else}
+                <div class="mt-6 rounded-lg border-2 border-dashed border-slate-300 p-12 text-center dark:border-slate-700">
+                    <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">No setlists</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Get started by creating a new setlist.</p>
+                </div>
+            {/if}
+        </div>
+    </div>
+</div>
+</file>
+
+<file path="frontend/src/routes/(app)/+page.ts">
+import type { PageLoad } from './$types';
+import { error } from '@sveltejs/kit';
+
+export const load: PageLoad = async ({ fetch }) => {
+    const fetchUserInfo = async () => {
+        const res = await fetch('/api/user/info');
+        if (!res.ok) throw error(res.status, 'Failed to fetch user info');
+        return res.json();
+    };
+
+    const fetchSetlists = async () => {
+        const res = await fetch('/api/setlist');
+        if (!res.ok) throw error(res.status, 'Failed to fetch setlists');
+        return res.json();
+    };
+
+    try {
+        const [userInfo, setlists] = await Promise.all([fetchUserInfo(), fetchSetlists()]);
+        return { userInfo, setlists };
+    } catch (err: any) {
+        throw error(err.status || 500, err.body?.message || 'Could not load dashboard data.');
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(auth)/join/+page.server.ts">
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
+
+export const actions: Actions = {
+    default: async ({ request, cookies, fetch }) => {
+        const data = await request.formData();
+        const bandName = data.get('bandName');
+        const username = data.get('username');
+        const password = data.get('password');
+
+        const response = await fetch('/api/auth/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ band_name: bandName, username, password })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            return fail(response.status, { error: result.error });
+        }
+
+        cookies.set('jwt_token', result.token, { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' });
+        throw redirect(303, '/');
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(auth)/join/+page.svelte">
+<script lang="ts">
+    import Button from '$lib/components/ui/Button.svelte';
+    import Input from '$lib/components/ui/Input.svelte';
+    import { enhance } from '$app/forms';
+    import { navigating } from '$app/stores';
+
+    let { form } = $props();
+</script>
+
+<div class="space-y-6">
+    <div>
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight text-slate-900 dark:text-white">
+            Join an Existing Band
+        </h2>
+        <p class="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
+            Enter the exact band name and create your personal account.
+        </p>
+    </div>
+
+    <form method="POST" use:enhance class="space-y-6">
+        <Input label="Exact Band Name" id="bandName" name="bandName" required />
+        <Input label="Your Username" id="username" name="username" required />
+        <Input label="Password" id="password" name="password" type="password" required />
+
+        {#if form?.error}
+            <p class="text-center text-sm text-red-500">{form.error}</p>
+        {/if}
+
+        <Button isLoading={$navigating?.type === 'form'} variant="secondary">
+            {#if $navigating?.type === 'form'}
+                Joining...
+            {:else}
+                Join Band
+            {/if}
+        </Button>
+    </form>
+
+    <p class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        Need to create a new band? <a href="/signup" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">Create one here</a>.
+    </p>
+</div>
+</file>
+
+<file path="frontend/src/routes/(auth)/login/+page.server.ts">
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
+
+export const actions: Actions = {
+    default: async ({ request, cookies, fetch }) => {
+        const data = await request.formData();
+        const username = data.get('username');
+        const password = data.get('password');
+
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            return fail(response.status, { error: result.error });
+        }
+
+        cookies.set('jwt_token', result.token, {
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 60 * 60 * 24 * 7,
+            sameSite: 'lax',
+        });
+
+        throw redirect(303, '/');
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(auth)/login/+page.svelte">
+<script lang="ts">
+    import Button from '$lib/components/ui/Button.svelte';
+    import Input from '$lib/components/ui/Input.svelte';
+    import { enhance } from '$app/forms';
+    import { navigating } from '$app/stores';
+
+    let { form } = $props();
+</script>
+
+<div class="space-y-6">
+    <div>
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight text-slate-900 dark:text-white">
+            Log in to your account
+        </h2>
+    </div>
+
+    <form method="POST" use:enhance class="space-y-6">
+        <Input label="Username" id="username" name="username" required />
+        <Input label="Password" id="password" name="password" type="password" required />
+
+        {#if form?.error}
+            <p class="text-center text-sm text-red-500">{form.error}</p>
+        {/if}
+
+        <Button isLoading={$navigating?.type === 'form'}>
+            {#if $navigating?.type === 'form'}
+                Logging in...
+            {:else}
+                Log In
+            {/if}
+        </Button>
+    </form>
+
+    <p class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        No account? <a href="/signup" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">Create a band</a> or <a href="/join" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">join one</a>.
+    </p>
+</div>
+</file>
+
+<file path="frontend/src/routes/(auth)/signup/+page.server.ts">
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
+
+export const actions: Actions = {
+    default: async ({ request, cookies, fetch }) => {
+        const data = await request.formData();
+        const bandName = data.get('bandName');
+        const username = data.get('username');
+        const password = data.get('password');
+
+        const response = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ band_name: bandName, username, password })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            return fail(response.status, { error: result.error });
+        }
+
+        cookies.set('jwt_token', result.token, { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax' });
+        throw redirect(303, '/');
+    }
+};
+</file>
+
+<file path="frontend/src/routes/(auth)/signup/+page.svelte">
+<script lang="ts">
+    import Button from '$lib/components/ui/Button.svelte';
+    import Input from '$lib/components/ui/Input.svelte';
+    import { enhance } from '$app/forms';
+    import { navigating } from '$app/stores';
+
+    let { form } = $props();
+</script>
+
+<div class="space-y-6">
+    <div>
+        <h2 class="text-center text-2xl font-bold leading-9 tracking-tight text-slate-900 dark:text-white">
+            Create a New Band
+        </h2>
+        <p class="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
+            Start by giving your band a name and creating your account.
+        </p>
+    </div>
+
+    <form method="POST" use:enhance class="space-y-6">
+        <Input label="Band Name" id="bandName" name="bandName" placeholder="The Rolling Scones" required />
+        <Input label="Your Username" id="username" name="username" placeholder="your_nickname" required />
+        <Input label="Password" id="password" name="password" type="password" required />
+
+        {#if form?.error}
+            <p class="text-center text-sm text-red-500">{form.error}</p>
+        {/if}
+
+        <Button isLoading={$navigating?.type === 'form'}>
+            {#if $navigating?.type === 'form'}
+                Creating...
+            {:else}
+                Create Band & Sign Up
+            {/if}
+        </Button>
+    </form>
+
+    <p class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        Looking to join a band? <a href="/join" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">Join an existing one</a>.
+    </p>
+</div>
+</file>
+
+<file path="frontend/src/routes/(auth)/+layout.svelte">
+<script lang="ts">
+    let { children } = $props();
+</script>
+
+<main class="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-900">
+    <div class="w-full max-w-md">
+        <div class="flex justify-center mb-6">
+            <svg class="h-12 w-auto text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
+            </svg>
+        </div>
+        <div class="rounded-xl bg-white p-8 shadow-2xl dark:bg-slate-800">
+            {@render children?.()}
+        </div>
+    </div>
+</main>
+</file>
+
+<file path="frontend/src/routes/api/[...slug]/+server.ts">
+import { error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+const BACKEND_URL = 'http://backend:8089/api';
+
+const handleProxy: RequestHandler = async ({ request, params, fetch, locals }) => {
+    const url = `${BACKEND_URL}/${params.slug}`;
+
+    const headers = new Headers(request.headers);
+
+    if (locals.token) {
+        headers.set('Authorization', `Bearer ${locals.token}`);
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: request.method,
+            headers: headers, // Utilise les nouveaux headers
+            body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : null,
+            duplex: 'half'
+        });
+        return response;
+    } catch (e) {
+        console.error('API proxy error:', e);
+        throw error(500, 'Could not connect to the backend API.');
+    }
+};
+
+export const GET = handleProxy;
+export const POST = handleProxy;
+export const PUT = handleProxy;
+export const PATCH = handleProxy;
+export const DELETE = handleProxy;
+</file>
+
+<file path="frontend/src/routes/logout/+server.ts">
+import { redirect } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async ({ cookies }) => {
+    cookies.delete('jwt_token', { path: '/' });
+    throw redirect(303, '/login');
+};
+</file>
+
+<file path="frontend/src/routes/+layout.server.ts">
+import type { LayoutServerLoad } from './$types';
+
+export const load: LayoutServerLoad = async ({ locals }) => {
+    return {
+        user: locals.user
+    };
+};
+</file>
+
+<file path="frontend/src/routes/+layout.svelte">
+<script lang="ts">
+	import '../app.css';
+	import favicon from '$lib/assets/favicon.svg';
+	import PWABadge from '$lib/components/PWABadge.svelte';
+
+	let { children } = $props();
+</script>
+
+<svelte:head>
+	<link rel="icon" href={favicon} />
+</svelte:head>
+
+<PWABadge/>
+
+{@render children?.()}
+</file>
+
+<file path="frontend/src/routes/+layout.ts">
+import { redirect } from '@sveltejs/kit';
+import type { LayoutLoad } from './$types';
+
+export const load: LayoutLoad = ({ data, url }) => {
+    const { user } = data;
+    const { pathname } = url;
+
+    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/join');
+
+    if (!user && !isAuthRoute) {
+        throw redirect(307, '/login');
+    }
+
+    if (user && isAuthRoute) {
+        throw redirect(307, '/');
+    }
+
+    return { user };
+};
+</file>
+
+<file path="frontend/src/app.css">
+@import 'tailwindcss';
+</file>
+
+<file path="frontend/src/app.d.ts">
+declare global {
+	namespace App {
+		interface Locals {
+			user: { id: number; bandId: number } | null;
+			token: string | null;
+		}
+	}
+	interface RequestInit {
+		duplex?: 'half';
+	}
+}
+
+export {};
+</file>
+
+<file path="frontend/src/app.html">
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#333333" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png">
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
+</file>
+
+<file path="frontend/src/hooks.server.ts">
+import type { Handle } from '@sveltejs/kit';
+import { jwtDecode } from 'jwt-decode';
+
+type UserPayload = {
+    user_id: number;
+    band_id: number;
+    exp: number;
+};
+
+export const handle: Handle = async ({ event, resolve }) => {
+    const token = event.cookies.get('jwt_token');
+
+    event.locals.user = null;
+    event.locals.token = null;
+
+    if (token) {
+        event.locals.token = token;
+        try {
+            const decoded = jwtDecode<UserPayload>(token);
+            if (decoded.exp * 1000 > Date.now()) {
+                event.locals.user = { id: decoded.user_id, bandId: decoded.band_id };
+            }
+        } catch {
+            // Le token est invalide, l'utilisateur et le token restent null
+        }
+    }
+
+    return resolve(event);
+};
+</file>
+
+<file path="frontend/static/favicon/site.webmanifest">
+{
+  "name": "Lister",
+  "short_name": "Lister",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
+</file>
+
+<file path="frontend/static/robots.txt">
+# allow crawling everything by default
+User-agent: *
+Disallow:
+</file>
+
+<file path="frontend/.gitignore">
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+</file>
+
+<file path="frontend/.npmrc">
+engine-strict=true
+</file>
+
+<file path="frontend/.prettierignore">
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+# Miscellaneous
+/static/
+</file>
+
+<file path="frontend/.prettierrc">
+{
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"printWidth": 100,
+	"plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss"],
+	"overrides": [
+		{
+			"files": "*.svelte",
+			"options": {
+				"parser": "svelte"
+			}
+		}
+	],
+	"tailwindStylesheet": "./src/app.css"
+}
+</file>
+
+<file path="frontend/Dockerfile">
+FROM node:22-alpine AS builder
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM node:18-alpine
+WORKDIR /app
+
+COPY --from=builder /app/package*.json ./
+RUN npm install --omit=dev
+
+COPY --from=builder /app/build ./build
+
+EXPOSE 4000
+
+CMD [ "node", "build" ]
+</file>
+
+<file path="frontend/eslint.config.js">
+import prettier from 'eslint-config-prettier';
+import { includeIgnoreFile } from '@eslint/compat';
+import js from '@eslint/js';
+import svelte from 'eslint-plugin-svelte';
+import globals from 'globals';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript-eslint';
+import svelteConfig from './svelte.config.js';
+
+const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
+
+export default ts.config(
+	includeIgnoreFile(gitignorePath),
+	js.configs.recommended,
+	...ts.configs.recommended,
+	...svelte.configs.recommended,
+	prettier,
+	...svelte.configs.prettier,
+	{
+		languageOptions: {
+			globals: { ...globals.browser, ...globals.node }
+		},
+		rules: {
+			'no-undef': 'off',
+			'svelte/no-navigation-without-resolve': 'off'
+		}
+	},
+	{
+		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
+		languageOptions: {
+			parserOptions: {
+				projectService: true,
+				extraFileExtensions: ['.svelte'],
+				parser: ts.parser,
+				svelteConfig
+			}
+		}
+	}
+);
+</file>
+
+<file path="frontend/package.json">
+{
+	"name": "frontend",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint ."
+	},
+	"devDependencies": {
+		"@eslint/compat": "^1.2.5",
+		"@eslint/js": "^9.18.0",
+		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/adapter-node": "^5.3.2",
+		"@sveltejs/kit": "^2.22.0",
+		"@sveltejs/vite-plugin-svelte": "^6.0.0",
+		"@tailwindcss/vite": "^4.0.0",
+		"@types/node": "^24.3.3",
+		"@vite-pwa/sveltekit": "^1.0.0",
+		"eslint": "^9.18.0",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-svelte": "^3.0.0",
+		"globals": "^16.0.0",
+		"prettier": "^3.4.2",
+		"prettier-plugin-svelte": "^3.3.3",
+		"prettier-plugin-tailwindcss": "^0.6.11",
+		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
+		"tailwindcss": "^4.0.0",
+		"typescript": "^5.0.0",
+		"typescript-eslint": "^8.20.0",
+		"vite": "^7.0.4",
+		"workbox-window": "^7.3.0"
+	},
+	"dependencies": {
+		"jwt-decode": "^4.0.0"
+	}
+}
+</file>
+
+<file path="frontend/README.md">
+# Frontend - Setlist PWA
+
+Ce service est le frontend en SvelteKit pour l'application Setlist PWA. Il fournit l'interface utilisateur pour interagir avec l'API backend et est conçu pour être une Progressive Web App (PWA) installable et utilisable hors ligne.
+
+## Stack Technique
+
+- **Framework** : SvelteKit (utilisant Svelte 5 et les Runes)
+- **Styling** : Tailwind CSS
+- **Langage** : TypeScript
+- **PWA** : `@vite-pwa/sveltekit`
+- **Bundler** : Vite
+- **Containerisation** : Docker
+
+---
+
+## Prérequis
+
+- [Node.js](https://nodejs.org/) (version 22 ou supérieure)
+- `npm` (généralement inclus avec Node.js)
+- [Docker](https://docs.docker.com/get-docker/) et [Docker Compose](https://docs.docker.com/compose/install/)
+
+---
+
+## Démarrage Rapide
+
+Toutes les commandes sont à lancer depuis la **racine du projet** (`setlist-pwa/`), pas depuis le dossier `frontend`.
+
+### 1. Configuration (Première fois uniquement)
+
+Assurez-vous d'avoir créé le fichier `.env` à la racine du projet en copiant `.env.example`.
+
+### 2. Installation des Dépendances (Première fois uniquement)
+
+```bash
+# Naviguer dans le dossier frontend
+cd frontend
+
+# Installer les paquets npm
+npm install
+
+# Revenir à la racine
+cd ..
+```
+
+### 3. Lancer le Projet Complet (Recommandé)
+
+Cette méthode lance le frontend, le backend et la base de données ensemble, assurant que tout communique correctement.
+
+```bash
+make up
+```
+L'application sera accessible à l'adresse `http://localhost:4000`.
+
+### 4. Lancer le Frontend Seul (pour le développement UI)
+
+Si vous travaillez uniquement sur des changements visuels et que le backend tourne déjà (ou que vous n'en avez pas besoin), vous pouvez utiliser le serveur de développement de Vite.
+
+```bash
+# Naviguer dans le dossier frontend
+cd frontend
+
+# Lancer le serveur de dev
+npm run dev
+```
+L'application sera accessible à l'adresse `http://localhost:5173` (ou un autre port si celui-ci est pris).
+
+---
+
+## Scripts Utiles (`package.json`)
+
+Les commandes suivantes sont à lancer depuis le dossier `frontend/`.
+
+- `npm run dev`: Démarre le serveur de développement avec rechargement à chaud (HMR).
+- `npm run build`: Construit l'application pour la production.
+- `npm run preview`: Prévisualise la version de production.
+- `npm run lint`: Vérifie les erreurs de style et de code avec ESLint.
+- `npm run check`: Lance le vérificateur de types de Svelte (TypeScript).
+
+---
+
+## Structure du Projet
+
+- `src/routes/`: Contient toutes les pages de l'application. Le nom des dossiers définit les URLs.
+    - `(auth)/`: Un groupe de layout pour les pages de connexion, inscription, etc.
+- `src/lib/`: Code réutilisable (composants, stores, utilitaires).
+    - `components/ui/`: Composants d'interface génériques (Button, Input...).
+    - `stores/`: Stores Svelte pour la gestion d'état global (ex: `auth.ts`).
+- `static/`: Fichiers publics (icônes, `robots.txt`...).
+</file>
+
+<file path="frontend/svelte.config.js">
+import adapter from '@sveltejs/adapter-node';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+
+/** @type {import('@sveltejs/kit').Config} */
+const config = {
+	preprocess: vitePreprocess(),
+	kit: {
+		adapter: adapter(),
+		csrf: {
+			checkOrigin: false,
+		}
+	}
+};
+
+export default config;
+</file>
+
+<file path="frontend/tsconfig.json">
+{
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"moduleResolution": "bundler",
+		"extends": "./.svelte-kit/tsconfig.json",
+		"types": ["@sveltejs/kit", "@vite-pwa/sveltekit", "vite-plugin-pwa/client.d.ts"]
+	}
+}
+</file>
+
+<file path="frontend/vite.config.ts">
+import tailwindcss from '@tailwindcss/vite';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+	plugins: [
+		tailwindcss(),
+		sveltekit(),
+		SvelteKitPWA({
+			registerType: 'autoUpdate',
+
+			includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+
+			manifest: {
+				name: 'lister',
+				short_name: 'Lister',
+				description: 'Une application pour gérer les setlists de votre groupe',
+				theme_color: '#333333',
+				background_color: '#ffffff',
+				display: 'standalone',
+				icons: [
+					{
+						src: 'pwa-192x192.png',
+						sizes: '192x192',
+						type: 'image/png'
+					},
+					{
+						src: 'pwa-512x512.png',
+						sizes: '512x512',
+						type: 'image/png'
+					}
+				]
+			},
+
+			workbox: {
+				navigateFallback: '/',
+				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,webp}', 'server/manifest.webmanifest']
+			},
+
+			devOptions: {
+				enabled: true,
+				type: 'module',
+			},
+		})
+	]
+});
+</file>
+
+<file path=".env.example">
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_DB=setlistdb
+DATABASE_URL=postgres://user:password@db:5432/setlistdb?sslmode=disable
+DB_URL_MIGRATE=postgres://user:password@localhost:5432/setlistdb?sslmode=disable
+VITE_ORIGIN=http://localhost:4000
+</file>
+
+<file path=".gitignore">
+.env
+</file>
+
+<file path="docker-compose.yml">
+version: '3.8'
+
+services:  
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8089:8089"
+    networks:
+      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - VITE_ORIGIN=${VITE_ORIGIN}
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d setlistdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+</file>
+
+<file path="Makefile">
+include .env
+export
+
+up:
+	docker-compose up -d --build
+
+down:
+	docker-compose down
+
+logs:
+	docker-compose logs -f
+
+db-up:
+	docker-compose up -d db
+
+migrate-create:
+	@if [ -z "$(name)" ]; then \
+		echo "Erreur : L'argument 'name' est requis. Usage : make migrate-create name=mon_nom_de_migration"; \
+		exit 1; \
+	fi
+	cd backend && migrate create -ext sql -dir db/migrations -seq $(name)
+
+migrate-up:
+	migrate -path ./backend/db/migrations -database "$(DB_URL_MIGRATE)" up
+
+migrate-down:
+	migrate -path ./backend/db/migrations -database "$(DB_URL_MIGRATE)" down
+
+migrate-force:
+	migrate -path ./backend/db/migrations -database "$(DB_URL_MIGRATE)" force $(version)
+
+shell-front:
+	docker-compose exec frontend sh
+
+shell-back:
+	docker-compose exec backend sh
+
+shell-db:
+	docker-compose exec db sh
+
+db-connect:
+	docker-compose exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
+</file>
+
+</files>
