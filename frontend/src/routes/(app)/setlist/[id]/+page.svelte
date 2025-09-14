@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import { formatDuration } from '$lib/utils/utils';
-    import { dndzone } from 'svelte-dnd-action';
+    import { dragHandle, dragHandleZone } from 'svelte-dnd-action';
     import { enhance } from '$app/forms';
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
@@ -136,7 +136,7 @@
 
             <ul
                     class="divide-y divide-slate-200 dark:divide-slate-700"
-                    use:dndzone={{ items: items, flipDurationMs: 300 }}
+                    use:dragHandleZone={{ items: items, flipDurationMs: 300 }}
                     onconsider={handleDndConsider}
                     onfinalize={handleDndFinalize}
             >
@@ -145,6 +145,7 @@
                         <div class="flex min-w-0 flex-grow items-start gap-4">
                             <div class="flex-shrink-0 pt-1">
                                 <div
+                                        use:dragHandle
                                         class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
                                         aria-label="Drag to reorder"
                                 >

@@ -4,7 +4,7 @@
     import { navigating } from '$app/stores';
     import { invalidateAll } from '$app/navigation';
     import { formatDuration } from '$lib/utils/utils';
-    import { dndzone } from 'svelte-dnd-action';
+    import { dragHandle, dragHandleZone } from 'svelte-dnd-action';
 
     let { data } = $props<{ data: PageData }>();
 
@@ -94,13 +94,14 @@
                         <input type="hidden" name="itemIds" value={JSON.stringify(items.map((item) => item.id))} />
                         <ul
                                 class="space-y-3"
-                                use:dndzone={{ items: items, flipDurationMs: 300 }}
+                                use:dragHandleZone={{ items: items, flipDurationMs: 300 }}
                                 onconsider={handleDndConsider}
                                 onfinalize={handleDndFinalize}
                         >
                             {#each items as item (item.id)}
                                 <li class="flex items-center gap-2">
                                     <div
+                                            use:dragHandle
                                             class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
                                             aria-label="Drag to reorder"
                                     >
