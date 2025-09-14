@@ -39,6 +39,10 @@ type UpdateOrderPayload struct {
 	ItemIDs []int `json:"item_ids"`
 }
 
+type UpdateItemPayload struct {
+	Notes string `json:"notes"`
+}
+
 var hexColorRegex = regexp.MustCompile(`^#(?:[0-9a-fA-F]{3}){1,2}$`)
 
 func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload, bandID int) (model.Setlist, error) {
@@ -117,4 +121,13 @@ func (s SetlistService) UpdateOrder(ctx context.Context, setlistID int, payload 
 		return nil
 	}
 	return s.SetlistRepo.UpdateItemOrder(ctx, setlistID, payload.ItemIDs)
+}
+
+func (s SetlistService) UpdateItem(ctx context.Context, itemID int, bandID int, payload UpdateItemPayload) (model.SetlistItem, error) {
+	notes := sql.NullString{String: payload.Notes, Valid: payload.Notes != ""}
+	return s.SetlistRepo.UpdateSetlistItem(ctx, itemID, bandID, notes)
+}
+
+func (s SetlistService) DeleteItem(ctx context.Context, itemID int, bandID int) error {
+	return s.SetlistRepo.DeleteSetlistItem(ctx, itemID, bandID)
 }

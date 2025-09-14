@@ -52,6 +52,8 @@ func main() {
 	mux.Handle("PUT /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.UpdateSetlist)))
 	mux.Handle("POST /api/setlist/{id}/items", authMiddleware(http.HandlerFunc(setlistHandler.AddItem)))
 	mux.Handle("PUT /api/setlist/{id}/items/order", authMiddleware(http.HandlerFunc(setlistHandler.UpdateItemOrder)))
+	mux.Handle("PUT /api/setlist/item/{itemId}", authMiddleware(http.HandlerFunc(setlistHandler.UpdateItem)))
+	mux.Handle("DELETE /api/setlist/item/{itemId}", authMiddleware(http.HandlerFunc(setlistHandler.DeleteItem)))
 
 	mux.Handle("POST /api/song", authMiddleware(http.HandlerFunc(songHandler.CreateSong)))
 	mux.Handle("GET /api/song", authMiddleware(http.HandlerFunc(songHandler.GetSongs)))

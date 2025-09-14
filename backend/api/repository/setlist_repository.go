@@ -163,3 +163,31 @@ func (r SetlistRepository) UpdateItemOrder(ctx context.Context, setlistID int, i
 
 	return tx.Commit(ctx)
 }
+
+func (r SetlistRepository) UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes sql.NullString) (model.SetlistItem, error) {
+	var item model.SetlistItem
+	query := `
+		UPDATE setlist_items si SET notes = $1
+		FROM setlists s
+		WHERE si.id = $2 AND si.setlist_id = s.id AND s.band_id = $3
+		RETURNING si.id, si.notes
+	`
+	err := r.DB.QueryRow(ctx, query, notes, itemID, bandID).Scan(&item.ID, &item.Notes)
+	return item, err
+}
+
+func (r SetlistRepository) DeleteSetlistItem(ctx context.Context, itemID int, bandID int) error {
+	query := `
+		DELETE FROM setlist_items si
+		USING setlists s
+		WHERE si.id = $1 AND si.setlist_id = s.id AND s.band_id = $2
+	`
+	cmdTag, err := r.DB.Exec(ctx, query, itemID, bandID)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
