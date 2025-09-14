@@ -2,7 +2,7 @@
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
     import { enhance } from '$app/forms';
-    import { navigating } from '$app/stores';
+    import { navigating, page } from '$app/stores';
     import { goto } from '$app/navigation';
 
     type FormState =
@@ -14,6 +14,8 @@
         | undefined;
 
     let { form } = $props<{ form: FormState }>();
+
+    const cancelHref = $page.url.searchParams.get('redirectTo') || '/';
 
     $effect(() => {
         if (form?.success && form?.redirectTo) {
@@ -47,6 +49,8 @@
             <Input label="Tempo (BPM)" id="tempo" name="tempo" type="number" />
         </div>
 
+        <Input label="Link (optional)" id="links" name="links" type="text" placeholder="https://youtube.com/..." />
+
         <div>
             <label for="lyrics" class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200"
             >Lyrics (optional)</label
@@ -67,7 +71,7 @@
 
         <div class="flex items-center justify-between gap-4 pt-4">
             <a
-                    href="/song"
+                    href={cancelHref}
                     class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
             >
                 Cancel

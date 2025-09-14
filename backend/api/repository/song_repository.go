@@ -37,7 +37,7 @@ func (r SongRepository) CreateSong(ctx context.Context, song model.Song) (model.
 
 func (r SongRepository) GetAllSongsByBandID(ctx context.Context, bandID int) ([]model.Song, error) {
 	songs := make([]model.Song, 0)
-	query := `SELECT id, title, album_name FROM songs WHERE band_id = $1 AND is_deleted = FALSE ORDER BY album_name ASC, title ASC`
+	query := `SELECT id, title, album_name, duration_seconds, tempo, song_key, links FROM songs WHERE band_id = $1 AND is_deleted = FALSE ORDER BY album_name ASC, title ASC`
 
 	rows, err := r.DB.Query(ctx, query, bandID)
 	if err != nil {
@@ -47,7 +47,7 @@ func (r SongRepository) GetAllSongsByBandID(ctx context.Context, bandID int) ([]
 
 	for rows.Next() {
 		var song model.Song
-		if err := rows.Scan(&song.ID, &song.Title, &song.AlbumName); err != nil {
+		if err := rows.Scan(&song.ID, &song.Title, &song.AlbumName, &song.DurationSeconds, &song.Tempo, &song.SongKey, &song.Links); err != nil {
 			return nil, err
 		}
 		songs = append(songs, song)

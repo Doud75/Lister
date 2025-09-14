@@ -168,20 +168,26 @@
                             <div class="min-w-0 flex-grow">
                                 {#if item.item_type === 'song'}
                                     <div class="flex items-center gap-3">
-										<span class="text-lg font-bold text-slate-400 dark:text-slate-500"
-                                        >{items.findIndex((i) => i.id === item.id) + 1}.</span
-                                        >
+                                        <span class="text-lg font-bold text-slate-400 dark:text-slate-500">{items.findIndex((i) => i.id === item.id) + 1}.</span>
                                         <p class="truncate font-semibold text-slate-800 dark:text-slate-100">
                                             {item.title.String}
                                         </p>
                                     </div>
-                                    <div
-                                            class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400"
-                                    >
-                                        <span>Duration: {formatItemDuration(item.duration_seconds.Int32)}</span>
-                                        {#if item.tempo.Valid}
+                                    <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400">
+                                        {#if item.duration_seconds?.Valid}
+                                            <span>Durée: {formatItemDuration(item.duration_seconds.Int32)}</span>
+                                        {/if}
+                                        {#if item.tempo?.Valid}
                                             <span class="hidden sm:inline">&bull;</span>
                                             <span>Tempo: {item.tempo.Int32} BPM</span>
+                                        {/if}
+                                        {#if item.song_key?.Valid}
+                                            <span class="hidden sm:inline">&bull;</span>
+                                            <span>Tonalité: {item.song_key.String}</span>
+                                        {/if}
+                                        {#if item.links?.Valid}
+                                            <span class="hidden sm:inline">&bull;</span>
+                                            <a href={item.links.String} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
                                         {/if}
                                     </div>
                                     {#if item.notes?.Valid && item.notes.String}

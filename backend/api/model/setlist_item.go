@@ -1,6 +1,8 @@
 package model
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type SetlistItem struct {
 	ID                        int            `json:"id"`
@@ -16,4 +18,6 @@ type SetlistItem struct {
 	Tempo                     sql.NullInt32  `json:"tempo,omitempty"`
 	Speaker                   sql.NullString `json:"speaker,omitempty"`
 	Script                    sql.NullString `json:"script,omitempty"`
+	SongKey                   sql.NullString `json:"song_key,omitempty"`
+	Links                     sql.NullString `json:"links,omitempty"`
 }

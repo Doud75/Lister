@@ -16,7 +16,7 @@ type CreateSongPayload struct {
 	Lyrics          *string          `json:"lyrics"`
 	AlbumName       *string          `json:"album_name"`
 	Instrumentation *json.RawMessage `json:"instrumentation"`
-	Links           *json.RawMessage `json:"links"`
+	Links           *string          `json:"links"`
 }
 
 type UpdateSongPayload = CreateSongPayload
@@ -52,9 +52,7 @@ func (s SongService) Create(ctx context.Context, payload CreateSongPayload, band
 		song.Instrumentation = json.RawMessage("null")
 	}
 	if payload.Links != nil {
-		song.Links = *payload.Links
-	} else {
-		song.Links = json.RawMessage("null")
+		song.Links = sql.NullString{String: *payload.Links, Valid: true}
 	}
 
 	return s.SongRepo.CreateSong(ctx, song)
@@ -96,9 +94,7 @@ func (s SongService) Update(ctx context.Context, id int, bandID int, payload Upd
 		song.Instrumentation = json.RawMessage("null")
 	}
 	if payload.Links != nil {
-		song.Links = *payload.Links
-	} else {
-		song.Links = json.RawMessage("null")
+		song.Links = sql.NullString{String: *payload.Links, Valid: true}
 	}
 
 	return s.SongRepo.UpdateSong(ctx, song)

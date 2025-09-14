@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { ActionData, PageData } from './$types';
     import { enhance } from '$app/forms';
+    import { formatDuration } from '$lib/utils/utils';
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -8,6 +9,10 @@
         id: number;
         title: string;
         album_name: { String: string; Valid: boolean };
+        duration_seconds: { Int32: number; Valid: boolean };
+        tempo: { Int32: number; Valid: boolean };
+        song_key: { String: string; Valid: boolean };
+        links: { String: string; Valid: boolean };
     };
 
     let songs = $state<Song[]>(data.songs);
@@ -71,8 +76,28 @@
                     <ul class="mt-4 divide-y divide-slate-200 dark:divide-slate-700">
                         {#each albumSongs as song (song.id)}
                             <li class="flex items-center justify-between gap-3 py-3">
-                                <p class="text-slate-700 dark:text-slate-300">{song.title}</p>
-
+                                <div class="min-w-0 flex-grow">
+                                    <div class="flex items-center gap-3">
+                                        <p class="truncate font-semibold text-slate-800 dark:text-slate-100">{song.title}</p>
+                                    </div>
+                                    <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                        {#if song.duration_seconds.Valid}
+                                            <span>Durée: {formatDuration(song.duration_seconds.Int32)}</span>
+                                        {/if}
+                                        {#if song.tempo.Valid}
+                                            <span class="hidden sm:inline">&bull;</span>
+                                            <span>Tempo: {song.tempo.Int32} BPM</span>
+                                        {/if}
+                                        {#if song.song_key.Valid}
+                                            <span class="hidden sm:inline">&bull;</span>
+                                            <span>Tonalité: {song.song_key.String}</span>
+                                        {/if}
+                                        {#if song.links.Valid}
+                                            <span class="hidden sm:inline">&bull;</span>
+                                            <a href={song.links.String} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
+                                        {/if}
+                                    </div>
+                                </div>
                                 <div class="flex items-center gap-2">
                                     <a
                                             href="/song/{song.id}/edit"

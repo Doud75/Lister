@@ -12,7 +12,8 @@ export const actions: Actions = {
             song_key: data.get('song_key') || null,
             duration_seconds: Number(data.get('duration_seconds')) || null,
             tempo: Number(data.get('tempo')) || null,
-            lyrics: data.get('lyrics') || null
+            lyrics: data.get('lyrics') || null,
+            links: data.get('links') || null
         };
 
         const response = await fetch(`/api/song/${id}`, {
@@ -26,7 +27,6 @@ export const actions: Actions = {
             return fail(response.status, { error: result.error });
         }
 
-        // Si la mise à jour réussit, on redirige vers la liste des chansons
         throw redirect(303, '/song');
     }
 };

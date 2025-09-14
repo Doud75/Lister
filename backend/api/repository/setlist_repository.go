@@ -85,7 +85,9 @@ func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setli
 			COALESCE(s.duration_seconds, i.duration_seconds) as duration_seconds,
 			s.tempo,
 			i.speaker, 
-			i.script
+			i.script,
+			s.song_key,
+			s.links
 		FROM setlist_items si
 		LEFT JOIN songs s ON si.song_id = s.id
 		LEFT JOIN interludes i ON si.interlude_id = i.id
@@ -105,6 +107,7 @@ func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setli
 			&item.SongID, &item.InterludeID, &item.Notes, &item.TransitionDurationSeconds,
 			&item.Title, &item.DurationSeconds, &item.Tempo,
 			&item.Speaker, &item.Script,
+			&item.SongKey, &item.Links,
 		)
 		if err != nil {
 			return items, err

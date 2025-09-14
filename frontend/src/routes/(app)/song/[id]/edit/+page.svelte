@@ -13,6 +13,7 @@
     let duration_seconds = $state(data.song.duration_seconds?.Int32?.toString() ?? '');
     let tempo = $state(data.song.tempo?.Int32?.toString() ?? '');
     let lyrics = $state(data.song.lyrics?.String ?? '');
+    let links = $state(data.song.links?.String ?? '');
 </script>
 
 <div class="container mx-auto max-w-2xl px-4 sm:px-6">
@@ -54,6 +55,8 @@
             />
             <Input label="Tempo (BPM)" id="tempo" name="tempo" type="number" bind:value={tempo} />
         </div>
+
+        <Input label="Link (optional)" id="links" name="links" type="text" placeholder="https://youtube.com/..." bind:value={links} />
 
         <div>
             <label for="lyrics" class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200"

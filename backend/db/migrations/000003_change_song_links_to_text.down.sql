@@ -1,0 +1,2 @@
+ALTER TABLE songs
+ALTER COLUMN links TYPE JSONB USING links::jsonb;

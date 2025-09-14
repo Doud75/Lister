@@ -18,6 +18,6 @@ type Song struct {
 	AlbumName       sql.NullString  `json:"album_name"`
 	Instrumentation json.RawMessage `json:"instrumentation"`
 	Notes           sql.NullString  `json:"notes"`
-	Links           json.RawMessage `json:"links"`
+	Links           sql.NullString  `json:"links"`
 	CreatedAt       time.Time       `json:"created_at"`
 }

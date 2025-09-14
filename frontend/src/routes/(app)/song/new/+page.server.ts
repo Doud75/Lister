@@ -11,7 +11,8 @@ export const actions: Actions = {
             song_key: data.get('song_key') || null,
             duration_seconds: Number(data.get('duration_seconds')) || null,
             tempo: Number(data.get('tempo')) || null,
-            lyrics: data.get('lyrics') || null
+            lyrics: data.get('lyrics') || null,
+            links: data.get('links') || null
         };
 
         const response = await fetch('/api/song', {
@@ -25,7 +26,6 @@ export const actions: Actions = {
             return fail(response.status, { error: result.error });
         }
 
-        // Rediriger vers la nouvelle page de liste des chansons
         const redirectTo = url.searchParams.get('redirectTo') || '/song';
         return { success: true, redirectTo: redirectTo };
     }
