@@ -3,48 +3,56 @@
     import Input from '$lib/components/ui/Input.svelte';
     import { enhance } from '$app/forms';
     import { navigating } from '$app/stores';
-    import { goto } from '$app/navigation';
+    import type { ActionData, PageData } from './$types';
 
-    type FormState =
-        | {
-        error?: string;
-        success?: boolean;
-        redirectTo?: string;
-    }
-        | undefined;
+    let { data, form }: { data: PageData; form: ActionData } = $props();
 
-    let { form } = $props<{ form: FormState }>();
-
-    $effect(() => {
-        if (form?.success && form?.redirectTo) {
-            goto(form.redirectTo);
-        }
-    });
+    let title = $state(data.song.title ?? '');
+    let album_name = $state(data.song.album_name?.String ?? '');
+    let song_key = $state(data.song.song_key?.String ?? '');
+    let duration_seconds = $state(data.song.duration_seconds?.Int32?.toString() ?? '');
+    let tempo = $state(data.song.tempo?.Int32?.toString() ?? '');
+    let lyrics = $state(data.song.lyrics?.String ?? '');
 </script>
 
 <div class="container mx-auto max-w-2xl px-4 sm:px-6">
     <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-        Add a New Song to Your Library
+        Modifier: <span class="text-indigo-500">{data.song.title}</span>
     </h1>
-    <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
-        This will add the song to your global library.
-    </p>
 
     <form
             method="POST"
             use:enhance
             class="mt-8 space-y-6 rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800"
     >
-        <Input label="Song Title" id="title" name="title" required />
+        <Input label="Song Title" id="title" name="title" bind:value={title} required />
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Input label="Album Name (optional)" id="album_name" name="album_name" placeholder="e.g., Abbey Road" />
-            <Input label="Key (optional)" id="song_key" name="song_key" placeholder="e.g., Am" />
+            <Input
+                    label="Album Name (optional)"
+                    id="album_name"
+                    name="album_name"
+                    placeholder="e.g., Abbey Road"
+                    bind:value={album_name}
+            />
+            <Input
+                    label="Key (optional)"
+                    id="song_key"
+                    name="song_key"
+                    placeholder="e.g., Am"
+                    bind:value={song_key}
+            />
         </div>
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Input label="Duration (seconds)" id="duration_seconds" name="duration_seconds" type="number" />
-            <Input label="Tempo (BPM)" id="tempo" name="tempo" type="number" />
+            <Input
+                    label="Duration (seconds)"
+                    id="duration_seconds"
+                    name="duration_seconds"
+                    type="number"
+                    bind:value={duration_seconds}
+            />
+            <Input label="Tempo (BPM)" id="tempo" name="tempo" type="number" bind:value={tempo} />
         </div>
 
         <div>
@@ -56,6 +64,7 @@
                         id="lyrics"
                         name="lyrics"
                         rows="8"
+                        bind:value={lyrics}
                         class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500"
                 ></textarea>
             </div>
@@ -70,9 +79,9 @@
                     href="/song"
                     class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
             >
-                Cancel
+                Annuler
             </a>
-            <Button isLoading={$navigating?.type === 'form'} autoWidth>Create Song</Button>
+            <Button isLoading={$navigating?.type === 'form'} autoWidth>Sauvegarder</Button>
         </div>
     </form>
 </div>

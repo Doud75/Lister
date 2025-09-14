@@ -40,3 +40,22 @@ shell-db:
 
 db-connect:
 	docker-compose exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
+
+docker-clean:
+	@echo "Nettoyage du système Docker (conteneurs arrêtés, réseaux inutilisés, images en suspens, caches de build)..."
+	docker system prune
+
+docker-clean-all:
+	@echo "ATTENTION : Nettoyage AGRESSIF du système Docker..."
+	@echo "Suppression de TOUS les conteneurs arrêtés, réseaux, images et caches de build inutilisés."
+	docker system prune -a
+
+docker-clean-cache:
+	@echo "Nettoyage spécifique du cache de build Docker..."
+	docker builder prune
+
+docker-clean-project: down
+	@echo "Suppression des anciennes images Docker créées par ce projet..."
+	@docker images -a --filter "label=com.docker.compose.project=setlist-pwa" -q | xargs -r docker rmi
+	@echo "Nettoyage du cache de build..."
+	docker builder prune

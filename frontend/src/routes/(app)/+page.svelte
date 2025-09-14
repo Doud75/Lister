@@ -56,5 +56,53 @@
                 </div>
             {/if}
         </div>
+        <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Bibliothèque</h2>
+            <div class="mt-4">
+                <a
+                        href="/song"
+                        class="group flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-4 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-700/70"
+                >
+                    <div class="flex items-center gap-4">
+                        <div
+                                class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-500/20"
+                        >
+                            <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    class="h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                            >
+                                <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-900 dark:text-white">Gérer les chansons</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                                Voir et modifier tous les morceaux
+                            </p>
+                        </div>
+                    </div>
+                    <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="h-5 w-5 text-slate-400 transition-transform group-hover:translate-x-1"
+                    >
+                        <path
+                                fill-rule="evenodd"
+                                d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                                clip-rule="evenodd"
+                        />
+                    </svg>
+                </a>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,8 +1,9 @@
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
-    default: async ({ request, fetch, url }) => {
+    default: async ({ request, fetch, params }) => {
+        const { id } = params;
         const data = await request.formData();
 
         const payload = {
@@ -14,8 +15,8 @@ export const actions: Actions = {
             lyrics: data.get('lyrics') || null
         };
 
-        const response = await fetch('/api/song', {
-            method: 'POST',
+        const response = await fetch(`/api/song/${id}`, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
@@ -25,8 +26,7 @@ export const actions: Actions = {
             return fail(response.status, { error: result.error });
         }
 
-        // Rediriger vers la nouvelle page de liste des chansons
-        const redirectTo = url.searchParams.get('redirectTo') || '/song';
-        return { success: true, redirectTo: redirectTo };
+        // Si la mise à jour réussit, on redirige vers la liste des chansons
+        throw redirect(303, '/song');
     }
 };
