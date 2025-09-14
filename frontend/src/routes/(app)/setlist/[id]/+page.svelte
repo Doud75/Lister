@@ -54,12 +54,14 @@
                     >
                 </div>
             </div>
-            <a
-                    href="/setlist/{setlistId}/add"
-                    class="flex w-auto justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
-            >
-                + Add Item
-            </a>
+            <div class="flex items-center gap-4">
+                <a href="/setlist/{setlistId}/edit" class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                    Edit Info
+                </a>
+                <a href="/setlist/{setlistId}/add" class="flex w-auto justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500">
+                    + Add Item
+                </a>
+            </div>
         </div>
     </header>
 

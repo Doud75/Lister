@@ -56,3 +56,5 @@ frontend/vite.config.ts.timestamp-*
 # Cette ligne est souvent optionnelle car les volumes sont gérés hors du projet,
 # mais c'est une bonne pratique de l'ajouter.
 postgres-data/
+
+repomix-output.xml

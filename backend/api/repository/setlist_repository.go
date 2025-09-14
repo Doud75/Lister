@@ -25,6 +25,20 @@ func (r SetlistRepository) CreateSetlist(ctx context.Context, name, color string
 	return setlist, err
 }
 
+func (r SetlistRepository) UpdateSetlist(ctx context.Context, id int, bandID int, name, color string) (model.Setlist, error) {
+	var setlist model.Setlist
+	query := `
+		UPDATE setlists
+		SET name = $1, color = $2
+		WHERE id = $3 AND band_id = $4
+		RETURNING id, band_id, name, color, created_at
+	`
+	err := r.DB.QueryRow(ctx, query, name, color, id, bandID).Scan(
+		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt,
+	)
+	return setlist, err
+}
+
 func (r SetlistRepository) GetSetlistsByBandID(ctx context.Context, bandID int) ([]model.Setlist, error) {
 	setlists := make([]model.Setlist, 0)
 	query := `

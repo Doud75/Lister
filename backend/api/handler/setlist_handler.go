@@ -37,6 +37,37 @@ func (h SetlistHandler) CreateSetlist(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(setlist)
 }
 
+func (h SetlistHandler) UpdateSetlist(w http.ResponseWriter, r *http.Request) {
+	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
+	if !ok {
+		writeError(w, "Could not identify band from token", http.StatusInternalServerError)
+		return
+	}
+
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		writeError(w, "Invalid setlist ID", http.StatusBadRequest)
+		return
+	}
+
+	var payload service.UpdateSetlistPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	setlist, err := h.SetlistService.Update(r.Context(), id, bandID, payload)
+	if err != nil {
+		writeError(w, "Failed to update setlist", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(setlist)
+}
+
 func (h SetlistHandler) GetSetlists(w http.ResponseWriter, r *http.Request) {
 	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
 	if !ok {

@@ -19,6 +19,11 @@ type CreateSetlistPayload struct {
 	Color string `json:"color"`
 }
 
+type UpdateSetlistPayload struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
 type SetlistDetails struct {
 	model.Setlist
 	Items []model.SetlistItem `json:"items"`
@@ -50,6 +55,22 @@ func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload
 	}
 
 	return s.SetlistRepo.CreateSetlist(ctx, payload.Name, payload.Color, bandID)
+}
+
+func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) (model.Setlist, error) {
+	if payload.Name == "" {
+		return model.Setlist{}, errors.New("setlist name cannot be empty")
+	}
+
+	if payload.Color == "" {
+		return model.Setlist{}, errors.New("color cannot be empty")
+	}
+
+	if !hexColorRegex.MatchString(payload.Color) {
+		return model.Setlist{}, fmt.Errorf("invalid color format: %s", payload.Color)
+	}
+
+	return s.SetlistRepo.UpdateSetlist(ctx, id, bandID, payload.Name, payload.Color)
 }
 
 func (s SetlistService) GetAllForBand(ctx context.Context, bandID int) ([]model.Setlist, error) {
