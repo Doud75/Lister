@@ -51,12 +51,21 @@ func main() {
 	mux.Handle("GET /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlistDetails)))
 	mux.Handle("POST /api/setlist/{id}/items", authMiddleware(http.HandlerFunc(setlistHandler.AddItem)))
 	mux.Handle("PUT /api/setlist/{id}/items/order", authMiddleware(http.HandlerFunc(setlistHandler.UpdateItemOrder)))
+	mux.Handle("PUT /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.UpdateSetlist)))
+	mux.Handle("DELETE /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.DeleteSetlist)))
+	mux.Handle("DELETE /api/setlist/{id}/items/{itemId}", authMiddleware(http.HandlerFunc(setlistHandler.DeleteSetlistItem)))
 
 	mux.Handle("POST /api/song", authMiddleware(http.HandlerFunc(songHandler.CreateSong)))
 	mux.Handle("GET /api/song", authMiddleware(http.HandlerFunc(songHandler.GetSongs)))
+	mux.Handle("GET /api/song/{id}", authMiddleware(http.HandlerFunc(songHandler.GetSong)))
+	mux.Handle("PUT /api/song/{id}", authMiddleware(http.HandlerFunc(songHandler.UpdateSong)))
+	mux.Handle("DELETE /api/song/{id}", authMiddleware(http.HandlerFunc(songHandler.DeleteSong)))
 
 	mux.Handle("POST /api/interlude", authMiddleware(http.HandlerFunc(interludeHandler.CreateInterlude)))
 	mux.Handle("GET /api/interlude", authMiddleware(http.HandlerFunc(interludeHandler.GetInterludes)))
+	mux.Handle("GET /api/interlude/{id}", authMiddleware(http.HandlerFunc(interludeHandler.GetInterlude)))
+	mux.Handle("PUT /api/interlude/{id}", authMiddleware(http.HandlerFunc(interludeHandler.UpdateInterlude)))
+	mux.Handle("DELETE /api/interlude/{id}", authMiddleware(http.HandlerFunc(interludeHandler.DeleteInterlude)))
 
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

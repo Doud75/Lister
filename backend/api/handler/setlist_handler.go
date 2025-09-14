@@ -121,3 +121,43 @@ func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Order updated successfully"})
 }
+
+func (h SetlistHandler) UpdateSetlist(w http.ResponseWriter, r *http.Request) {
+	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+	id, _ := strconv.Atoi(r.PathValue("id"))
+
+	var payload service.UpdateSetlistPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.SetlistService.Update(r.Context(), id, bandID, payload); err != nil {
+		writeError(w, "Failed to update setlist", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h SetlistHandler) DeleteSetlist(w http.ResponseWriter, r *http.Request) {
+	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+	id, _ := strconv.Atoi(r.PathValue("id"))
+
+	if err := h.SetlistService.Delete(r.Context(), id, bandID); err != nil {
+		writeError(w, "Failed to delete setlist", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h SetlistHandler) DeleteSetlistItem(w http.ResponseWriter, r *http.Request) {
+	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+	setlistID, _ := strconv.Atoi(r.PathValue("id"))
+	itemID, _ := strconv.Atoi(r.PathValue("itemId"))
+
+	if err := h.SetlistService.DeleteItem(r.Context(), itemID, setlistID, bandID); err != nil {
+		writeError(w, "Failed to delete item from setlist", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

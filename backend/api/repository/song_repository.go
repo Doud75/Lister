@@ -48,3 +48,22 @@ func (r SongRepository) GetAllSongsByBandID(ctx context.Context, bandID int) ([]
 	}
 	return songs, rows.Err()
 }
+
+func (r SongRepository) GetSongByID(ctx context.Context, id int, bandID int) (model.Song, error) {
+	var song model.Song
+	query := `SELECT id, band_id, title, duration_seconds, tempo, song_key FROM songs WHERE id = $1 AND band_id = $2`
+	err := r.DB.QueryRow(ctx, query, id, bandID).Scan(&song.ID, &song.BandID, &song.Title, &song.DurationSeconds, &song.Tempo, &song.SongKey)
+	return song, err
+}
+
+func (r SongRepository) UpdateSong(ctx context.Context, song model.Song) error {
+	query := `UPDATE songs SET title = $1, duration_seconds = $2, tempo = $3, song_key = $4 WHERE id = $5 AND band_id = $6`
+	_, err := r.DB.Exec(ctx, query, song.Title, song.DurationSeconds, song.Tempo, song.SongKey, song.ID, song.BandID)
+	return err
+}
+
+func (r SongRepository) DeleteSong(ctx context.Context, id int, bandID int) error {
+	query := `DELETE FROM songs WHERE id = $1 AND band_id = $2`
+	_, err := r.DB.Exec(ctx, query, id, bandID)
+	return err
+}

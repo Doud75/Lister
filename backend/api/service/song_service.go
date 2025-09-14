@@ -44,3 +44,30 @@ func (s SongService) Create(ctx context.Context, payload CreateSongPayload, band
 func (s SongService) GetAllForBand(ctx context.Context, bandID int) ([]model.Song, error) {
 	return s.SongRepo.GetAllSongsByBandID(ctx, bandID)
 }
+
+func (s SongService) GetByID(ctx context.Context, id int, bandID int) (model.Song, error) {
+	return s.SongRepo.GetSongByID(ctx, id, bandID)
+}
+
+func (s SongService) Update(ctx context.Context, id int, bandID int, payload CreateSongPayload) error {
+	song := model.Song{
+		ID:     id,
+		BandID: bandID,
+		Title:  payload.Title,
+	}
+	if payload.DurationSeconds != nil {
+		song.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}
+	}
+	if payload.Tempo != nil {
+		song.Tempo = sql.NullInt32{Int32: int32(*payload.Tempo), Valid: true}
+	}
+	if payload.SongKey != nil {
+		song.SongKey = sql.NullString{String: *payload.SongKey, Valid: true}
+	}
+
+	return s.SongRepo.UpdateSong(ctx, song)
+}
+
+func (s SongService) Delete(ctx context.Context, id int, bandID int) error {
+	return s.SongRepo.DeleteSong(ctx, id, bandID)
+}

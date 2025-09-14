@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"setlist/api/model"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -87,7 +89,7 @@ func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setli
 		err := rows.Scan(
 			&item.ID, &item.SetlistID, &item.Position, &item.ItemType,
 			&item.SongID, &item.InterludeID, &item.Notes, &item.TransitionDurationSeconds,
-			&item.Title, &item.DurationSeconds, &item.Tempo, // <- Ces champs viennent du modèle corrigé
+			&item.Title, &item.DurationSeconds, &item.Tempo,
 		)
 		if err != nil {
 			return items, err
@@ -135,17 +137,51 @@ func (r SetlistRepository) UpdateItemOrder(ctx context.Context, setlistID int, i
 	}
 	defer tx.Rollback(ctx)
 
-	if _, err := tx.Exec(ctx, "SET CONSTRAINTS unique_position_in_setlist DEFERRED"); err != nil {
+	args := make([]interface{}, len(itemIDs)*2+1)
+	args[0] = setlistID
+
+	var whenClauses []string
+	placeholderIndex := 2
+
+	for i, id := range itemIDs {
+		whenClauses = append(whenClauses, fmt.Sprintf("WHEN $%d THEN $%d", placeholderIndex, placeholderIndex+1))
+		args[placeholderIndex-1] = id
+		args[placeholderIndex] = i
+		placeholderIndex += 2
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE setlist_items
+		SET position = CASE id %s END
+		WHERE setlist_id = $1
+	`, strings.Join(whenClauses, " "))
+
+	_, err = tx.Exec(ctx, query, args...)
+	if err != nil {
 		return err
 	}
 
-	query := `UPDATE setlist_items SET position = $1 WHERE id = $2 AND setlist_id = $3`
-
-	for i, id := range itemIDs {
-		if _, err := tx.Exec(ctx, query, i, id, setlistID); err != nil {
-			return err
-		}
-	}
-
 	return tx.Commit(ctx)
+}
+
+func (r SetlistRepository) UpdateSetlist(ctx context.Context, setlist model.Setlist) error {
+	query := `UPDATE setlists SET name = $1, color = $2 WHERE id = $3 AND band_id = $4`
+	_, err := r.DB.Exec(ctx, query, setlist.Name, setlist.Color, setlist.ID, setlist.BandID)
+	return err
+}
+
+func (r SetlistRepository) DeleteSetlist(ctx context.Context, id int, bandID int) error {
+	query := `DELETE FROM setlists WHERE id = $1 AND band_id = $2`
+	_, err := r.DB.Exec(ctx, query, id, bandID)
+	return err
+}
+
+func (r SetlistRepository) DeleteSetlistItem(ctx context.Context, itemID int, setlistID int, bandID int) error {
+	query := `
+		DELETE FROM setlist_items si
+		WHERE si.id = $1 AND si.setlist_id = $2
+		  AND EXISTS (SELECT 1 FROM setlists s WHERE s.id = si.setlist_id AND s.band_id = $3)
+	`
+	_, err := r.DB.Exec(ctx, query, itemID, setlistID, bandID)
+	return err
 }

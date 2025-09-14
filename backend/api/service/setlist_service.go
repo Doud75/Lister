@@ -34,6 +34,11 @@ type UpdateOrderPayload struct {
 	ItemIDs []int `json:"item_ids"`
 }
 
+type UpdateSetlistPayload struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
 var hexColorRegex = regexp.MustCompile(`^#(?:[0-9a-fA-F]{3}){1,2}$`)
 
 func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload, bandID int) (model.Setlist, error) {
@@ -96,4 +101,29 @@ func (s SetlistService) UpdateOrder(ctx context.Context, setlistID int, payload 
 		return nil
 	}
 	return s.SetlistRepo.UpdateItemOrder(ctx, setlistID, payload.ItemIDs)
+}
+
+func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) error {
+	if payload.Name == "" {
+		return errors.New("setlist name cannot be empty")
+	}
+	if !hexColorRegex.MatchString(payload.Color) {
+		return fmt.Errorf("invalid color format")
+	}
+
+	setlist := model.Setlist{
+		ID:     id,
+		BandID: bandID,
+		Name:   payload.Name,
+		Color:  payload.Color,
+	}
+	return s.SetlistRepo.UpdateSetlist(ctx, setlist)
+}
+
+func (s SetlistService) Delete(ctx context.Context, id int, bandID int) error {
+	return s.SetlistRepo.DeleteSetlist(ctx, id, bandID)
+}
+
+func (s SetlistService) DeleteItem(ctx context.Context, itemID int, setlistID int, bandID int) error {
+	return s.SetlistRepo.DeleteSetlistItem(ctx, itemID, setlistID, bandID)
 }
