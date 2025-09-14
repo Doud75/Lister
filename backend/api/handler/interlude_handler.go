@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"setlist/api/middleware"
 	"setlist/api/service"
+	"strconv"
 )
 
 type InterludeHandler struct {
@@ -40,4 +41,25 @@ func (h InterludeHandler) GetInterludes(w http.ResponseWriter, r *http.Request) 
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(interludes)
+}
+
+func (h InterludeHandler) UpdateInterlude(w http.ResponseWriter, r *http.Request) {
+	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+	idStr := r.PathValue("id")
+	id, _ := strconv.Atoi(idStr)
+
+	var payload service.UpdateInterludePayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	updatedInterlude, err := h.InterludeService.Update(r.Context(), id, bandID, payload)
+	if err != nil {
+		writeError(w, "Failed to update interlude", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedInterlude)
 }

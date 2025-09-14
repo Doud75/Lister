@@ -38,7 +38,7 @@ export const actions: Actions = {
 
         return { deleted: true, itemId: Number(itemId) };
     },
-    updateItem: async ({ request, fetch }) => {
+    updateSongNotes: async ({ request, fetch }) => {
         const data = await request.formData();
         const itemId = data.get('itemId');
         const notes = data.get('notes');
@@ -49,11 +49,29 @@ export const actions: Actions = {
             body: JSON.stringify({ notes })
         });
 
-        if (!response.ok) {
-            return fail(response.status, { error: 'Failed to update item notes.' });
-        }
-
+        if (!response.ok) return fail(response.status, { error: 'Failed to update song notes.' });
         const updatedItem = await response.json();
-        return { updated: true, item: updatedItem };
+        return { updatedSong: true, item: updatedItem };
+    },
+    updateInterlude: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const interludeId = data.get('interludeId');
+
+        const payload = {
+            title: data.get('title'),
+            speaker: data.get('speaker') || null,
+            script: data.get('script') || null,
+            duration_seconds: Number(data.get('duration')) || null
+        };
+
+        const response = await fetch(`/api/interlude/${interludeId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) return fail(response.status, { error: 'Failed to update interlude.' });
+        const updatedInterlude = await response.json();
+        return { updatedInterlude: true, interlude: updatedInterlude };
     }
 };

@@ -47,3 +47,22 @@ func (r InterludeRepository) GetAllInterludesByBandID(ctx context.Context, bandI
 	}
 	return interludes, rows.Err()
 }
+
+func (r InterludeRepository) UpdateInterlude(ctx context.Context, interlude model.Interlude) (model.Interlude, error) {
+	query := `
+		UPDATE interludes 
+		SET title = $1, speaker = $2, script = $3, duration_seconds = $4
+		WHERE id = $5 AND band_id = $6
+		RETURNING id, title, speaker, script, duration_seconds
+	`
+	err := r.DB.QueryRow(ctx, query,
+		interlude.Title,
+		interlude.Speaker,
+		interlude.Script,
+		interlude.DurationSeconds,
+		interlude.ID,
+		interlude.BandID,
+	).Scan(&interlude.ID, &interlude.Title, &interlude.Speaker, &interlude.Script, &interlude.DurationSeconds)
+
+	return interlude, err
+}

@@ -14,4 +14,6 @@ type SetlistItem struct {
 	Title                     sql.NullString `json:"title,omitempty"`
 	DurationSeconds           sql.NullInt32  `json:"duration_seconds,omitempty"`
 	Tempo                     sql.NullInt32  `json:"tempo,omitempty"`
+	Speaker                   sql.NullString `json:"speaker,omitempty"`
+	Script                    sql.NullString `json:"script,omitempty"`
 }

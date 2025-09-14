@@ -12,12 +12,6 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- ... (CREATE TABLE bands et CREATE TABLE users restent avant) ...
-
--- Supprime l'ancienne définition de la table `songs` si elle existe dans ce fichier
--- CREATE TABLE songs (...);
-
--- Voici la nouvelle définition complète :
 CREATE TABLE songs (
     id SERIAL PRIMARY KEY,
     band_id INT NOT NULL REFERENCES bands(id) ON DELETE CASCADE,

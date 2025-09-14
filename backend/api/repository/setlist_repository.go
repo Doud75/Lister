@@ -83,7 +83,9 @@ func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setli
 			si.song_id, si.interlude_id, si.notes, si.transition_duration_seconds,
 			COALESCE(s.title, i.title) as title,
 			COALESCE(s.duration_seconds, i.duration_seconds) as duration_seconds,
-			s.tempo
+			s.tempo,
+			i.speaker, 
+			i.script
 		FROM setlist_items si
 		LEFT JOIN songs s ON si.song_id = s.id
 		LEFT JOIN interludes i ON si.interlude_id = i.id
@@ -101,7 +103,8 @@ func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setli
 		err := rows.Scan(
 			&item.ID, &item.SetlistID, &item.Position, &item.ItemType,
 			&item.SongID, &item.InterludeID, &item.Notes, &item.TransitionDurationSeconds,
-			&item.Title, &item.DurationSeconds, &item.Tempo, // <- Ces champs viennent du modèle corrigé
+			&item.Title, &item.DurationSeconds, &item.Tempo,
+			&item.Speaker, &item.Script,
 		)
 		if err != nil {
 			return items, err

@@ -60,6 +60,7 @@ func main() {
 
 	mux.Handle("POST /api/interlude", authMiddleware(http.HandlerFunc(interludeHandler.CreateInterlude)))
 	mux.Handle("GET /api/interlude", authMiddleware(http.HandlerFunc(interludeHandler.GetInterludes)))
+	mux.Handle("PUT /api/interlude/{id}", authMiddleware(http.HandlerFunc(interludeHandler.UpdateInterlude)))
 
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

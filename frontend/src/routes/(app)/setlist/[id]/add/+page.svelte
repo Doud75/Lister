@@ -20,7 +20,7 @@
 
     const totalDurationSeconds = $derived(
         items.reduce((total, item) => {
-            const duration = item.item_type === 'song' ? item.duration_seconds?.Int32 ?? 0 : 0;
+            const duration = item.duration_seconds?.Int32 ?? 0;
             return total + duration;
         }, 0)
     );
