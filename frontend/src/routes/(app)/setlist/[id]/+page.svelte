@@ -94,11 +94,10 @@
         const doc = new jsPDF();
 
         const margin = 15;
-        const lineHeight = 7;
+        const lineHeight = 6; // Ligne plus serrée
         const pageHeight = doc.internal.pageSize.getHeight();
         let yPos = margin;
 
-        // Palette de couleurs claires pour le surlignage
         const highlightColors = ['#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'];
         const speakerColors = new Map<string, string>();
         let songCounter = 1;
@@ -111,58 +110,39 @@
         };
 
         // Titre de la setlist
-        doc.setFontSize(22);
+        doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
         doc.text(setlist.name, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-        yPos += lineHeight * 2;
+        yPos += lineHeight * 1.5;
 
         // Durée totale
-        doc.setFontSize(12);
+        doc.setFontSize(11);
         doc.setFont('helvetica', 'normal');
         doc.text(`Durée totale : ${formatDuration(totalDurationSeconds)}`, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
         yPos += lineHeight * 2;
 
-        doc.line(margin, yPos, doc.internal.pageSize.getWidth() - margin, yPos);
-        yPos += lineHeight * 1.5;
-
         items.forEach((item) => {
-            checkPageBreak(30);
+            checkPageBreak(20);
 
             if (item.item_type === 'song') {
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
                 doc.text(`${songCounter}. ${item.title.String}`, margin, yPos);
-                songCounter++; // Incrémenter seulement pour les chansons
-                yPos += lineHeight;
-
-                const details = [];
-                if (item.song_key?.Valid) details.push(`Tonalité: ${item.song_key.String}`);
-                if (item.tempo?.Valid) details.push(`Tempo: ${item.tempo.Int32} BPM`);
-                if (item.duration_seconds?.Valid)
-                    details.push(`Durée: ${formatDuration(item.duration_seconds.Int32)}`);
-
-                if (details.length > 0) {
-                    doc.setFontSize(10);
-                    doc.setFont('helvetica', 'italic');
-                    doc.text(details.join(' | '), margin, yPos);
-                    yPos += lineHeight;
-                }
+                songCounter++;
+                yPos += lineHeight * 1.2; // Espace réduit après le titre
 
                 if (item.notes?.Valid && item.notes.String) {
                     doc.setFontSize(11);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text("Notes:", margin, yPos);
-                    yPos += lineHeight * 0.8;
-                    const notesLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2);
+                    doc.setFont('helvetica', 'italic');
+                    const notesLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
                     checkPageBreak(notesLines.length * lineHeight * 0.8);
                     doc.text(notesLines, margin + 5, yPos);
-                    yPos += notesLines.length * lineHeight * 0.8;
+                    yPos += notesLines.length * lineHeight * 0.9;
                 }
 
             } else if (item.item_type === 'interlude') {
                 const speakerName = (item.speaker?.Valid && item.speaker.String) ? item.speaker.String : "Interlude";
 
-                // Assigner une couleur au speaker s'il n'en a pas
                 if (!speakerColors.has(speakerName)) {
                     const color = highlightColors[speakerColors.size % highlightColors.length];
                     speakerColors.set(speakerName, color);
@@ -170,42 +150,25 @@
                 const highlightColor = speakerColors.get(speakerName)!;
 
                 doc.setFontSize(14);
-                doc.setFont('helvetica', 'normal'); // Pas de gras pour le speaker
+                doc.setFont('helvetica', 'normal');
 
-                // Simuler le surlignage en dessinant un rectangle derrière le texte
                 const textWidth = doc.getTextWidth(speakerName);
                 doc.setFillColor(highlightColor);
-                doc.rect(margin, yPos - 5, textWidth + 4, lineHeight, 'F'); // 'F' pour fill
+                doc.rect(margin, yPos - 4.5, textWidth + 4, lineHeight + 1, 'F');
 
-                // Afficher le nom du speaker sur le rectangle
                 doc.text(speakerName, margin + 2, yPos);
-                yPos += lineHeight;
-
-                if (item.duration_seconds?.Valid) {
-                    doc.setFontSize(10);
-                    doc.setFont('helvetica', 'italic');
-                    doc.text(`Durée: ${formatDuration(item.duration_seconds.Int32)}`, margin, yPos);
-                    yPos += lineHeight;
-                }
+                yPos += lineHeight * 1.2;
 
                 if (item.script?.Valid && item.script.String) {
                     doc.setFontSize(11);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text("Discours:", margin, yPos);
-                    yPos += lineHeight * 0.8;
-                    const scriptLines = doc.splitTextToSize(item.script.String, doc.internal.pageSize.getWidth() - margin * 2);
+                    doc.setFont('helvetica', 'italic');
+                    const scriptLines = doc.splitTextToSize(item.script.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
                     checkPageBreak(scriptLines.length * lineHeight * 0.8);
                     doc.text(scriptLines, margin + 5, yPos);
-                    yPos += scriptLines.length * lineHeight * 0.8;
+                    yPos += scriptLines.length * lineHeight * 0.9;
                 }
             }
-            yPos += lineHeight * 1.5;
-            if (yPos < pageHeight - margin * 2) {
-                doc.setLineDashPattern([1, 1], 0);
-                doc.line(margin + 20, yPos, doc.internal.pageSize.getWidth() - margin - 20, yPos);
-                doc.setLineDashPattern([], 0);
-            }
-            yPos += lineHeight * 1.5;
+            yPos += lineHeight * 1.8; // Espace entre les items
         });
 
         const sanitizedFileName = `${setlist.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
