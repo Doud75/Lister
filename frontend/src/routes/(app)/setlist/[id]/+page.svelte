@@ -6,6 +6,7 @@
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
     import type { ActionData } from './$types';
+    import jsPDF from 'jspdf'; // <-- Importer la bibliothèque
 
     let { data, form }: { data: any; form: ActionData } = $props();
     const setlistId = $page.params.id;
@@ -86,6 +87,111 @@
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
+
+    // --- NOUVELLE FONCTION POUR LE TÉLÉCHARGEMENT PDF ---
+    function downloadPdf() {
+        const setlist = data.setlistDetails;
+        const doc = new jsPDF();
+
+        const margin = 15;
+        const lineHeight = 7;
+        const pageHeight = doc.internal.pageSize.getHeight();
+        let yPos = margin;
+
+        const checkPageBreak = (spaceNeeded: number) => {
+            if (yPos + spaceNeeded > pageHeight - margin) {
+                doc.addPage();
+                yPos = margin;
+            }
+        };
+
+        // Titre de la setlist
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text(setlist.name, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+        yPos += lineHeight * 2;
+
+        // Durée totale
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Durée totale : ${formatDuration(totalDurationSeconds)}`, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+        yPos += lineHeight * 2;
+
+        // Ligne de séparation
+        doc.line(margin, yPos, doc.internal.pageSize.getWidth() - margin, yPos);
+        yPos += lineHeight * 1.5;
+
+
+        items.forEach((item, index) => {
+            checkPageBreak(30); // Espace minimum pour un item
+
+            if (item.item_type === 'song') {
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`${index + 1}. ${item.title.String}`, margin, yPos);
+                yPos += lineHeight;
+
+                const details = [];
+                if (item.song_key?.Valid) details.push(`Tonalité: ${item.song_key.String}`);
+                if (item.tempo?.Valid) details.push(`Tempo: ${item.tempo.Int32} BPM`);
+                if (item.duration_seconds?.Valid)
+                    details.push(`Durée: ${formatDuration(item.duration_seconds.Int32)}`);
+
+                if (details.length > 0) {
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'italic');
+                    doc.text(details.join(' | '), margin, yPos);
+                    yPos += lineHeight;
+                }
+
+                if (item.notes?.Valid && item.notes.String) {
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text("Notes:", margin, yPos);
+                    yPos += lineHeight * 0.8;
+                    const notesLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2);
+                    checkPageBreak(notesLines.length * lineHeight * 0.8);
+                    doc.text(notesLines, margin + 5, yPos);
+                    yPos += notesLines.length * lineHeight * 0.8;
+                }
+
+            } else if (item.item_type === 'interlude') {
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bolditalic');
+                doc.text(`${index + 1}. ${item.title.String} (Interlude)`, margin, yPos);
+                yPos += lineHeight;
+
+                const details = [];
+                if (item.speaker?.Valid) details.push(`Orateur: ${item.speaker.String}`);
+                if (item.duration_seconds?.Valid)
+                    details.push(`Durée: ${formatDuration(item.duration_seconds.Int32)}`);
+
+                if(details.length > 0) {
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'italic');
+                    doc.text(details.join(' | '), margin, yPos);
+                    yPos += lineHeight;
+                }
+
+                if (item.script?.Valid && item.script.String) {
+                    doc.setFontSize(11);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text("Script:", margin, yPos);
+                    yPos += lineHeight * 0.8;
+                    const scriptLines = doc.splitTextToSize(item.script.String, doc.internal.pageSize.getWidth() - margin * 2);
+                    checkPageBreak(scriptLines.length * lineHeight * 0.8);
+                    doc.text(scriptLines, margin + 5, yPos);
+                    yPos += scriptLines.length * lineHeight * 0.8;
+                }
+            }
+            yPos += lineHeight * 1.5;
+            doc.line(margin, yPos, doc.internal.pageSize.getWidth() - margin, yPos);
+            yPos += lineHeight * 1.5;
+        });
+
+        const sanitizedFileName = `${setlist.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+        doc.save(sanitizedFileName);
+    }
 </script>
 
 <div class="container mx-auto px-4 sm:px-6">
@@ -112,6 +218,21 @@
                 </div>
             </div>
             <div class="flex items-center gap-4">
+                <button
+                        onclick={downloadPdf}
+                        type="button"
+                        class="flex w-auto items-center gap-2 justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                        <path
+                                d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z"
+                        />
+                        <path
+                                d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z"
+                        />
+                    </svg>
+                    Télécharger PDF
+                </button>
                 <a
                         href="/setlist/{setlistId}/edit"
                         class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
@@ -168,12 +289,16 @@
                             <div class="min-w-0 flex-grow">
                                 {#if item.item_type === 'song'}
                                     <div class="flex items-center gap-3">
-                                        <span class="text-lg font-bold text-slate-400 dark:text-slate-500">{items.findIndex((i) => i.id === item.id) + 1}.</span>
+										<span class="text-lg font-bold text-slate-400 dark:text-slate-500"
+                                        >{items.findIndex((i) => i.id === item.id) + 1}.</span
+                                        >
                                         <p class="truncate font-semibold text-slate-800 dark:text-slate-100">
                                             {item.title.String}
                                         </p>
                                     </div>
-                                    <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400">
+                                    <div
+                                            class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400"
+                                    >
                                         {#if item.duration_seconds?.Valid}
                                             <span>Durée: {formatItemDuration(item.duration_seconds.Int32)}</span>
                                         {/if}
@@ -187,7 +312,12 @@
                                         {/if}
                                         {#if item.links?.Valid}
                                             <span class="hidden sm:inline">&bull;</span>
-                                            <a href={item.links.String} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
+                                            <a
+                                                    href={item.links.String}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="hover:underline">Lien</a
+                                            >
                                         {/if}
                                     </div>
                                     {#if item.notes?.Valid && item.notes.String}
@@ -222,16 +352,12 @@
                                         >
                                             {#if item.speaker?.Valid && item.speaker.String}
 												<span
-                                                >Speaker: <span class="font-medium"
-                                                >{item.speaker.String}</span
-                                                ></span
+                                                >Speaker: <span class="font-medium">{item.speaker.String}</span></span
                                                 >
                                                 <span class="hidden sm:inline">&bull;</span>
                                             {/if}
                                             <span
-                                            >Duration: {formatItemDuration(
-                                                item.duration_seconds.Int32
-                                            )}</span
+                                            >Duration: {formatItemDuration(item.duration_seconds.Int32)}</span
                                             >
                                         </div>
                                         {#if item.script?.Valid && item.script.String}
