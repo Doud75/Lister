@@ -6,7 +6,7 @@
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
     import type { ActionData } from './$types';
-    import jsPDF from 'jspdf'; // <-- Importer la bibliothèque
+    import jsPDF from 'jspdf';
 
     let { data, form }: { data: any; form: ActionData } = $props();
     const setlistId = $page.params.id;
@@ -88,7 +88,7 @@
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    // --- NOUVELLE FONCTION POUR LE TÉLÉCHARGEMENT PDF ---
+    // --- FONCTION PDF MISE À JOUR ---
     function downloadPdf() {
         const setlist = data.setlistDetails;
         const doc = new jsPDF();
@@ -97,6 +97,11 @@
         const lineHeight = 7;
         const pageHeight = doc.internal.pageSize.getHeight();
         let yPos = margin;
+
+        // Palette de couleurs claires pour le surlignage
+        const highlightColors = ['#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'];
+        const speakerColors = new Map<string, string>();
+        let songCounter = 1;
 
         const checkPageBreak = (spaceNeeded: number) => {
             if (yPos + spaceNeeded > pageHeight - margin) {
@@ -117,18 +122,17 @@
         doc.text(`Durée totale : ${formatDuration(totalDurationSeconds)}`, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
         yPos += lineHeight * 2;
 
-        // Ligne de séparation
         doc.line(margin, yPos, doc.internal.pageSize.getWidth() - margin, yPos);
         yPos += lineHeight * 1.5;
 
-
-        items.forEach((item, index) => {
-            checkPageBreak(30); // Espace minimum pour un item
+        items.forEach((item) => {
+            checkPageBreak(30);
 
             if (item.item_type === 'song') {
                 doc.setFontSize(16);
                 doc.setFont('helvetica', 'bold');
-                doc.text(`${index + 1}. ${item.title.String}`, margin, yPos);
+                doc.text(`${songCounter}. ${item.title.String}`, margin, yPos);
+                songCounter++; // Incrémenter seulement pour les chansons
                 yPos += lineHeight;
 
                 const details = [];
@@ -156,27 +160,38 @@
                 }
 
             } else if (item.item_type === 'interlude') {
-                doc.setFontSize(16);
-                doc.setFont('helvetica', 'bolditalic');
-                doc.text(`${index + 1}. ${item.title.String} (Interlude)`, margin, yPos);
+                const speakerName = (item.speaker?.Valid && item.speaker.String) ? item.speaker.String : "Interlude";
+
+                // Assigner une couleur au speaker s'il n'en a pas
+                if (!speakerColors.has(speakerName)) {
+                    const color = highlightColors[speakerColors.size % highlightColors.length];
+                    speakerColors.set(speakerName, color);
+                }
+                const highlightColor = speakerColors.get(speakerName)!;
+
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'normal'); // Pas de gras pour le speaker
+
+                // Simuler le surlignage en dessinant un rectangle derrière le texte
+                const textWidth = doc.getTextWidth(speakerName);
+                doc.setFillColor(highlightColor);
+                doc.rect(margin, yPos - 5, textWidth + 4, lineHeight, 'F'); // 'F' pour fill
+
+                // Afficher le nom du speaker sur le rectangle
+                doc.text(speakerName, margin + 2, yPos);
                 yPos += lineHeight;
 
-                const details = [];
-                if (item.speaker?.Valid) details.push(`Orateur: ${item.speaker.String}`);
-                if (item.duration_seconds?.Valid)
-                    details.push(`Durée: ${formatDuration(item.duration_seconds.Int32)}`);
-
-                if(details.length > 0) {
+                if (item.duration_seconds?.Valid) {
                     doc.setFontSize(10);
                     doc.setFont('helvetica', 'italic');
-                    doc.text(details.join(' | '), margin, yPos);
+                    doc.text(`Durée: ${formatDuration(item.duration_seconds.Int32)}`, margin, yPos);
                     yPos += lineHeight;
                 }
 
                 if (item.script?.Valid && item.script.String) {
                     doc.setFontSize(11);
                     doc.setFont('helvetica', 'normal');
-                    doc.text("Script:", margin, yPos);
+                    doc.text("Discours:", margin, yPos);
                     yPos += lineHeight * 0.8;
                     const scriptLines = doc.splitTextToSize(item.script.String, doc.internal.pageSize.getWidth() - margin * 2);
                     checkPageBreak(scriptLines.length * lineHeight * 0.8);
@@ -185,7 +200,11 @@
                 }
             }
             yPos += lineHeight * 1.5;
-            doc.line(margin, yPos, doc.internal.pageSize.getWidth() - margin, yPos);
+            if (yPos < pageHeight - margin * 2) {
+                doc.setLineDashPattern([1, 1], 0);
+                doc.line(margin + 20, yPos, doc.internal.pageSize.getWidth() - margin - 20, yPos);
+                doc.setLineDashPattern([], 0);
+            }
             yPos += lineHeight * 1.5;
         });
 
