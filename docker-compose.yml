@@ -43,6 +43,18 @@ services:
     networks:
       - app-network
 
+  migrator:
+    build:
+      context: ./backend
+      target: builder
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    networks:
+      - app-network
+    command: ["/bin/sh", "-c", "sleep 5 && /go/bin/migrate -path db/migrations -database $DATABASE_URL up"]
+
 networks:
   app-network:
     driver: bridge
