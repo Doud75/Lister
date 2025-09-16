@@ -22,6 +22,7 @@ services:
     environment:
       - PORT=4000
       - VITE_ORIGIN=${VITE_ORIGIN}
+    env_file: .env
     networks:
       - app-network
     depends_on:

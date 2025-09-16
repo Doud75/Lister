@@ -88,13 +88,12 @@
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    // --- FONCTION PDF MISE À JOUR ---
     function downloadPdf() {
         const setlist = data.setlistDetails;
         const doc = new jsPDF();
 
         const margin = 15;
-        const lineHeight = 6; // Ligne plus serrée
+        const lineHeight = 6;
         const pageHeight = doc.internal.pageSize.getHeight();
         let yPos = margin;
 
@@ -109,13 +108,11 @@
             }
         };
 
-        // Titre de la setlist
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
         doc.text(setlist.name, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
         yPos += lineHeight * 1.5;
 
-        // Durée totale
         doc.setFontSize(11);
         doc.setFont('helvetica', 'normal');
         doc.text(`Durée totale : ${formatDuration(totalDurationSeconds)}`, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
@@ -129,7 +126,7 @@
                 doc.setFont('helvetica', 'bold');
                 doc.text(`${songCounter}. ${item.title.String}`, margin, yPos);
                 songCounter++;
-                yPos += lineHeight * 1.2; // Espace réduit après le titre
+                yPos += lineHeight * 1.2;
 
                 if (item.notes?.Valid && item.notes.String) {
                     doc.setFontSize(11);
@@ -168,7 +165,7 @@
                     yPos += scriptLines.length * lineHeight * 0.9;
                 }
             }
-            yPos += lineHeight * 1.8; // Espace entre les items
+            yPos += lineHeight * 1.8;
         });
 
         const sanitizedFileName = `${setlist.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
@@ -237,6 +234,7 @@
             </form>
 
             <ul
+                    data-testid="setlist-items"
                     class="divide-y divide-slate-200 dark:divide-slate-700"
                     use:dragHandleZone={{ items: items, flipDurationMs: 300 }}
                     onconsider={handleDndConsider}

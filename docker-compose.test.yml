@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  db_test:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    env_file: .env.test
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Le service migrator_seeder_test a été supprimé.
+
+  backend_test:
+    build:
+      context: ./backend
+      # IMPORTANT : On utilise le stage 'builder' du Dockerfile
+      # car il contient Go et l'outil 'migrate'. La version finale 'alpine' ne les a pas.
+      target: builder
+    restart: unless-stopped
+    env_file: .env.test
+    networks:
+      - app-network
+    depends_on:
+      db_test:
+        # On attend que la base de données soit prête à accepter des connexions.
+        condition: service_healthy
+    command: >
+      /bin/sh -c "
+        echo 'Backend waiting for DB...' && sleep 3 &&
+        echo 'Backend running migrations...' &&
+        /go/bin/migrate -path db/migrations -database $$DATABASE_URL up &&
+        echo 'Backend seeding database...' &&
+        go run ./db/seed/main.go &&
+        echo 'DB setup complete. Starting API server...' &&
+        /main 
+      "
+    healthcheck:
+      # NOUVEAU HEALTHCHECK : On teste directement une route de l'API Go.
+      # C'est plus fiable car ça ne s'active que lorsque le serveur est VRAIMENT démarré.
+      test: ["CMD", "curl", "-f", "http://localhost:8089/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      # On donne 30s au conteneur pour faire la migration/seed avant de tester le healthcheck.
+      start_period: 30s
+
+  frontend_test:
+    build:
+      context: ./frontend
+      dockerfile: test.Dockerfile
+    ports:
+      - "4001:4000"
+    environment:
+      - PORT=4000
+      - BACKEND_INTERNAL_URL=http://backend_test:8089/api
+    networks:
+      - app-network
+    depends_on:
+      backend_test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-test-data:

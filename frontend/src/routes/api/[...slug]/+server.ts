@@ -1,7 +1,8 @@
 import { error } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
-const BACKEND_URL = 'http://backend:8089/api';
+const BACKEND_URL = env.BACKEND_INTERNAL_URL || 'http://backend:8089/api';
 
 const handleProxy: RequestHandler = async ({ request, params, fetch, locals }) => {
     const url = `${BACKEND_URL}/${params.slug}`;
@@ -15,7 +16,7 @@ const handleProxy: RequestHandler = async ({ request, params, fetch, locals }) =
     try {
         const response = await fetch(url, {
             method: request.method,
-            headers: headers, // Utilise les nouveaux headers
+            headers: headers,
             body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : null,
             duplex: 'half'
         });
