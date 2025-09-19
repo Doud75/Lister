@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
+import type {Interlude, SetlistItem} from "$lib/types";
 
 export const actions: Actions = {
     updateOrder: async ({ request, params, fetch }) => {
@@ -50,7 +51,7 @@ export const actions: Actions = {
         });
 
         if (!response.ok) return fail(response.status, { error: 'Failed to update song notes.' });
-        const updatedItem = await response.json();
+        const updatedItem: SetlistItem = await response.json();
         return { updatedSong: true, item: updatedItem };
     },
     updateInterlude: async ({ request, fetch }) => {
@@ -71,7 +72,7 @@ export const actions: Actions = {
         });
 
         if (!response.ok) return fail(response.status, { error: 'Failed to update interlude.' });
-        const updatedInterlude = await response.json();
+        const updatedInterlude: Interlude = await response.json();
         return { updatedInterlude: true, interlude: updatedInterlude };
     }
 };

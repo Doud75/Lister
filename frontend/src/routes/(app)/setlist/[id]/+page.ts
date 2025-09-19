@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
+import type {SetlistDetails} from "$lib/types";
 
 export const load: PageLoad = async ({ fetch, params }) => {
     const { id } = params;
@@ -9,7 +10,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
         if (!res.ok) {
             throw error(res.status, 'Setlist not found');
         }
-        const setlistDetails = await res.json();
+        const setlistDetails: SetlistDetails = await res.json();
         return {
             setlistDetails
         };

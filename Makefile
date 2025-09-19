@@ -1,6 +1,7 @@
 include .env
 export
 
+# --- General Development Commands ---
 up:
 	docker-compose up -d --build backend frontend db
 
@@ -15,6 +16,8 @@ migrate:
 
 deploy: migrate up
 
+
+# --- Shell & DB Access ---
 db-up:
 	docker-compose up -d db
 
@@ -30,11 +33,14 @@ shell-db:
 db-connect:
 	docker-compose exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
+
+# --- Docker Cleanup Commands ---
 docker-clean:
 	docker system prune
 
 docker-clean-all:
 	docker system prune -f -a --volumes
+	docker builder prune -af
 
 docker-clean-cache:
 	docker builder prune
@@ -44,48 +50,63 @@ docker-clean-project: down
 	docker builder prune
 
 
+# ==============================================================================
+# --- TEST SUITE COMMANDS ---
+# ==============================================================================
 
-# --- Test Commands ---
+# --- Global Test Runner ---
+# Lance tous les tests : d'abord les tests unitaires rapides, puis les tests E2E.
+test-all: test-unit test
+	@echo "✅ All tests (Unit & E2E) finished successfully."
+
+
+# --- Unit Tests (Vitest) ---
+# Rapides, sans Docker, pour les fonctions et composants isolés.
+test-unit:
+	@echo "--- Running Unit Tests ---"
+	@cd frontend && npx vitest run
+	@echo "✅ Unit Tests finished."
+
+# Lance les tests unitaires en mode "watch" pour le développement.
+test-unit-watch:
+	@echo "--- Running Unit Tests in watch mode ---"
+	@cd frontend && npx vitest
+
+
+# --- End-to-End Tests (Playwright) ---
+# Complets, avec Docker, pour les parcours utilisateurs.
 
 # Lance TOUS les tests E2E
-test: test-up run-playwright test-down docker-clean-all
+test: test-up run-playwright test-down docker-clean-project
 	@echo "✅ E2E Tests finished. Report available in frontend/playwright-report/index.html"
-	@# Sur macOS/Linux, cette commande peut ouvrir le rapport.
-	@# open ./frontend/playwright-report/index.html || xdg-open ./frontend/playwright-report/index.html
 
-# Lance tous les tests relatifs aux SETLISTS
-test-setlist: test-up run-playwright-setlist test-down docker-clean-all
-	@echo "✅ Setlist tests finished. Report available in frontend/playwright-report/index.html"
+# Tests E2E spécifiques par catégorie
+test-setlist: test-up run-playwright-setlist test-down docker-clean-project
+	@echo "✅ Setlist tests finished."
 
-# Lance uniquement les tests de la page de DÉTAIL d'une setlist
-test-setlist-detail: test-up run-playwright-setlist-detail test-down docker-clean-all
-	@echo "✅ Setlist detail tests finished. Report available in frontend/playwright-report/index.html"
+test-setlist-detail: test-up run-playwright-setlist-detail test-down docker-clean-project
+	@echo "✅ Setlist detail tests finished."
 
-# Lance uniquement les tests de la page d'AJOUT d'une setlist
-test-setlist-add: test-up run-playwright-setlist-add test-down docker-clean-all
-	@echo "✅ Setlist add tests finished. Report available in frontend/playwright-report/index.html"
+test-setlist-add: test-up run-playwright-setlist-add test-down docker-clean-project
+	@echo "✅ Setlist add tests finished."
 
-# Lance uniquement les tests de la page de CRÉATION d'une setlist
-test-setlist-new: test-up run-playwright-setlist-new test-down docker-clean-all
-	@echo "✅ Setlist new tests finished. Report available in frontend/playwright-report/index.html"
+test-setlist-new: test-up run-playwright-setlist-new test-down docker-clean-project
+	@echo "✅ Setlist new tests finished."
 
-test-song: test-up run-playwright-song test-down docker-clean-all
-	@echo "✅ Song tests finished. Report available in frontend/playwright-report/index.html"
+test-song: test-up run-playwright-song test-down docker-clean-project
+	@echo "✅ Song tests finished."
 
-# Lance uniquement les tests de la page LISTE des chansons
-test-song-list: test-up run-playwright-song-list test-down docker-clean-all
-	@echo "✅ Song list tests finished. Report available in frontend/playwright-report/index.html"
+test-song-list: test-up run-playwright-song-list test-down docker-clean-project
+	@echo "✅ Song list tests finished."
 
-# Lance uniquement les tests de la page de CRÉATION d'une chanson
-test-song-new: test-up run-playwright-song-new test-down docker-clean-all
-	@echo "✅ Song new tests finished. Report available in frontend/playwright-report/index.html"
+test-song-new: test-up run-playwright-song-new test-down docker-clean-project
+	@echo "✅ Song new tests finished."
 
-# Lance uniquement les tests de la page d'ÉDITION d'une chanson
-test-song-edit: test-up run-playwright-song-edit test-down docker-clean-all
-	@echo "✅ Song edit tests finished. Report available in frontend/playwright-report/index.html"
+test-song-edit: test-up run-playwright-song-edit test-down docker-clean-project
+	@echo "✅ Song edit tests finished."
 
 
-# --- Test Helpers (ne pas lancer directement) ---
+# --- E2E Test Helpers (private commands) ---
 
 test-up:
 	@echo "--- Cleaning up previous test environment ---"
@@ -101,39 +122,39 @@ test-up:
 
 run-playwright:
 	@echo "--- Running ALL Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test
+	@cd frontend && npx playwright test
 
 run-playwright-setlist:
 	@echo "--- Running SETLIST Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/setlist/
+	@cd frontend && npx playwright test tests/setlist/
 
 run-playwright-setlist-detail:
 	@echo "--- Running SETLIST DETAIL Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/setlist/detail.spec.ts
+	@cd frontend && npx playwright test tests/setlist/detail.spec.ts
 
 run-playwright-setlist-add:
 	@echo "--- Running SETLIST ADD Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/setlist/add.spec.ts
+	@cd frontend && npx playwright test tests/setlist/add.spec.ts
 
 run-playwright-setlist-new:
 	@echo "--- Running SETLIST NEW Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/setlist/new.spec.ts
+	@cd frontend && npx playwright test tests/setlist/new.spec.ts
 
 run-playwright-song:
 	@echo "--- Running SONG Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/song/
+	@cd frontend && npx playwright test tests/song/
 
 run-playwright-song-list:
 	@echo "--- Running SONG LIST Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/song/list.spec.ts
+	@cd frontend && npx playwright test tests/song/list.spec.ts
 
 run-playwright-song-new:
 	@echo "--- Running SONG NEW Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/song/new.spec.ts
+	@cd frontend && npx playwright test tests/song/new.spec.ts
 
 run-playwright-song-edit:
 	@echo "--- Running SONG EDIT Playwright tests ---"
-	@cd frontend && PLAYWRIGHT_TEST_BASE_URL=http://localhost:4001 npx playwright test tests/song/edit.spec.ts
+	@cd frontend && npx playwright test tests/song/edit.spec.ts
 
 test-down:
 	@echo "--- Tearing down test environment ---"

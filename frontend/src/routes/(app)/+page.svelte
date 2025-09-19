@@ -1,8 +1,10 @@
 <script lang="ts">
+    import type {SetlistSummary} from "$lib/types";
+
     let { data } = $props<{
         data: {
             userInfo: { username: string; band_name: string };
-            setlists: Array<{ id: number; name: string; color: string; created_at: string }>;
+            setlists: SetlistSummary[];
         };
     }>();
 </script>

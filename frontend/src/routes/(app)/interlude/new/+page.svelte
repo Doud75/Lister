@@ -4,6 +4,7 @@
     import { enhance } from '$app/forms';
     import { navigating, page } from '$app/stores';
     import { goto } from '$app/navigation';
+    import Textarea from "$lib/components/ui/Textarea.svelte";
 
     type FormState = {
         error?: string;
@@ -53,12 +54,7 @@
             >Script / Notes (optional)</label
             >
             <div class="mt-2">
-				<textarea
-                        id="script"
-                        name="script"
-                        rows="4"
-                        class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500"
-                ></textarea>
+                <Textarea label="Script / Notes (optional)" id="script" name="script" rows={4} />
             </div>
         </div>
 

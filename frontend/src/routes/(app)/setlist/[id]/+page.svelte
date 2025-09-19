@@ -1,58 +1,53 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { formatDuration } from '$lib/utils/utils';
-    import { dragHandle, dragHandleZone } from 'svelte-dnd-action';
+    import {calculateTotalDuration, formatDuration} from '$lib/utils/utils';
+    import { dragHandleZone } from 'svelte-dnd-action';
     import { enhance } from '$app/forms';
-    import Button from '$lib/components/ui/Button.svelte';
-    import Input from '$lib/components/ui/Input.svelte';
-    import type { ActionData } from './$types';
-    import jsPDF from 'jspdf';
+    import type { ActionData, PageData } from './$types';
+    import { generateSetlistPdf } from '$lib/utils/pdfGenerator';
+    import SetlistItem from '$lib/components/setlist/SetlistItem.svelte';
+    import Modal from '$lib/components/ui/Modal.svelte';
+    import EditItemForm from '$lib/components/setlist/EditItemForm.svelte';
+    import type { SetlistItem as SetlistItemType } from '$lib/types';
 
-    let { data, form }: { data: any; form: ActionData } = $props();
+    let { data, form }: { data: PageData; form: ActionData } = $props();
     const setlistId = $page.params.id;
 
-    let items = $state(data.setlistDetails.items);
-
+    let items = $state<SetlistItemType[]>(data.setlistDetails.items);
     let isModalOpen = $state(false);
-    let editingItem = $state<any>(null);
-
-    let modalTitle = $state('');
-    let modalSpeaker = $state('');
-    let modalDuration = $state('');
-    let modalScript = $state('');
-    let modalNotes = $state('');
+    let editingItem = $state<SetlistItemType | null>(null);
 
     $effect(() => {
         if (form?.deleted) {
-            const index = items.findIndex((item) => item.id === form.itemId);
+            const index = items.findIndex((item: SetlistItemType) => item.id === form.itemId);
             if (index !== -1) {
                 items.splice(index, 1);
             }
         }
         if (form?.updatedSong) {
-            const index = items.findIndex((item) => item.id === form.item.id);
+            const index = items.findIndex((item: SetlistItemType) => item.id === form.item.id);
             if (index !== -1) {
                 items[index].notes = form.item.notes;
             }
         }
         if (form?.updatedInterlude) {
-            items.forEach((item, index) => {
-                if (item.interlude_id?.Int32 === form.interlude.id) {
-                    items[index].title.String = form.interlude.title;
-                    items[index].speaker = form.interlude.speaker;
-                    items[index].script = form.interlude.script;
-                    items[index].duration_seconds = form.interlude.duration_seconds;
+            const index = items.findIndex(
+                (item) => item.item_type === 'interlude' && item.interlude_id?.Int32 === form.interlude.id
+            );
+            if (index !== -1) {
+                const updatedItem = items[index] as SetlistItemType;
+                if (updatedItem.item_type === 'interlude') {
+                    updatedItem.title.String = form.interlude.title;
+                    updatedItem.speaker = form.interlude.speaker;
+                    updatedItem.script = form.interlude.script;
+                    updatedItem.duration_seconds = form.interlude.duration_seconds;
+                    items[index] = updatedItem;
                 }
-            });
+            }
         }
     });
 
-    const totalDurationSeconds = $derived(
-        items.reduce((total, item) => {
-            const duration = item.duration_seconds?.Int32 ?? 0;
-            return total + duration;
-        }, 0)
-    );
+    const totalDurationSeconds = $derived(calculateTotalDuration(items));
 
     function handleDndConsider(e: CustomEvent) {
         items = e.detail.items;
@@ -63,16 +58,8 @@
         document.getElementById('order-form')?.requestSubmit();
     }
 
-    function openEditModal(item: any) {
+    function openEditModal(item: SetlistItemType) {
         editingItem = item;
-        if (item.item_type === 'song') {
-            modalNotes = item.notes?.String || '';
-        } else {
-            modalTitle = item.title.String || '';
-            modalSpeaker = item.speaker?.String || '';
-            modalDuration = item.duration_seconds?.Int32?.toString() || '';
-            modalScript = item.script?.String || '';
-        }
         isModalOpen = true;
     }
 
@@ -81,95 +68,8 @@
         editingItem = null;
     }
 
-    function formatItemDuration(seconds: number | null | undefined): string {
-        if (seconds === null || seconds === undefined) return '-';
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-
     function downloadPdf() {
-        const setlist = data.setlistDetails;
-        const doc = new jsPDF();
-
-        const margin = 15;
-        const lineHeight = 6;
-        const pageHeight = doc.internal.pageSize.getHeight();
-        let yPos = margin;
-
-        const highlightColors = ['#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'];
-        const speakerColors = new Map<string, string>();
-        let songCounter = 1;
-
-        const checkPageBreak = (spaceNeeded: number) => {
-            if (yPos + spaceNeeded > pageHeight - margin) {
-                doc.addPage();
-                yPos = margin;
-            }
-        };
-
-        doc.setFontSize(20);
-        doc.setFont('helvetica', 'bold');
-        doc.text(setlist.name, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-        yPos += lineHeight * 1.5;
-
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Durée totale : ${formatDuration(totalDurationSeconds)}`, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
-        yPos += lineHeight * 2;
-
-        items.forEach((item) => {
-            checkPageBreak(20);
-
-            if (item.item_type === 'song') {
-                doc.setFontSize(16);
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${songCounter}. ${item.title.String}`, margin, yPos);
-                songCounter++;
-                yPos += lineHeight * 1.2;
-
-                if (item.notes?.Valid && item.notes.String) {
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'italic');
-                    const notesLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
-                    checkPageBreak(notesLines.length * lineHeight * 0.8);
-                    doc.text(notesLines, margin + 5, yPos);
-                    yPos += notesLines.length * lineHeight * 0.9;
-                }
-
-            } else if (item.item_type === 'interlude') {
-                const speakerName = (item.speaker?.Valid && item.speaker.String) ? item.speaker.String : "Interlude";
-
-                if (!speakerColors.has(speakerName)) {
-                    const color = highlightColors[speakerColors.size % highlightColors.length];
-                    speakerColors.set(speakerName, color);
-                }
-                const highlightColor = speakerColors.get(speakerName)!;
-
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'normal');
-
-                const textWidth = doc.getTextWidth(speakerName);
-                doc.setFillColor(highlightColor);
-                doc.rect(margin, yPos - 4.5, textWidth + 4, lineHeight + 1, 'F');
-
-                doc.text(speakerName, margin + 2, yPos);
-                yPos += lineHeight * 1.2;
-
-                if (item.script?.Valid && item.script.String) {
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'italic');
-                    const scriptLines = doc.splitTextToSize(item.script.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
-                    checkPageBreak(scriptLines.length * lineHeight * 0.8);
-                    doc.text(scriptLines, margin + 5, yPos);
-                    yPos += scriptLines.length * lineHeight * 0.9;
-                }
-            }
-            yPos += lineHeight * 1.8;
-        });
-
-        const sanitizedFileName = `${setlist.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
-        doc.save(sanitizedFileName);
+        generateSetlistPdf({ ...data.setlistDetails, items }, totalDurationSeconds);
     }
 </script>
 
@@ -200,6 +100,7 @@
                 <button
                         onclick={downloadPdf}
                         type="button"
+                        aria-label="Télécharger le PDF"
                         class="flex w-auto items-center gap-2 justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
@@ -240,160 +141,8 @@
                     onconsider={handleDndConsider}
                     onfinalize={handleDndFinalize}
             >
-                {#each items as item (item.id)}
-                    <li class="flex items-center justify-between gap-3 py-4">
-                        <div class="flex min-w-0 flex-grow items-start gap-4">
-                            <div class="flex-shrink-0 pt-1">
-                                <div
-                                        use:dragHandle
-                                        class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
-                                        aria-label="Drag to reorder"
-                                >
-                                    <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="h-5 w-5"
-                                    ><path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M3.75 9h16.5m-16.5 6.75h16.5"
-                                    /></svg
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="min-w-0 flex-grow">
-                                {#if item.item_type === 'song'}
-                                    <div class="flex items-center gap-3">
-										<span class="text-lg font-bold text-slate-400 dark:text-slate-500"
-                                        >{items.findIndex((i) => i.id === item.id) + 1}.</span
-                                        >
-                                        <p class="truncate font-semibold text-slate-800 dark:text-slate-100">
-                                            {item.title.String}
-                                        </p>
-                                    </div>
-                                    <div
-                                            class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400"
-                                    >
-                                        {#if item.duration_seconds?.Valid}
-                                            <span>Durée: {formatItemDuration(item.duration_seconds.Int32)}</span>
-                                        {/if}
-                                        {#if item.tempo?.Valid}
-                                            <span class="hidden sm:inline">&bull;</span>
-                                            <span>Tempo: {item.tempo.Int32} BPM</span>
-                                        {/if}
-                                        {#if item.song_key?.Valid}
-                                            <span class="hidden sm:inline">&bull;</span>
-                                            <span>Tonalité: {item.song_key.String}</span>
-                                        {/if}
-                                        {#if item.links?.Valid}
-                                            <span class="hidden sm:inline">&bull;</span>
-                                            <a
-                                                    href={item.links.String}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    class="hover:underline">Lien</a
-                                            >
-                                        {/if}
-                                    </div>
-                                    {#if item.notes?.Valid && item.notes.String}
-                                        <p
-                                                class="mt-2 whitespace-pre-wrap pl-8 text-xs italic text-slate-500 dark:text-slate-400"
-                                        >
-                                            {item.notes.String}
-                                        </p>
-                                    {/if}
-                                {:else if item.item_type === 'interlude'}
-                                    <div
-                                            class="w-full rounded-md border-l-4 border-teal-500 bg-teal-50 p-4 dark:border-teal-400 dark:bg-slate-700/50"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                    class="h-5 w-5 flex-shrink-0 text-teal-600 dark:text-teal-300"
-                                            ><path
-                                                    fill-rule="evenodd"
-                                                    d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM9 10a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z"
-                                                    clip-rule="evenodd"
-                                            /></svg
-                                            >
-                                            <p class="truncate font-semibold text-teal-900 dark:text-teal-200">
-                                                {item.title.String}
-                                            </p>
-                                        </div>
-                                        <div
-                                                class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-teal-700 dark:text-teal-300"
-                                        >
-                                            {#if item.speaker?.Valid && item.speaker.String}
-												<span
-                                                >Speaker: <span class="font-medium">{item.speaker.String}</span></span
-                                                >
-                                                <span class="hidden sm:inline">&bull;</span>
-                                            {/if}
-                                            <span
-                                            >Duration: {formatItemDuration(item.duration_seconds.Int32)}</span
-                                            >
-                                        </div>
-                                        {#if item.script?.Valid && item.script.String}
-                                            <p
-                                                    class="mt-2 whitespace-pre-wrap pl-8 text-xs italic text-teal-800 dark:text-teal-200"
-                                            >
-                                                {item.script.String}
-                                            </p>
-                                        {/if}
-                                    </div>
-                                {/if}
-                            </div>
-                        </div>
-
-                        <div class="flex flex-shrink-0 items-center gap-2 pl-4">
-                            <button
-                                    onclick={() => openEditModal(item)}
-                                    type="button"
-                                    class="rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                                    aria-label="Edit item"
-                            ><svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="h-5 w-5"
-                            ><path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-                            /></svg
-                            ></button
-                            >
-                            <form method="POST" action="?/deleteItem" use:enhance>
-                                <input type="hidden" name="itemId" value={item.id} />
-                                <button
-                                        type="submit"
-                                        class="rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                                        aria-label="Remove item"
-                                ><svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="h-5 w-5"
-                                ><path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.033-2.134H8.033C6.91 2.75 6 3.704 6 4.874v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                                /></svg
-                                ></button
-                                >
-                            </form>
-                        </div>
-                    </li>
+                {#each items as item, index (item.id)}
+                    <SetlistItem {item} {index} onEdit={openEditModal} />
                 {/each}
             </ul>
         {:else}
@@ -422,98 +171,8 @@
     </div>
 </div>
 
-{#if isModalOpen && editingItem}
-    <div
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            onclick={closeEditModal}
-            role="dialog"
-            aria-modal="true"
-    >
-        <div
-                class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-slate-800"
-                onclick={(event) => event.stopPropagation()}
-        >
-            {#if editingItem.item_type === 'song'}
-                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                    Edit Note for {editingItem.title.String}
-                </h3>
-                <form
-                        method="POST"
-                        action="?/updateSongNotes"
-                        use:enhance={() => {
-						return async ({ update }) => {
-							await update();
-							closeEditModal();
-						};
-					}}
-                        class="mt-4 space-y-4"
-                >
-                    <input type="hidden" name="itemId" value={editingItem.id} />
-                    <div>
-                        <label for="notes" class="sr-only">Notes</label>
-                        <textarea
-                                id="notes"
-                                name="notes"
-                                bind:value={modalNotes}
-                                rows="4"
-                                class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500"
-                                placeholder="Add a comment..."
-                        ></textarea>
-                    </div>
-                    <div class="flex justify-end gap-3">
-                        <Button type="button" variant="secondary" onclick={closeEditModal} autoWidth>Cancel</Button
-                        >
-                        <Button type="submit" autoWidth>Save Note</Button>
-                    </div>
-                </form>
-            {/if}
-
-            {#if editingItem.item_type === 'interlude'}
-                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Edit Interlude</h3>
-                <form
-                        method="POST"
-                        action="?/updateInterlude"
-                        use:enhance={() => {
-						return async ({ update }) => {
-							await update();
-							closeEditModal();
-						};
-					}}
-                        class="mt-4 space-y-4"
-                >
-                    <input type="hidden" name="interludeId" value={editingItem.interlude_id.Int32} />
-                    <Input label="Title" id="title" name="title" bind:value={modalTitle} required />
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <Input label="Speaker" id="speaker" name="speaker" bind:value={modalSpeaker} />
-                        <Input
-                                label="Duration (s)"
-                                id="duration"
-                                name="duration"
-                                type="number"
-                                bind:value={modalDuration}
-                        />
-                    </div>
-                    <div>
-                        <label
-                                for="script"
-                                class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200"
-                        >Script</label
-                        >
-                        <textarea
-                                id="script"
-                                name="script"
-                                bind:value={modalScript}
-                                rows="4"
-                                class="mt-2 block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 dark:bg-white/5 dark:text-white dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-                        ></textarea>
-                    </div>
-                    <div class="flex justify-end gap-3 pt-2">
-                        <Button type="button" variant="secondary" onclick={closeEditModal} autoWidth>Cancel</Button
-                        >
-                        <Button type="submit" autoWidth>Save Interlude</Button>
-                    </div>
-                </form>
-            {/if}
-        </div>
-    </div>
-{/if}
+<Modal isOpen={isModalOpen} onClose={closeEditModal}>
+    {#if editingItem}
+        <EditItemForm item={editingItem} close={closeEditModal} />
+    {/if}
+</Modal>

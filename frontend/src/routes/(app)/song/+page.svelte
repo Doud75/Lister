@@ -2,20 +2,11 @@
     import type { ActionData, PageData } from './$types';
     import { enhance } from '$app/forms';
     import { formatDuration } from '$lib/utils/utils';
+    import type {Song} from "$lib/types";
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
 
-    type Song = {
-        id: number;
-        title: string;
-        album_name: { String: string; Valid: boolean };
-        duration_seconds: { Int32: number; Valid: boolean };
-        tempo: { Int32: number; Valid: boolean };
-        song_key: { String: string; Valid: boolean };
-        links: { String: string; Valid: boolean };
-    };
-
-    let songs = $state<Song[]>(data.songs);
+    let songs = $state<Song[]>(data.songs || []);
 
     const songsByAlbum = $derived.by(() => {
         const grouped: Record<string, Song[]> = {};

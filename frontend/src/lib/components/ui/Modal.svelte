@@ -1,0 +1,31 @@
+<script lang="ts">
+    let {
+        isOpen,
+        onClose,
+        children
+    } = $props<{
+        isOpen: boolean;
+        onClose: () => void;
+        children: any;
+    }>();
+</script>
+
+{#if isOpen}
+    <div
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            role="dialog"
+            aria-modal="true"
+            tabindex="0"
+            onclick={onClose}
+            onkeydown={(e) => (e.key === "Escape" || e.key === "Enter" || e.key === " ") && onClose()}
+    >
+        <div
+                class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-slate-800"
+                role="presentation"
+                onclick={(event) => event.stopPropagation()}
+        >
+            {@render children()}
+        </div>
+    </div>
+
+{/if}

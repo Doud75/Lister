@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
+import type { SetlistSummary } from '$lib/types';
 
 export const load: PageLoad = async ({ fetch, params }) => {
     const { id } = params;
@@ -9,6 +10,6 @@ export const load: PageLoad = async ({ fetch, params }) => {
         throw error(res.status, 'Failed to load setlist data for editing.');
     }
 
-    const setlist = await res.json();
+    const setlist: SetlistSummary = await res.json();
     return { setlist };
 };

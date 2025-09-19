@@ -3,8 +3,9 @@
     import Input from '$lib/components/ui/Input.svelte';
     import { enhance } from '$app/forms';
     import { navigating } from '$app/stores';
+    import type { ActionData, PageData } from './$types';
 
-    let { data, form } = $props<{ data: any, form: any }>();
+    let { data, form } = $props<{ data: PageData; form: ActionData }>();
 </script>
 
 <div class="container mx-auto max-w-2xl px-4 sm:px-6">

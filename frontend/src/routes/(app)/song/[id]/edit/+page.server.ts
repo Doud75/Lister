@@ -1,20 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
+import {extractSongData} from "$lib/server/songActions";
 
 export const actions: Actions = {
-    default: async ({ request, fetch, params }) => {
+    default: async (event) => {
+        const { fetch, params } = event;
         const { id } = params;
-        const data = await request.formData();
-
-        const payload = {
-            title: data.get('title'),
-            album_name: data.get('album_name') || null,
-            song_key: data.get('song_key') || null,
-            duration_seconds: Number(data.get('duration_seconds')) || null,
-            tempo: Number(data.get('tempo')) || null,
-            lyrics: data.get('lyrics') || null,
-            links: data.get('links') || null
-        };
+        const payload = await extractSongData(event);
 
         const response = await fetch(`/api/song/${id}`, {
             method: 'PUT',
