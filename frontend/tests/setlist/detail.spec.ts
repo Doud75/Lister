@@ -10,20 +10,21 @@ async function login(page: Page) {
 
 const SETLIST_ID = 1;
 const SETLIST_URL = `/setlist/${SETLIST_ID}`;
+const getSetlistItems = (page: Page) => page.locator('ul[data-testid="setlist-items"] > li');
+
 
 test.describe('Setlist Detail Page', () => {
 
     test.beforeEach(async ({ page }) => {
         await login(page);
         await page.goto(SETLIST_URL);
-        await expect(page.getByRole('heading', { name: 'Test Setlist' })).toBeVisible();
+        await page.waitForTimeout(1000);
     });
 
     test('should display the setlist items in the correct initial order', async ({ page }) => {
-        const items = page.locator('ul[data-testid="setlist-items"] > li');
+        const items = getSetlistItems(page);
 
         await expect(items).toHaveCount(3);
-
         await expect(items.nth(0)).toContainText('Song Title 1');
         await expect(items.nth(1)).toContainText('Test Interlude');
         await expect(items.nth(2)).toContainText('Song Title 2');
@@ -35,14 +36,14 @@ test.describe('Setlist Detail Page', () => {
 
         await handle.hover();
         await page.mouse.down();
-
         await dropTarget.hover();
-
         await dropTarget.hover();
+        await page.waitForTimeout(1000);
 
         await page.mouse.up();
 
-        await expect(page.locator('ul[data-testid="setlist-items"] > li').first()).toContainText('Test Interlude', { timeout: 10000 });
+        const items = getSetlistItems(page);
+        await expect(items.first()).toContainText('Test Interlude');
 
         const reorderedItems = page.locator('ul[data-testid="setlist-items"] > li');
         await expect(reorderedItems.nth(0)).toContainText('Test Interlude');

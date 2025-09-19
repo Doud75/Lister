@@ -93,6 +93,7 @@
                     <form id="order-form-add-page" method="POST" action="?/updateOrder" use:enhance>
                         <input type="hidden" name="itemIds" value={JSON.stringify(items.map((item) => item.id))} />
                         <ul
+                                data-testid="setlist-items"
                                 class="space-y-3"
                                 use:dragHandleZone={{ items: items, flipDurationMs: 300 }}
                                 onconsider={handleDndConsider}
