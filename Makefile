@@ -1,4 +1,4 @@
-include .env
+-include .env
 export
 
 # --- General Development Commands ---
