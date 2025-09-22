@@ -3,35 +3,35 @@ export
 
 # --- General Development Commands ---
 up:
-	docker-compose up -d --build backend frontend db
+	docker compose up -d --build backend frontend db
 
 down:
-	docker-compose down
+	docker compose down
 
 logs:
-	docker-compose logs -f backend frontend db
+	docker compose logs -f backend frontend db
 
 migrate:
-	docker-compose up migrator
+	docker compose up migrator
 
 deploy: migrate up
 
 
 # --- Shell & DB Access ---
 db-up:
-	docker-compose up -d db
+	docker compose up -d db
 
 shell-front:
-	docker-compose exec frontend sh
+	docker compose exec frontend sh
 
 shell-back:
-	docker-compose exec backend sh
+	docker compose exec backend sh
 
 shell-db:
-	docker-compose exec db sh
+	docker compose exec db sh
 
 db-connect:
-	docker-compose exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
+	docker compose exec db psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 
 # --- Docker Cleanup Commands ---
@@ -110,9 +110,9 @@ test-song-edit: test-up run-playwright-song-edit test-down docker-clean-project
 
 test-up:
 	@echo "--- Cleaning up previous test environment ---"
-	@docker-compose -f docker-compose.test.yml --env-file .env.test down -v --remove-orphans
+	@docker compose -f docker compose.test.yml --env-file .env.test down -v --remove-orphans
 	@echo "--- Building and starting test environment (DB, Backend with seed, Frontend) ---"
-	@docker-compose -f docker-compose.test.yml --env-file .env.test up --build -d
+	@docker compose -f docker compose.test.yml --env-file .env.test up --build -d
 	@echo "--- Waiting for frontend to be healthy before running tests ---"
 	@until curl -s -f http://localhost:4001 > /dev/null; do \
 		echo "Waiting for frontend_test service on port 4001..."; \
@@ -158,4 +158,4 @@ run-playwright-song-edit:
 
 test-down:
 	@echo "--- Tearing down test environment ---"
-	@docker-compose -f docker-compose.test.yml --env-file .env.test down -v --remove-orphans
+	@docker compose -f docker compose.test.yml --env-file .env.test down -v --remove-orphans
