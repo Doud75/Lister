@@ -77,7 +77,7 @@ test-unit-watch:
 # Complets, avec Docker, pour les parcours utilisateurs.
 
 # Lance TOUS les tests E2E
-test: test-up run-playwright test-down docker-clean-project
+test: test-up run-playwright test-down docker-clean-all
 	@echo "✅ E2E Tests finished. Report available in frontend/playwright-report/index.html"
 
 # Tests E2E spécifiques par catégorie

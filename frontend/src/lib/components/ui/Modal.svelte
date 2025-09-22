@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type {Snippet} from "svelte";
+
     let {
         isOpen,
         onClose,
@@ -6,7 +8,7 @@
     } = $props<{
         isOpen: boolean;
         onClose: () => void;
-        children: any;
+        children: Snippet;
     }>();
 </script>
 

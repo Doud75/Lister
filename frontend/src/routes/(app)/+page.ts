@@ -17,6 +17,7 @@ export const load: PageLoad = async ({ fetch }) => {
     try {
         const [userInfo, setlists] = await Promise.all([fetchUserInfo(), fetchSetlists()]);
         return { userInfo, setlists };
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     } catch (err: any) {
         throw error(err.status || 500, err.body?.message || 'Could not load dashboard data.');
     }

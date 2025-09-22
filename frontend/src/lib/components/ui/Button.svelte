@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type {Snippet} from "svelte";
+
     let {
         type = 'submit',
         isLoading = false,
@@ -14,7 +16,7 @@
         variant?: 'primary' | 'secondary';
         autoWidth?: boolean;
         onclick?: (event: MouseEvent) => void;
-        children: any;
+        children: Snippet;
     }>();
 
     const baseClasses = "flex justify-center rounded-md px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:cursor-not-allowed disabled:opacity-60";

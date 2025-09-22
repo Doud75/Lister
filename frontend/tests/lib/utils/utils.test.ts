@@ -20,6 +20,7 @@ describe('formatDuration', () => {
     });
 
     it('should handle null or undefined input by returning 0m 00s', () => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         expect(formatDuration(null)).toBe('0m 00s');
     });
