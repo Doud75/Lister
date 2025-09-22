@@ -99,7 +99,10 @@ test-up:
 	@echo "--- Cleaning up previous test environment ---"
 	@docker compose -f docker-compose.test.yml --env-file .env.test down -v --remove-orphans
 	@echo "--- Building and starting test environment (DB, Backend with seed, Frontend) ---"
-	@docker compose -f docker-compose.test.yml --env-file .env.test up --build -d
+	@docker compose -f docker-compose.test.yml --env-file .env.test up --build -d || \
+        (echo "🔴 'docker compose up' failed. Displaying logs:"; \
+        docker compose -f docker-compose.test.yml --env-file .env.test logs; \
+        exit 1)
 	@echo "--- Waiting for frontend to be healthy before running tests ---"
 	@until curl -s -f http://localhost:4001 > /dev/null; do \
 		echo "Waiting for frontend_test service on port 4001..."; \

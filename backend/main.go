@@ -71,8 +71,9 @@ func main() {
 	})
 
 	port := "8089"
-	fmt.Printf("Backend server starting on port %s\n", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
-		log.Fatalf("Could not start server: %s\n", err)
-	}
+    address := fmt.Sprintf("0.0.0.0:%s", port)
+    fmt.Printf("Backend server starting on %s\n", address)
+    if err := http.ListenAndServe(address, mux); err != nil {
+        log.Fatalf("Could not start server: %s\n", err)
+    }
 }
