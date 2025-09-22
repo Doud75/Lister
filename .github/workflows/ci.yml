@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.25.0'
+          cache-dependency-path: backend/go.sum
 
       - name: Build Go backend
         working-directory: ./backend
@@ -33,7 +34,7 @@ jobs:
       - name: Run Linting (non-blocking)
         working-directory: ./frontend
         continue-on-error: true
-        run: npm run lint
+        run: npm run lint:eslint
 
       - name: Build SvelteKit app
         working-directory: ./frontend
@@ -47,6 +48,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Set up Node.js for Unit Tests
         uses: actions/setup-node@v3
         with:
@@ -57,18 +61,18 @@ jobs:
         run: npm install
 
       - name: Run Unit Tests
-        working-directory: ./frontend
         run: make test-unit
 
-      - name: Create .env.test file for E2E Tests
-        run: cp .env.example .env.test
+      - name: Install Playwright Browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps
 
       - name: Run E2E Tests
         run: make test
 
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: frontend/playwright-report/

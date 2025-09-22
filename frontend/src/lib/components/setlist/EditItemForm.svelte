@@ -17,6 +17,7 @@
     let modalNotes = $state(item.notes?.String || '');
 
     const commonEnhance = () => {
+        /* eslint-disable  @typescript-eslint/no-explicit-any */
         return async ({ update }: { update: any }) => {
             await update();
             close();

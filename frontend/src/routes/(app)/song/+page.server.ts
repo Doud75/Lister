@@ -14,6 +14,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
         return {
             songs: await fetchSongs()
         };
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     } catch (err: any) {
         throw error(err.status || 500, err.body?.message || 'Could not load song library.');
     }
