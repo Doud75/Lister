@@ -1,9 +1,90 @@
 <script lang="ts">
+    import { navigating } from '$app/stores';
+    import { browser } from '$app/environment';
+
     let { children } = $props();
+
+
+    const SWIPE_THRESHOLD = 70;
+    const SWIPE_EDGE_WIDTH = 50;
+
+    let isSwiping = $state(false);
+    let startX = $state(0);
+    let translateX = $state(0);
+    let canNavigateBack = $state(browser && window.history.length > 1);
+    let containerEl: HTMLElement | undefined = $state();
+
+    function updateNavigationState() {
+        canNavigateBack = window.history.length > 1;
+    }
+
+    function handleTouchStart(e: TouchEvent) {
+        if (e.touches.length !== 1) return;
+
+        const touchX = e.touches[0].clientX;
+
+        if (touchX > SWIPE_EDGE_WIDTH && touchX < window.innerWidth - SWIPE_EDGE_WIDTH) {
+            return;
+        }
+
+        startX = touchX;
+        isSwiping = true;
+        if (containerEl) {
+            containerEl.style.transition = 'none';
+        }
+    }
+
+    function handleTouchMove(e: TouchEvent) {
+        if (!isSwiping || e.touches.length !== 1) return;
+
+        const currentX = e.touches[0].clientX;
+        let deltaX = currentX - startX;
+
+        if (deltaX > 0 && !canNavigateBack) {
+            deltaX = 0;
+        }
+
+        translateX = deltaX;
+    }
+
+    function handleTouchEnd() {
+        if (!isSwiping) return;
+
+        if (containerEl) {
+            containerEl.style.transition = 'transform 0.3s ease';
+        }
+
+        if (translateX > SWIPE_THRESHOLD && canNavigateBack) {
+            history.back();
+            setTimeout(() => {
+                updateNavigationState();
+            }, 300);
+        }
+        else if (translateX < -SWIPE_THRESHOLD) {
+            history.forward();
+            setTimeout(updateNavigationState, 300);
+        }
+
+        isSwiping = false;
+        translateX = 0;
+    }
+
+    $effect(() => {
+        if ($navigating) {
+            isSwiping = false;
+            translateX = 0;
+            if (containerEl) {
+                containerEl.style.transition = 'none';
+                containerEl.style.transform = 'translateX(0)';
+            }
+            setTimeout(updateNavigationState, 50);
+        }
+    });
 </script>
 
 <div class="min-h-screen bg-slate-100 dark:bg-slate-900">
     <header class="bg-white shadow-sm dark:bg-slate-800">
+        <!-- Contenu du header (inchangé) -->
         <nav class="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
             <div class="flex items-center gap-4">
                 <a href="/" class="flex-shrink-0" aria-label="Go to Dashboard">
@@ -23,7 +104,22 @@
         </nav>
     </header>
 
-    <main class="py-10">
+    <main
+        class="py-10"
+        ontouchstart={handleTouchStart}
+        ontouchmove={handleTouchMove}
+        ontouchend={handleTouchEnd}
+        bind:this={containerEl}
+        style:transform="translateX({translateX}px)"
+        style:transition={isSwiping ? 'none' : 'transform 0.3s ease'}
+        style:touch-action="pan-y"
+    >
         {@render children?.()}
     </main>
 </div>
+
+<style>
+    main {
+        touch-action: pan-y;
+    }
+</style>
