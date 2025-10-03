@@ -59,3 +59,7 @@ frontend/vite.config.ts.timestamp-*
 postgres-data/
 
 repomix-output.xml
+
+frontend/playwright-report
+frontend/test-results
+test-results
