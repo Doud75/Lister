@@ -25,7 +25,7 @@ func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.UserService.Signup(r.Context(), payload)
+	response, err := h.UserService.Signup(r.Context(), payload)
 	if err != nil {
 		if errors.Is(err, repository.ErrDuplicateBand) || errors.Is(err, repository.ErrDuplicateUsername) {
 			writeError(w, err.Error(), http.StatusConflict)
@@ -37,7 +37,7 @@ func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h UserHandler) Join(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +47,7 @@ func (h UserHandler) Join(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.UserService.Join(r.Context(), payload)
+	response, err := h.UserService.Join(r.Context(), payload)
 	if err != nil {
 		if err.Error() == "band not found" {
 			writeError(w, err.Error(), http.StatusNotFound)
@@ -63,7 +63,7 @@ func (h UserHandler) Join(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -73,12 +73,12 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.UserService.Login(r.Context(), payload)
+	response, err := h.UserService.Login(r.Context(), payload)
 	if err != nil {
 		writeError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	json.NewEncoder(w).Encode(response)
 }

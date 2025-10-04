@@ -45,7 +45,7 @@ Personnalisez les valeurs dans `.env` si nécessaire (surtout `JWT_SECRET`).
 make db-up
 
 # 2. Applique les schémas de table à la base de données
-make migrate-up
+make migrate
 ```
 
 ### 3. Lancer le Projet Complet
@@ -67,16 +67,9 @@ L'API sera accessible à l'adresse `http://localhost:8089`.
 
 ## Gestion de la Base de Données
 
-- **Créer une nouvelle migration** :
-  ```bash
-  make migrate-create name=le_nom_de_la_migration
-  ```
-- **Appliquer les migrations** : `make migrate-up`
-- **Annuler la dernière migration** : `make migrate-down`
-- **Se connecter à la base de données** :
-  ```bash
-  make db-connect
-  ```
+- **Créer une nouvelle migration** : `make migrate-create name=le_nom_de_la_migration`
+- **Appliquer les migrations** : `make migrate`
+- **Se connecter à la base de données** : `make db-connect`
 
 ---
 

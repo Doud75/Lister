@@ -3,7 +3,6 @@ import { jwtDecode } from 'jwt-decode';
 
 type UserPayload = {
     user_id: number;
-    band_id: number;
     exp: number;
 };
 
@@ -18,12 +17,14 @@ export const handle: Handle = async ({ event, resolve }) => {
         try {
             const decoded = jwtDecode<UserPayload>(token);
             if (decoded.exp * 1000 > Date.now()) {
-                event.locals.user = { id: decoded.user_id, bandId: decoded.band_id };
+                event.locals.user = { id: decoded.user_id };
             }
         } catch {
             // Le token est invalide, l'utilisateur et le token restent null
         }
     }
+
+    event.locals.activeBandId = event.cookies.get('active_band_id');
 
     return resolve(event);
 };
