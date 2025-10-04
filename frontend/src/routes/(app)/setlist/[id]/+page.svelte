@@ -87,7 +87,7 @@
                     </h1>
                 </div>
                 <div class="mt-2 flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                    <a href="/" class="hover:underline">&larr; Back to Dashboard</a>
+                    <a href="/" class="hover:underline">&larr; Back to Home</a>
                     <span>&bull;</span>
                     <span
                     >Total Duration: <span class="font-semibold"

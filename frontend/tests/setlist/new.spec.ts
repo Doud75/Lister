@@ -41,7 +41,7 @@ test.describe('Create New Setlist Page', () => {
         expect(isInvalid).toBe(true);
     });
 
-    test('should navigate back to dashboard when cancel is clicked', async ({ page }) => {
+    test('should navigate back to home when cancel is clicked', async ({ page }) => {
         await page.getByRole('link', { name: 'Cancel' }).click();
 
         await page.waitForURL('/');

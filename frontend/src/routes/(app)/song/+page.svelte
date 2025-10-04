@@ -47,7 +47,7 @@
                     Bibliothèque de chansons
                 </h1>
                 <div class="mt-2 flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                    <a href="/" class="hover:underline">&larr; Back to Dashboard</a>
+                    <a href="/" class="hover:underline">&larr; Back to Home</a>
                 </div>
             </div>
             <a

@@ -1,8 +1,9 @@
 declare global {
 	namespace App {
 		interface Locals {
-			user: { id: number; bandId: number } | null;
+			user: { id: number } | null;
 			token: string | null;
+			activeBandId: string | undefined;
 		}
 	}
 	interface RequestInit {
