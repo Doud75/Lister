@@ -2,6 +2,7 @@
     import { navigating } from '$app/stores';
     import { browser } from '$app/environment';
     import type { PageData } from './$types';
+    import type {Snippet} from "svelte";
 
     let { children, data }: { children: Snippet; data: PageData } = $props();
 
@@ -77,7 +78,7 @@
                         <form method="POST" action="/switch-band">
                             <select
                                     name="bandId"
-                                    class="rounded-md border-slate-300 text-sm font-medium shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    class="p-2 rounded-md border-slate-300 text-sm font-medium shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                                     onchange={(e) => e.currentTarget.form?.requestSubmit()}
                             >
                                 {#each data.userBands as band (band.id)}
