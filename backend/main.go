@@ -36,7 +36,7 @@ func main() {
 	interludeService := service.InterludeService{InterludeRepo: interludeRepo}
 	interludeHandler := handler.InterludeHandler{InterludeService: interludeService}
 
-	authMiddleware := middleware.JWTAuth(cfg.JWTSecret)
+	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)
 
 	mux := http.NewServeMux()
 

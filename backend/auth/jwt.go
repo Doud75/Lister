@@ -8,14 +8,12 @@ import (
 
 type JWTClaims struct {
 	UserID int `json:"user_id"`
-	BandID int `json:"band_id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(secretKey string, userID, bandID int) (string, error) {
+func GenerateJWT(secretKey string, userID int) (string, error) {
 	claims := JWTClaims{
 		UserID: userID,
-		BandID: bandID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

@@ -19,6 +19,6 @@ export const load: PageLoad = async ({ fetch }) => {
         return { userInfo, setlists };
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     } catch (err: any) {
-        throw error(err.status || 500, err.body?.message || 'Could not load dashboard data.');
+        throw error(err.status || 500, err.body?.message || 'Could not load home data.');
     }
 };

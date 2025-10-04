@@ -1,9 +1,9 @@
 <script lang="ts">
     import { navigating } from '$app/stores';
     import { browser } from '$app/environment';
+    import type { PageData } from './$types';
 
-    let { children } = $props();
-
+    let { children, data }: { children: Snippet; data: PageData } = $props();
 
     const SWIPE_THRESHOLD = 70;
     const SWIPE_EDGE_WIDTH = 50;
@@ -20,51 +20,31 @@
 
     function handleTouchStart(e: TouchEvent) {
         if (e.touches.length !== 1) return;
-
         const touchX = e.touches[0].clientX;
-
-        if (touchX > SWIPE_EDGE_WIDTH && touchX < window.innerWidth - SWIPE_EDGE_WIDTH) {
-            return;
-        }
-
+        if (touchX > SWIPE_EDGE_WIDTH && touchX < window.innerWidth - SWIPE_EDGE_WIDTH) return;
         startX = touchX;
         isSwiping = true;
-        if (containerEl) {
-            containerEl.style.transition = 'none';
-        }
+        if (containerEl) containerEl.style.transition = 'none';
     }
 
     function handleTouchMove(e: TouchEvent) {
         if (!isSwiping || e.touches.length !== 1) return;
-
         const currentX = e.touches[0].clientX;
         let deltaX = currentX - startX;
-
-        if (deltaX > 0 && !canNavigateBack) {
-            deltaX = 0;
-        }
-
+        if (deltaX > 0 && !canNavigateBack) deltaX = 0;
         translateX = deltaX;
     }
 
     function handleTouchEnd() {
         if (!isSwiping) return;
-
-        if (containerEl) {
-            containerEl.style.transition = 'transform 0.3s ease';
-        }
-
+        if (containerEl) containerEl.style.transition = 'transform 0.3s ease';
         if (translateX > SWIPE_THRESHOLD && canNavigateBack) {
             history.back();
-            setTimeout(() => {
-                updateNavigationState();
-            }, 300);
-        }
-        else if (translateX < -SWIPE_THRESHOLD) {
+            setTimeout(() => { updateNavigationState(); }, 300);
+        } else if (translateX < -SWIPE_THRESHOLD) {
             history.forward();
             setTimeout(updateNavigationState, 300);
         }
-
         isSwiping = false;
         translateX = 0;
     }
@@ -84,17 +64,31 @@
 
 <div class="min-h-screen bg-slate-100 dark:bg-slate-900">
     <header class="bg-white shadow-sm dark:bg-slate-800">
-        <!-- Contenu du header (inchangé) -->
         <nav class="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
             <div class="flex items-center gap-4">
-                <a href="/" class="flex-shrink-0" aria-label="Go to Dashboard">
+                <a href="/" class="flex-shrink-0" aria-label="Go to Home">
                     <svg class="h-8 w-auto text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 0 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
                     </svg>
                 </a>
-                <div class="hidden md:block">
-                    <a href="/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700">Dashboard</a>
-                </div>
+
+                {#if data.userBands && data.userBands.length > 1}
+                    <div class="ml-4">
+                        <form method="POST" action="/switch-band">
+                            <select
+                                    name="bandId"
+                                    class="rounded-md border-slate-300 text-sm font-medium shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    onchange={(e) => e.currentTarget.form?.requestSubmit()}
+                            >
+                                {#each data.userBands as band (band.id)}
+                                    <option value={band.id} selected={band.id.toString() === data.activeBandId}>
+                                        {band.name}
+                                    </option>
+                                {/each}
+                            </select>
+                        </form>
+                    </div>
+                {/if}
             </div>
             <div class="flex items-center">
                 <a href="/logout" class="rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
@@ -105,14 +99,14 @@
     </header>
 
     <main
-        class="py-10"
-        ontouchstart={handleTouchStart}
-        ontouchmove={handleTouchMove}
-        ontouchend={handleTouchEnd}
-        bind:this={containerEl}
-        style:transform="translateX({translateX}px)"
-        style:transition={isSwiping ? 'none' : 'transform 0.3s ease'}
-        style:touch-action="pan-y"
+            class="py-10"
+            ontouchstart={handleTouchStart}
+            ontouchmove={handleTouchMove}
+            ontouchend={handleTouchEnd}
+            bind:this={containerEl}
+            style:transform="translateX({translateX}px)"
+            style:transition={isSwiping ? 'none' : 'transform 0.3s ease'}
+            style:touch-action="pan-y"
     >
         {@render children?.()}
     </main>
