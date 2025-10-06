@@ -101,6 +101,8 @@ test-song-new: test-up run-playwright-song-new test-down docker-clean-project
 test-song-edit: test-up run-playwright-song-edit test-down docker-clean-project
 	@echo "✅ Song edit tests finished."
 
+test-multi-group: test-up run-playwright-multi-group test-down docker-clean-project
+	@echo "✅ Multi-group E2E test finished."
 
 test-up:
 	@echo "--- Cleaning up previous test environment ---"
@@ -152,6 +154,10 @@ run-playwright-song-new:
 run-playwright-song-edit:
 	@echo "--- Running SONG EDIT Playwright tests ---"
 	@cd frontend && npx playwright test tests/song/edit.spec.ts
+
+run-playwright-multi-group:
+	@echo "--- Running MULTI-GROUP Playwright test ---"
+	@cd frontend && npx playwright test tests/group/multi-group.spec.ts
 
 test-down:
 	@echo "--- Tearing down test environment ---"
