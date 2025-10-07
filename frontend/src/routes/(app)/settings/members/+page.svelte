@@ -11,6 +11,7 @@
     let isInviting = $state(false);
     let usernameInput = $state('');
     let passwordInput = $state('');
+    let showPassword = $state(false);
 
     $effect(() => {
         if (form?.removeSuccess) {
@@ -19,22 +20,31 @@
                 members.splice(index, 1);
             }
         }
+
         if (form?.inviteSuccess) {
             usernameInput = '';
             passwordInput = '';
+            showPassword = false;
             invalidateAll();
+        }
+
+        if (form?.error && form.error.includes('password is required')) {
+            showPassword = true;
+            usernameInput = form.username || '';
+        } else if (form?.error) {
+            showPassword = false;
         }
     });
 </script>
 
-<div class="container mx-auto max-w-4xl px-4 sm:px-6">
+<div class="container mx-auto px-4 sm:px-6">
     <header class="mb-8">
         <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             Gérer les membres du groupe
         </h1>
-        <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
-            Invitez de nouveaux membres et gérez les accès.
-        </p>
+        <div class="mt-2 flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <a href="/" class="hover:underline">&larr; Back to Home</a>
+        </div>
     </header>
 
     <div class="grid grid-cols-1 gap-12 lg:grid-cols-3">
@@ -61,7 +71,6 @@
 									</span>
                                 </div>
 
-                                <!-- enhance simple, sans callback. Le $effect s'occupe de tout. -->
                                 <form method="POST" action="?/removeMember" use:enhance>
                                     <input type="hidden" name="userId" value={member.id} />
                                     <button
@@ -71,7 +80,18 @@
                                             disabled={member.role === 'admin' &&
 											members.filter((m) => m.role === 'admin').length <= 1}
                                     >
-                                        Supprimer
+                                        <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="h-5 w-5"
+                                        ><path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.033-2.134H8.033C6.91 2.75 6 3.704 6 4.874v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                        /></svg>
                                     </button>
                                 </form>
                             </li>
@@ -85,9 +105,9 @@
 
         <div class="lg:col-span-1">
             <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
-                <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Inviter un membre</h2>
+                <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Ajouter un membre</h2>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Créez un compte pour un nouveau membre. Il pourra changer son mot de passe plus tard.
+                    Entrez un nom d'utilisateur. S'il existe, il sera ajouté. Sinon, il vous sera demandé de créer un compte.
                 </p>
                 <form
                         method="POST"
@@ -96,7 +116,7 @@
                         use:enhance={() => {
 						isInviting = true;
 						return async ({ update }) => {
-							await update(); // On a juste besoin de `update` pour mettre à jour la prop `form`
+							await update();
 							isInviting = false;
 						};
 					}}
@@ -109,22 +129,36 @@
                                 bind:value={usernameInput}
                                 required
                         />
-                        <Input
-                                label="Mot de passe temporaire"
-                                id="password"
-                                name="password"
-                                type="password"
-                                bind:value={passwordInput}
-                                required
-                        />
+                        {#if showPassword}
+                            <Input
+                                    label="Mot de passe temporaire"
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    bind:value={passwordInput}
+                                    required
+                            />
+                        {/if}
                     </fieldset>
 
                     {#if form?.error}
-                        <p class="text-sm text-red-500">{form.error}</p>
+                        <p class="text-sm text-red-500">
+                            {#if form.error.includes('password is required')}
+                                Utilisateur non trouvé. Veuillez définir un mot de passe pour créer son compte.
+                            {:else}
+                                {form.error}
+                            {/if}
+                        </p>
                     {/if}
 
                     <div class="pt-2">
-                        <Button isLoading={isInviting} autoWidth> Inviter </Button>
+                        <Button isLoading={isInviting} autoWidth>
+                            {#if showPassword}
+                                Créer et Inviter
+                            {:else}
+                                Ajouter / Inviter
+                            {/if}
+                        </Button>
                     </div>
                 </form>
             </div>

@@ -210,3 +210,9 @@ func (r *UserRepository) IsUserInBand(ctx context.Context, userID int, bandID in
 	err := r.DB.QueryRow(ctx, query, userID, bandID).Scan(&exists)
 	return exists, err
 }
+
+func (r *UserRepository) AddUserToBand(ctx context.Context, userID, bandID int, role string) error {
+	query := `INSERT INTO band_users (user_id, band_id, role) VALUES ($1, $2, $3)`
+	_, err := r.DB.Exec(ctx, query, userID, bandID, role)
+	return err
+}

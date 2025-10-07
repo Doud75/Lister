@@ -6,6 +6,8 @@ import (
 	"setlist/api/model"
 	"setlist/api/repository"
 	"setlist/auth"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type UserService struct {
@@ -30,8 +32,8 @@ type UpdatePasswordPayload struct {
 }
 
 type InviteMemberPayload struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string  `json:"username"`
+	Password *string `json:"password"`
 }
 
 type AuthResponse struct {
@@ -113,21 +115,46 @@ func (s UserService) GetBandMembers(ctx context.Context, bandID int) ([]model.Ba
 }
 
 func (s UserService) InviteMember(ctx context.Context, bandID int, payload InviteMemberPayload) (model.User, error) {
-	if payload.Username == "" || payload.Password == "" {
-		return model.User{}, errors.New("username and password are required")
+	if payload.Username == "" {
+		return model.User{}, errors.New("username is required")
 	}
 
-	hashedPassword, err := auth.HashPassword(payload.Password)
+	existingUser, err := s.UserRepo.FindUserByUsername(ctx, payload.Username)
+	if err == nil {
+		isMember, err := s.UserRepo.IsUserInBand(ctx, existingUser.ID, bandID)
+		if err != nil {
+			return model.User{}, err
+		}
+		if isMember {
+			return model.User{}, errors.New("user is already a member of this band")
+		}
+
+		err = s.UserRepo.AddUserToBand(ctx, existingUser.ID, bandID, "member")
+		if err != nil {
+			return model.User{}, err
+		}
+		return existingUser, nil
+	}
+
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return model.User{}, err
+	}
+
+	if payload.Password == nil || *payload.Password == "" {
+		return model.User{}, errors.New("user not found, and password is required to create a new one")
+	}
+
+	hashedPassword, err := auth.HashPassword(*payload.Password)
 	if err != nil {
 		return model.User{}, err
 	}
 
-	user, err := s.UserRepo.CreateUserAndAddToBand(ctx, bandID, payload.Username, hashedPassword, "member")
+	newUser, err := s.UserRepo.CreateUserAndAddToBand(ctx, bandID, payload.Username, hashedPassword, "member")
 	if err != nil {
 		return model.User{}, err
 	}
 
-	return user, nil
+	return newUser, nil
 }
 
 func (s UserService) RemoveMember(ctx context.Context, bandID int, userID int) error {
