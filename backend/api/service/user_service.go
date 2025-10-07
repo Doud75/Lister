@@ -24,6 +24,11 @@ type LoginPayload struct {
 	Password string `json:"password"`
 }
 
+type UpdatePasswordPayload struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+}
+
 type AuthResponse struct {
 	Token string       `json:"token"`
 	Bands []model.Band `json:"bands"`
@@ -100,4 +105,22 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 		Token: token,
 		Bands: bands,
 	}, nil
+}
+
+func (s UserService) UpdatePassword(ctx context.Context, userID int, payload UpdatePasswordPayload) error {
+	user, err := s.UserRepo.FindUserByID(ctx, userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	if !auth.CheckPasswordHash(payload.CurrentPassword, user.PasswordHash) {
+		return errors.New("invalid current password")
+	}
+
+	newHashedPassword, err := auth.HashPassword(payload.NewPassword)
+	if err != nil {
+		return errors.New("failed to hash new password")
+	}
+
+	return s.UserRepo.UpdatePassword(ctx, userID, newHashedPassword)
 }

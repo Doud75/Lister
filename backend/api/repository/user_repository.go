@@ -104,6 +104,28 @@ func (r *UserRepository) FindUserByUsername(ctx context.Context, username string
 	return user, nil
 }
 
+func (r *UserRepository) FindUserByID(ctx context.Context, id int) (model.User, error) {
+	var user model.User
+	query := `SELECT id, password_hash, username FROM users WHERE id = $1`
+	err := r.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.PasswordHash, &user.Username)
+	if err != nil {
+		return model.User{}, err
+	}
+	return user, nil
+}
+
+func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, newHash string) error {
+	query := `UPDATE users SET password_hash = $1 WHERE id = $2`
+	cmdTag, err := r.DB.Exec(ctx, query, newHash, userID)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return errors.New("user not found or no update was needed")
+	}
+	return nil
+}
+
 func (r *UserRepository) FindBandsByUserID(ctx context.Context, userID int) ([]model.Band, error) {
 	var bands []model.Band
 	query := `

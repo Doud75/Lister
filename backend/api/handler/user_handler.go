@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"setlist/api/middleware"
 	"setlist/api/repository"
 	"setlist/api/service"
 )
@@ -81,4 +82,36 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func (h UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		writeError(w, "Could not identify user from token", http.StatusInternalServerError)
+		return
+	}
+
+	var payload service.UpdatePasswordPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if payload.NewPassword == "" {
+		writeError(w, "New password cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	err := h.UserService.UpdatePassword(r.Context(), userID, payload)
+	if err != nil {
+		if err.Error() == "invalid current password" {
+			writeError(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		writeError(w, "Failed to update password", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Password updated successfully"})
 }
