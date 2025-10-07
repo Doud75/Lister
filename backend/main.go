@@ -44,6 +44,7 @@ func main() {
 	mux.HandleFunc("POST /api/auth/join", userHandler.Join)
 	mux.HandleFunc("POST /api/auth/login", userHandler.Login)
 
+	mux.Handle("PUT /api/user/password", authMiddleware(http.HandlerFunc(userHandler.UpdatePassword)))
 	mux.Handle("GET /api/user/info", authMiddleware(http.HandlerFunc(infoHandler.GetCurrentUserInfo)))
 
 	mux.Handle("POST /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.CreateSetlist)))
@@ -71,9 +72,9 @@ func main() {
 	})
 
 	port := "8089"
-    address := fmt.Sprintf("0.0.0.0:%s", port)
-    fmt.Printf("Backend server starting on %s\n", address)
-    if err := http.ListenAndServe(address, mux); err != nil {
-        log.Fatalf("Could not start server: %s\n", err)
-    }
+	address := fmt.Sprintf("0.0.0.0:%s", port)
+	fmt.Printf("Backend server starting on %s\n", address)
+	if err := http.ListenAndServe(address, mux); err != nil {
+		log.Fatalf("Could not start server: %s\n", err)
+	}
 }
