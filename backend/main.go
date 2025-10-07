@@ -21,8 +21,10 @@ func main() {
 	userService := service.UserService{UserRepo: userRepo, JWTSecret: cfg.JWTSecret}
 	userHandler := handler.UserHandler{UserService: userService}
 
+	bandHandler := handler.BandHandler{UserService: userService}
+
 	infoRepo := repository.InfoRepository{DB: dbPool}
-	infoHandler := handler.InfoHandler{InfoRepo: infoRepo}
+	infoHandler := handler.InfoHandler{InfoRepo: infoRepo, UserRepo: userRepo}
 
 	setlistRepo := repository.SetlistRepository{DB: dbPool}
 	setlistService := service.SetlistService{SetlistRepo: setlistRepo}
@@ -37,15 +39,19 @@ func main() {
 	interludeHandler := handler.InterludeHandler{InterludeService: interludeService}
 
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)
+	adminMiddleware := middleware.AdminOnly(userRepo)
 
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("POST /api/auth/signup", userHandler.Signup)
-	mux.HandleFunc("POST /api/auth/join", userHandler.Join)
 	mux.HandleFunc("POST /api/auth/login", userHandler.Login)
 
 	mux.Handle("PUT /api/user/password", authMiddleware(http.HandlerFunc(userHandler.UpdatePassword)))
 	mux.Handle("GET /api/user/info", authMiddleware(http.HandlerFunc(infoHandler.GetCurrentUserInfo)))
+
+	mux.Handle("GET /api/bands/{bandId}/members", authMiddleware(http.HandlerFunc(bandHandler.GetMembers)))
+	mux.Handle("POST /api/bands/{bandId}/members", authMiddleware(adminMiddleware(http.HandlerFunc(bandHandler.InviteMember))))
+	mux.Handle("DELETE /api/bands/{bandId}/members/{userId}", authMiddleware(adminMiddleware(http.HandlerFunc(bandHandler.RemoveMember))))
 
 	mux.Handle("POST /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.CreateSetlist)))
 	mux.Handle("GET /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlists)))

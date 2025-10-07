@@ -92,6 +92,11 @@
                 {/if}
             </div>
             <div class="flex items-center gap-4">
+                {#if data.user?.role === 'admin'}
+                    <a href="/settings/members" class="rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
+                        Membres
+                    </a>
+                {/if}
                 <a href="/settings/account" class="rounded-md bg-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
                     Account
                 </a>

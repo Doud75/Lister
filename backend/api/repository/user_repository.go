@@ -57,41 +57,94 @@ func (r *UserRepository) CreateBandAndUser(ctx context.Context, bandName, userna
 	return user, band, tx.Commit(ctx)
 }
 
-func (r *UserRepository) CreateUserForExistingBand(ctx context.Context, bandName, username, passwordHash string) (model.User, model.Band, error) {
+func (r *UserRepository) CreateUserAndAddToBand(ctx context.Context, bandID int, username, passwordHash, role string) (model.User, error) {
 	tx, err := r.DB.Begin(ctx)
 	if err != nil {
-		return model.User{}, model.Band{}, err
+		return model.User{}, err
 	}
 	defer tx.Rollback(ctx)
-
-	var band model.Band
-	bandQuery := `SELECT id, name FROM bands WHERE name = $1`
-	err = tx.QueryRow(ctx, bandQuery, bandName).Scan(&band.ID, &band.Name)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return model.User{}, model.Band{}, errors.New("band not found")
-		}
-		return model.User{}, model.Band{}, err
-	}
 
 	var user model.User
 	userQuery := `INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username, created_at`
 	err = tx.QueryRow(ctx, userQuery, username, passwordHash).Scan(&user.ID, &user.Username, &user.CreatedAt)
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return model.User{}, model.Band{}, ErrDuplicateUsername
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" { // duplicate key
+			return model.User{}, ErrDuplicateUsername
 		}
-		return model.User{}, model.Band{}, err
+		return model.User{}, err
 	}
 
 	linkQuery := `INSERT INTO band_users (user_id, band_id, role) VALUES ($1, $2, $3)`
-	_, err = tx.Exec(ctx, linkQuery, user.ID, band.ID, "member")
+	_, err = tx.Exec(ctx, linkQuery, user.ID, bandID, role)
 	if err != nil {
-		return model.User{}, model.Band{}, err
+		return model.User{}, err
 	}
 
-	return user, band, tx.Commit(ctx)
+	return user, tx.Commit(ctx)
+}
+
+func (r *UserRepository) GetMembersByBandID(ctx context.Context, bandID int) ([]model.BandMember, error) {
+	members := make([]model.BandMember, 0)
+	query := `
+		SELECT u.id, u.username, bu.role
+		FROM users u
+		JOIN band_users bu ON u.id = bu.user_id
+		WHERE bu.band_id = $1
+		ORDER BY u.username
+	`
+	rows, err := r.DB.Query(ctx, query, bandID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var member model.BandMember
+		if err := rows.Scan(&member.ID, &member.Username, &member.Role); err != nil {
+			return nil, err
+		}
+		members = append(members, member)
+	}
+	return members, rows.Err()
+}
+
+func (r *UserRepository) RemoveUserFromBand(ctx context.Context, bandID int, userID int) error {
+	var adminCount int
+	countQuery := `SELECT COUNT(*) FROM band_users WHERE band_id = $1 AND role = 'admin'`
+	err := r.DB.QueryRow(ctx, countQuery, bandID).Scan(&adminCount)
+	if err != nil {
+		return err
+	}
+
+	if adminCount <= 1 {
+		var userRole string
+		roleQuery := `SELECT role FROM band_users WHERE user_id = $1 AND band_id = $2`
+		err := r.DB.QueryRow(ctx, roleQuery, userID, bandID).Scan(&userRole)
+		if err != nil {
+			return err
+		}
+		if userRole == "admin" {
+			return errors.New("cannot remove the last admin of the band")
+		}
+	}
+
+	query := `DELETE FROM band_users WHERE user_id = $1 AND band_id = $2`
+	cmdTag, err := r.DB.Exec(ctx, query, userID, bandID)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
+func (r *UserRepository) GetUserRoleInBand(ctx context.Context, userID int, bandID int) (string, error) {
+	var role string
+	query := `SELECT role FROM band_users WHERE user_id = $1 AND band_id = $2`
+	err := r.DB.QueryRow(ctx, query, userID, bandID).Scan(&role)
+	return role, err
 }
 
 func (r *UserRepository) FindUserByUsername(ctx context.Context, username string) (model.User, error) {

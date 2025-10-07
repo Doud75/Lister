@@ -66,3 +66,9 @@ export type SongPayload = {
     lyrics: string | null;
     links: string | null;
 };
+
+export type BandMember = {
+    id: number;
+    username: string;
+    role: string;
+};
