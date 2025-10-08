@@ -1,3 +1,5 @@
+// backend/db/seed/main.go
+
 package main
 
 import (
@@ -46,17 +48,30 @@ func seed(db *pgxpool.Pool) {
 		log.Fatalf("Failed to seed band: %v", err)
 	}
 
-	hashedPassword, _ := auth.HashPassword("password123")
-	var userID int
+	// Admin user
+	hashedPasswordAdmin, _ := auth.HashPassword("password123")
+	var adminUserID int
 	err = db.QueryRow(ctx, "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id",
-		"testuser", hashedPassword).Scan(&userID)
+		"testuser", hashedPasswordAdmin).Scan(&adminUserID)
 	if err != nil {
-		log.Fatalf("Failed to seed user: %v", err)
+		log.Fatalf("Failed to seed admin user: %v", err)
+	}
+	_, err = db.Exec(ctx, "INSERT INTO band_users (user_id, band_id, role) VALUES ($1, $2, $3)", adminUserID, bandID, "admin")
+	if err != nil {
+		log.Fatalf("Failed to link admin user to band: %v", err)
 	}
 
-	_, err = db.Exec(ctx, "INSERT INTO band_users (user_id, band_id, role) VALUES ($1, $2, $3)", userID, bandID, "admin")
+	// Member user (pour les tests de suppression)
+	hashedPasswordMember, _ := auth.HashPassword("password123")
+	var memberUserID int
+	err = db.QueryRow(ctx, "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id",
+		"memberuser", hashedPasswordMember).Scan(&memberUserID)
 	if err != nil {
-		log.Fatalf("Failed to link user to band: %v", err)
+		log.Fatalf("Failed to seed member user: %v", err)
+	}
+	_, err = db.Exec(ctx, "INSERT INTO band_users (user_id, band_id, role) VALUES ($1, $2, $3)", memberUserID, bandID, "member")
+	if err != nil {
+		log.Fatalf("Failed to link member user to band: %v", err)
 	}
 
 	// Songs pour le scénario de base

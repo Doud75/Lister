@@ -104,6 +104,15 @@ test-song-edit: test-up run-playwright-song-edit test-down docker-clean-project
 test-multi-group: test-up run-playwright-multi-group test-down docker-clean-project
 	@echo "✅ Multi-group E2E test finished."
 
+test-settings: test-up run-playwright-settings test-down docker-clean-project
+	@echo "✅ Settings tests finished."
+
+test-settings-account: test-up run-playwright-settings-account test-down docker-clean-project
+	@echo "✅ Settings account test finished."
+
+test-settings-members: test-up run-playwright-settings-members test-down docker-clean-project
+	@echo "✅ Settings members test finished."
+
 test-up:
 	@echo "--- Cleaning up previous test environment ---"
 	@docker compose -f docker-compose.test.yml --env-file .env.test down -v --remove-orphans
@@ -158,6 +167,18 @@ run-playwright-song-edit:
 run-playwright-multi-group:
 	@echo "--- Running MULTI-GROUP Playwright test ---"
 	@cd frontend && npx playwright test tests/group/multi-group.spec.ts
+
+run-playwright-settings:
+	@echo "--- Running SETTINGS Playwright tests ---"
+	@cd frontend && npx playwright test tests/settings/
+
+run-playwright-settings-account:
+	@echo "--- Running SETTINGS ACCOUNT Playwright test ---"
+	@cd frontend && npx playwright test tests/settings/account.spec.ts
+
+run-playwright-settings-members:
+	@echo "--- Running SETTINGS MEMBERS Playwright test ---"
+	@cd frontend && npx playwright test tests/settings/members.spec.ts
 
 test-down:
 	@echo "--- Tearing down test environment ---"
