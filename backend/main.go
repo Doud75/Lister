@@ -48,6 +48,7 @@ func main() {
 
 	mux.Handle("PUT /api/user/password", authMiddleware(http.HandlerFunc(userHandler.UpdatePassword)))
 	mux.Handle("GET /api/user/info", authMiddleware(http.HandlerFunc(infoHandler.GetCurrentUserInfo)))
+	mux.Handle("GET /api/user/search", authMiddleware(http.HandlerFunc(userHandler.SearchUsers)))
 
 	mux.Handle("GET /api/bands/{bandId}/members", authMiddleware(http.HandlerFunc(bandHandler.GetMembers)))
 	mux.Handle("POST /api/bands/{bandId}/members", authMiddleware(adminMiddleware(http.HandlerFunc(bandHandler.InviteMember))))

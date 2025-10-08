@@ -5,7 +5,8 @@ import type { RequestHandler } from './$types';
 const BACKEND_URL = env.BACKEND_INTERNAL_URL || 'http://backend:8089/api';
 
 const handleProxy: RequestHandler = async ({ request, params, fetch, locals }) => {
-	const url = `${BACKEND_URL}/${params.slug}`;
+	const url = new URL(request.url);
+	const proxyUrl = `${BACKEND_URL}/${params.slug}${url.search}`;
 
 	const headers = new Headers(request.headers);
 
@@ -18,7 +19,7 @@ const handleProxy: RequestHandler = async ({ request, params, fetch, locals }) =
 	}
 
 	try {
-        return await fetch(url, {
+        return await fetch(proxyUrl, {
 			method: request.method,
 			headers: headers,
 			body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : null,

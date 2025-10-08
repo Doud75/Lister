@@ -160,3 +160,11 @@ func (s UserService) InviteMember(ctx context.Context, bandID int, payload Invit
 func (s UserService) RemoveMember(ctx context.Context, bandID int, userID int) error {
 	return s.UserRepo.RemoveUserFromBand(ctx, bandID, userID)
 }
+
+func (s UserService) SearchUsers(ctx context.Context, query string) ([]model.User, error) {
+
+	if len(query) < 3 {
+		return []model.User{}, nil
+	}
+	return s.UserRepo.SearchUsersByUsername(ctx, query)
+}

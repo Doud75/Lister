@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"setlist/api/middleware"
+	"setlist/api/model"
 	"setlist/api/repository"
 	"setlist/api/service"
 )
@@ -88,4 +89,20 @@ func (h UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Password updated successfully"})
+}
+
+func (h UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+
+	users, err := h.UserService.SearchUsers(r.Context(), query)
+	if err != nil {
+		writeError(w, "Failed to search users", http.StatusInternalServerError)
+		return
+	}
+	if users == nil {
+		users = make([]model.User, 0)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }

@@ -19,7 +19,7 @@
         </div>
     </header>
 
-    <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+    <div class="rounded-xl mx-auto max-w-3xl bg-white p-6 shadow-lg dark:bg-slate-800">
         <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Changer de mot de passe</h2>
         <form
                 method="POST"

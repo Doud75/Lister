@@ -216,3 +216,23 @@ func (r *UserRepository) AddUserToBand(ctx context.Context, userID, bandID int, 
 	_, err := r.DB.Exec(ctx, query, userID, bandID, role)
 	return err
 }
+
+func (r *UserRepository) SearchUsersByUsername(ctx context.Context, usernameQuery string) ([]model.User, error) {
+	users := make([]model.User, 0)
+	query := `SELECT id, username FROM users WHERE username ILIKE $1 LIMIT 10`
+
+	rows, err := r.DB.Query(ctx, query, usernameQuery+"%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user model.User
+		if err := rows.Scan(&user.ID, &user.Username); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, rows.Err()
+}
