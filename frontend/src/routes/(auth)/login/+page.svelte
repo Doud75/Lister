@@ -32,6 +32,6 @@
     </form>
 
     <p class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        No account? <a href="/signup" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">Create a band</a> or <a href="/join" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">join one</a>.
+        Pas de compte ? <a href="/signup" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">Créez un groupe</a>.
     </p>
 </div>

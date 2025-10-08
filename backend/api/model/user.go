@@ -8,3 +8,9 @@ type User struct {
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"created_at"`
 }
+
+type BandMember struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}

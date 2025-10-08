@@ -9,6 +9,7 @@ import (
 
 type InfoHandler struct {
 	InfoRepo repository.InfoRepository
+	UserRepo repository.UserRepository
 }
 
 func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) {
@@ -31,9 +32,16 @@ func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	role, err := h.UserRepo.GetUserRoleInBand(r.Context(), userID, bandID)
+	if err != nil {
+		writeError(w, "Could not determine user role", http.StatusNotFound)
+		return
+	}
+
 	response := map[string]string{
 		"username":  user.Username,
 		"band_name": band.Name,
+		"role":      role,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

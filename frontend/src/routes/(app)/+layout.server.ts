@@ -10,6 +10,7 @@ export const load: LayoutServerLoad = async ({ cookies, locals }) => {
     const userBands = userBandsCookie ? JSON.parse(userBandsCookie) : [];
 
     return {
+        user: locals.user,
         userBands,
         activeBandId: locals.activeBandId
     };
