@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"setlist/api/model"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -196,4 +197,45 @@ func (r SetlistRepository) DeleteSetlistItem(ctx context.Context, itemID int, ba
 		return sql.ErrNoRows
 	}
 	return nil
+}
+
+func (r SetlistRepository) CreateSetlistInTx(ctx context.Context, tx pgx.Tx, name, color string, bandID int) (model.Setlist, error) {
+	var setlist model.Setlist
+	query := `
+		INSERT INTO setlists (name, color, band_id)
+		VALUES ($1, $2, $3)
+		RETURNING id, band_id, name, color, created_at
+	`
+	err := tx.QueryRow(ctx, query, name, color, bandID).Scan(
+		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt,
+	)
+	return setlist, err
+}
+
+func (r SetlistRepository) CopyItemsToNewSetlist(ctx context.Context, tx pgx.Tx, newSetlistID int, items []model.SetlistItem) error {
+	if len(items) == 0 {
+		return nil
+	}
+
+	rows := make([][]interface{}, len(items))
+	for i, item := range items {
+		rows[i] = []interface{}{
+			newSetlistID,
+			item.Position,
+			item.ItemType,
+			item.SongID,
+			item.InterludeID,
+			item.Notes,
+			item.TransitionDurationSeconds,
+		}
+	}
+
+	_, err := tx.CopyFrom(
+		ctx,
+		pgx.Identifier{"setlist_items"},
+		[]string{"setlist_id", "position", "item_type", "song_id", "interlude_id", "notes", "transition_duration_seconds"},
+		pgx.CopyFromRows(rows),
+	)
+
+	return err
 }

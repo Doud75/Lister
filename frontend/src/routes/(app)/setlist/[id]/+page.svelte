@@ -9,6 +9,8 @@
     import Modal from '$lib/components/ui/Modal.svelte';
     import EditItemForm from '$lib/components/setlist/EditItemForm.svelte';
     import type { SetlistItem as SetlistItemType } from '$lib/types';
+    import DuplicateSetlistForm from '$lib/components/setlist/DuplicateSetlistForm.svelte';
+    import {beforeNavigate} from "$app/navigation";
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
     const setlistId = $page.params.id;
@@ -16,6 +18,12 @@
     let items = $state<SetlistItemType[]>(data.setlistDetails.items);
     let isModalOpen = $state(false);
     let editingItem = $state<SetlistItemType | null>(null);
+    let isDuplicateModalOpen = $state(false);
+
+    beforeNavigate(() => {
+        isModalOpen = false;
+        isDuplicateModalOpen = false;
+    });
 
     $effect(() => {
         if (form?.deleted) {
@@ -118,6 +126,18 @@
                 >
                     Edit Info
                 </a>
+                <button
+                        onclick={() => (isDuplicateModalOpen = true)}
+                        type="button"
+                        aria-label="Dupliquer la setlist"
+                        class="flex w-auto items-center gap-2 justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                        <path d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3.879a1.5 1.5 0 0 1 1.06.44l3.122 3.121A1.5 1.5 0 0 1 17 6.621V16.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 7 16.5v-13Z" />
+                        <path d="M5 5.5A1.5 1.5 0 0 1 6.5 4h1V3H6.5A2.5 2.5 0 0 0 4 5.5v11A2.5 2.5 0 0 0 6.5 19h7a2.5 2.5 0 0 0 2.5-2.5v-1h1v1A3.5 3.5 0 0 1 13.5 20h-7A3.5 3.5 0 0 1 3 16.5v-11A3.5 3.5 0 0 1 6.5 2h1V4H5V5.5Z" />
+                    </svg>
+                    <span>Dupliquer</span>
+                </button>
                 <a
                         href="/setlist/{setlistId}/add"
                         class="flex w-auto justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
@@ -171,6 +191,13 @@
     </div>
 </div>
 
+<Modal isOpen={isDuplicateModalOpen} onClose={() => (isDuplicateModalOpen = false)}>
+    <DuplicateSetlistForm
+            setlistName={data.setlistDetails.name}
+            setColor={data.setlistDetails.color}
+            close={() => (isDuplicateModalOpen = false)}
+    />
+</Modal>
 <Modal isOpen={isModalOpen} onClose={closeEditModal}>
     {#if editingItem}
         <EditItemForm item={editingItem} close={closeEditModal} />

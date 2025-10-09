@@ -184,3 +184,34 @@ func (h SetlistHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h SetlistHandler) DuplicateSetlist(w http.ResponseWriter, r *http.Request) {
+	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
+	if !ok {
+		writeError(w, "Could not identify band from token", http.StatusInternalServerError)
+		return
+	}
+
+	idStr := r.PathValue("id")
+	originalSetlistID, err := strconv.Atoi(idStr)
+	if err != nil {
+		writeError(w, "Invalid original setlist ID", http.StatusBadRequest)
+		return
+	}
+
+	var payload service.DuplicateSetlistPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		writeError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	newSetlist, err := h.SetlistService.Duplicate(r.Context(), originalSetlistID, bandID, payload.Name, payload.Color)
+	if err != nil {
+		writeError(w, "Failed to duplicate setlist", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newSetlist)
+}
