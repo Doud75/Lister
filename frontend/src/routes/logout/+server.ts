@@ -1,9 +1,10 @@
-import { redirect } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ cookies }) => {
+export const POST: RequestHandler = async ({ cookies }) => {
     cookies.delete('jwt_token', { path: '/' });
     cookies.delete('active_band_id', { path: '/' });
     cookies.delete('user_bands', { path: '/' });
-    throw redirect(303, '/login');
+
+    return json({ success: true, message: "Déconnexion réussie" });
 };

@@ -1,5 +1,7 @@
 <script lang="ts">
     import type { PageData } from '../../../routes/(app)/$types';
+    import { enhance } from '$app/forms';
+    import type { SubmitFunction } from '@sveltejs/kit';
 
     let { user }: { user: PageData['user'] } = $props();
     let isOpen = $state(false);
@@ -7,6 +9,13 @@
     function close() {
         isOpen = false;
     }
+
+    const handleLogout: SubmitFunction = () => {
+        return async ({ update }) => {
+            await update({ reset: false });
+            window.location.href = '/login';
+        };
+    };
 </script>
 
 <div class="relative">
@@ -52,12 +61,15 @@
                 >
             </div>
             <div class="border-t border-slate-200 py-1 dark:border-slate-700">
-                <a
-                        href="/logout"
-                        class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-                        role="menuitem"
-                        onclick={close}>Déconnexion</a
-                >
+                <form action="/logout" method="POST" use:enhance={handleLogout}>
+                    <button
+                            type="submit"
+                            class="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                            role="menuitem"
+                    >
+                        Déconnexion
+                    </button>
+                </form>
             </div>
         </div>
     {/if}
