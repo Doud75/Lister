@@ -54,21 +54,19 @@ func (s InterludeService) GetAllForBand(ctx context.Context, bandID int) ([]mode
 }
 
 func (s InterludeService) Update(ctx context.Context, id int, bandID int, payload UpdateInterludePayload) (model.Interlude, error) {
-	if payload.Title == "" {
-		return model.Interlude{}, errors.New("interlude title cannot be empty")
+	interlude, err := s.InterludeRepo.GetInterludeByID(ctx, id, bandID)
+	if err != nil {
+		return model.Interlude{}, errors.New("interlude not found")
 	}
 
-	interlude := model.Interlude{
-		ID:     id,
-		BandID: bandID,
-		Title:  payload.Title,
+	if payload.Title != "" {
+		interlude.Title = payload.Title
+	} else {
+		return model.Interlude{}, errors.New("interlude title cannot be empty")
 	}
 
 	if payload.Speaker != nil {
 		interlude.Speaker = sql.NullString{String: *payload.Speaker, Valid: true}
-	}
-	if payload.Script != nil {
-		interlude.Script = sql.NullString{String: *payload.Script, Valid: true}
 	}
 	if payload.DurationSeconds != nil {
 		interlude.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}

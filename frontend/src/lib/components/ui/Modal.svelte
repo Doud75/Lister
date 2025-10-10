@@ -19,7 +19,7 @@
             aria-modal="true"
             tabindex="0"
             onclick={onClose}
-            onkeydown={(e) => (e.key === "Escape" || e.key === "Enter" || e.key === " ") && onClose()}
+            onkeydown={(e) => (e.key === "Escape") && onClose()}
     >
         <div
                 class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-slate-800"

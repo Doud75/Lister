@@ -22,20 +22,20 @@ func main() {
 	userHandler := handler.UserHandler{UserService: userService}
 	bandHandler := handler.BandHandler{UserService: userService}
 
+	interludeRepo := repository.InterludeRepository{DB: dbPool}
+	interludeService := service.InterludeService{InterludeRepo: interludeRepo}
+	interludeHandler := handler.InterludeHandler{InterludeService: interludeService}
+
 	infoRepo := repository.InfoRepository{DB: dbPool}
 	infoHandler := handler.InfoHandler{InfoRepo: infoRepo, UserRepo: userRepo}
 
 	setlistRepo := repository.SetlistRepository{DB: dbPool}
-	setlistService := service.SetlistService{SetlistRepo: setlistRepo}
+	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo}
 	setlistHandler := handler.SetlistHandler{SetlistService: setlistService}
 
 	songRepo := repository.SongRepository{DB: dbPool}
 	songService := service.SongService{SongRepo: songRepo}
 	songHandler := handler.SongHandler{SongService: songService}
-
-	interludeRepo := repository.InterludeRepository{DB: dbPool}
-	interludeService := service.InterludeService{InterludeRepo: interludeRepo}
-	interludeHandler := handler.InterludeHandler{InterludeService: interludeService}
 
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)
 	adminMiddleware := middleware.AdminOnly(userRepo)

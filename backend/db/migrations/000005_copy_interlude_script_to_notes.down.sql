@@ -1,0 +1,4 @@
+-- This data migration copies the global interlude script to the setlist-specific note.
+-- A "down" migration is intentionally omitted as it would be destructive
+-- to any notes that might have been added to setlist items of type 'interlude'
+-- after this migration was applied. The application logic changes handle the old state.

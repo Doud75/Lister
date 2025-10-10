@@ -69,10 +69,10 @@ export function generateSetlistPdf(setlist: SetlistDetails, totalDurationSeconds
             doc.text(speakerName, margin + 2, yPos);
             yPos += lineHeight * 1.2;
 
-            if (item.script?.Valid && item.script.String) {
+            if (item.notes?.Valid && item.notes.String) {
                 doc.setFontSize(11);
                 doc.setFont('helvetica', 'italic');
-                const scriptLines = doc.splitTextToSize(item.script.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
+                const scriptLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
                 checkPageBreak(scriptLines.length * lineHeight * 0.8);
                 doc.text(scriptLines, margin + 5, yPos);
                 yPos += scriptLines.length * lineHeight * 0.9;

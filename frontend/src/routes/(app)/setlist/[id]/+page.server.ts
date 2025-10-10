@@ -57,23 +57,36 @@ export const actions: Actions = {
     updateInterlude: async ({ request, fetch }) => {
         const data = await request.formData();
         const interludeId = data.get('interludeId');
+        const itemId = data.get('itemId');
+        const scriptForNotes = data.get('script');
 
-        const payload = {
+        const updateNotesPromise = fetch(`/api/setlist/item/${itemId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: scriptForNotes })
+        });
+
+        const interludeGlobalPayload = {
             title: data.get('title'),
             speaker: data.get('speaker') || null,
-            script: data.get('script') || null,
             duration_seconds: Number(data.get('duration')) || null
         };
 
-        const response = await fetch(`/api/interlude/${interludeId}`, {
+        const updateInterludePromise = fetch(`/api/interlude/${interludeId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(interludeGlobalPayload)
         });
 
-        if (!response.ok) return fail(response.status, { error: 'Failed to update interlude.' });
-        const updatedInterlude: Interlude = await response.json();
-        return { updatedInterlude: true, interlude: updatedInterlude };
+        const [notesResponse, interludeResponse] = await Promise.all([updateNotesPromise, updateInterludePromise]);
+
+        if (!notesResponse.ok || !interludeResponse.ok) {
+            return fail(500, { error: 'Failed to update interlude details.' });
+        }
+
+        const updatedInterlude: Interlude = await interludeResponse.json();
+        const updatedItemWithNotes: SetlistItem = await notesResponse.json();
+        return { updatedInterlude: true, interlude: updatedInterlude, item: updatedItemWithNotes };
     },
     duplicateSetlist: async ({ request, params, fetch }) => {
         const data = await request.formData();
