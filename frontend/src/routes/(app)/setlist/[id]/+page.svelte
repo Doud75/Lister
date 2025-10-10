@@ -92,13 +92,13 @@
 <div class="container mx-auto px-4 sm:px-6">
     <header class="mb-8">
         <div>
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
+            <div class="flex flex-nowrap items-center justify-between gap-4">
+                <div class="flex min-w-0 items-center gap-3">
 					<span
                             class="block h-5 w-5 flex-shrink-0 rounded-full"
                             style="background-color: {data.setlistDetails.color};"
                     ></span>
-                    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    <h1 class="truncate text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                         {data.setlistDetails.name}
                     </h1>
                 </div>

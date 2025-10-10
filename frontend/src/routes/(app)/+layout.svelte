@@ -104,7 +104,7 @@
             ontouchmove={handleTouchMove}
             ontouchend={handleTouchEnd}
             bind:this={containerEl}
-            style:transform="translateX({translateX}px)"
+            style:transform={translateX ? `translateX(${translateX}px)` : 'none'}
             style:transition={isSwiping ? 'none' : 'transform 0.3s ease'}
             style:touch-action="pan-y"
     >

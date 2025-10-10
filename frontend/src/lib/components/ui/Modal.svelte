@@ -22,7 +22,7 @@
             onkeydown={(e) => (e.key === "Escape") && onClose()}
     >
         <div
-                class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-slate-800"
+                class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-slate-800 max-h-[90vh] overflow-y-auto"
                 role="presentation"
                 onclick={(event) => event.stopPropagation()}
         >
