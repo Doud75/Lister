@@ -11,7 +11,7 @@
     }>();
 </script>
 
-<li class="flex items-center justify-between gap-3 py-4">
+<li class="flex items-center justify-between gap-3 py-4 data-item-id={item.id}">
     <div class="flex min-w-0 flex-grow items-start gap-4">
         <div class="flex-shrink-0 pt-1">
             <div

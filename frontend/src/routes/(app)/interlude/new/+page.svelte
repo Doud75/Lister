@@ -48,11 +48,6 @@
         </div>
 
         <div>
-            <label
-                    for="script"
-                    class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200"
-            >Script / Notes (optional)</label
-            >
             <div class="mt-2">
                 <Textarea label="Script / Notes (optional)" id="script" name="script" rows={4} />
             </div>

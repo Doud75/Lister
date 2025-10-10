@@ -116,6 +116,15 @@ test-settings-account: test-up run-playwright-settings-account test-down docker-
 test-settings-members: test-up run-playwright-settings-members test-down docker-clean-project
 	@echo "✅ Settings members test finished."
 
+test-interlude: test-up run-playwright-interlude test-down docker-clean-project
+	@echo "✅ Interlude tests finished."
+
+test-interlude-new: test-up run-playwright-interlude-new test-down docker-clean-project
+	@echo "✅ Interlude new tests finished."
+
+test-interlude-behavior: test-up run-playwright-interlude-behavior test-down docker-clean-project
+	@echo "✅ Interlude behavior tests finished."
+
 test-up:
 	@echo "--- Cleaning up previous test environment ---"
 	@docker compose -f docker-compose.test.yml --env-file .env.test down -v --remove-orphans
@@ -186,6 +195,18 @@ run-playwright-settings-account:
 run-playwright-settings-members:
 	@echo "--- Running SETTINGS MEMBERS Playwright test ---"
 	@cd frontend && npx playwright test tests/settings/members.spec.ts
+
+run-playwright-interlude:
+	@echo "--- Running INTERLUDE Playwright tests ---"
+	@cd frontend && npx playwright test tests/interlude/
+
+run-playwright-interlude-new:
+	@echo "--- Running INTERLUDE NEW Playwright tests ---"
+	@cd frontend && npx playwright test tests/interlude/new.spec.ts
+
+run-playwright-interlude-behavior:
+	@echo "--- Running INTERLUDE BEHAVIOR Playwright tests ---"
+	@cd frontend && npx playwright test tests/interlude/behavior.spec.ts
 
 test-down:
 	@echo "--- Tearing down test environment ---"
