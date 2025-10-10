@@ -38,12 +38,16 @@ export default defineConfig({
 					}
 				]
 			},
-
 			workbox: {
-				navigateFallback: '/',
-				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,webp}', 'server/manifest.webmanifest']
+				runtimeCaching: [
+					{
+						urlPattern: ({ url }) => {
+							return url.pathname.startsWith('/login') || url.pathname.startsWith('/signup');
+						},
+						handler: 'NetworkOnly',
+					},
+				],
 			},
-
 			devOptions: {
 				enabled: true,
 				type: 'module',

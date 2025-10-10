@@ -43,6 +43,11 @@ type UpdateItemPayload struct {
 	Notes string `json:"notes"`
 }
 
+type DuplicateSetlistPayload struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
 var hexColorRegex = regexp.MustCompile(`^#(?:[0-9a-fA-F]{3}){1,2}$`)
 
 func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload, bandID int) (model.Setlist, error) {
@@ -130,4 +135,37 @@ func (s SetlistService) UpdateItem(ctx context.Context, itemID int, bandID int, 
 
 func (s SetlistService) DeleteItem(ctx context.Context, itemID int, bandID int) error {
 	return s.SetlistRepo.DeleteSetlistItem(ctx, itemID, bandID)
+}
+
+func (s SetlistService) Duplicate(ctx context.Context, originalSetlistID int, bandID int, newName, newColor string) (model.Setlist, error) {
+	tx, err := s.SetlistRepo.DB.Begin(ctx)
+	if err != nil {
+		return model.Setlist{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = s.SetlistRepo.GetSetlistByID(ctx, originalSetlistID, bandID)
+	if err != nil {
+		return model.Setlist{}, errors.New("original setlist not found or does not belong to the user's band")
+	}
+
+	originalItems, err := s.SetlistRepo.GetSetlistItemsBySetlistID(ctx, originalSetlistID)
+	if err != nil {
+		return model.Setlist{}, err
+	}
+
+	newSetlist, err := s.SetlistRepo.CreateSetlistInTx(ctx, tx, newName, newColor, bandID)
+	if err != nil {
+		return model.Setlist{}, err
+	}
+
+	if err := s.SetlistRepo.CopyItemsToNewSetlist(ctx, tx, newSetlist.ID, originalItems); err != nil {
+		return model.Setlist{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return model.Setlist{}, err
+	}
+
+	return newSetlist, nil
 }

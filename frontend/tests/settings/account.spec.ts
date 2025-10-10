@@ -1,5 +1,3 @@
-// frontend/tests/settings/account.spec.ts
-
 import { test, expect, type Page } from '@playwright/test';
 
 async function login(page: Page, user: string, pass: string) {
@@ -8,6 +6,13 @@ async function login(page: Page, user: string, pass: string) {
     await page.getByLabel('Password').fill(pass);
     await page.getByRole('button', { name: 'Log In' }).click();
     await page.waitForURL('/');
+}
+
+async function logout(page: Page) {
+    await page.goto('/');
+    await page.getByRole('button', { name: "Ouvrir le menu du profil" }).click();
+    await page.getByRole('menuitem', { name: 'Déconnexion' }).click();
+    await page.waitForURL('/login');
 }
 
 test.describe.serial('Settings - Account Page', () => {
@@ -47,17 +52,13 @@ test.describe.serial('Settings - Account Page', () => {
         await page.waitForURL('/');
         await expect(page.getByRole('heading', { name: 'The Testers' })).toBeVisible();
 
-        // Logout
-        await page.goto('/logout');
-        await page.waitForURL('/login');
+        await logout(page);
 
-        // Try to login with old password (should fail)
         await page.getByLabel('Username').fill(userForTest);
         await page.getByLabel('Password').fill('password123');
         await page.getByRole('button', { name: 'Log In' }).click();
         await expect(page.getByText('invalid credentials')).toBeVisible();
 
-        // Login with new password (should succeed)
         await page.getByLabel('Password').fill(newPassword);
         await page.getByRole('button', { name: 'Log In' }).click();
         await page.waitForURL('/');

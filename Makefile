@@ -89,6 +89,9 @@ test-setlist-add: test-up run-playwright-setlist-add test-down docker-clean-proj
 test-setlist-new: test-up run-playwright-setlist-new test-down docker-clean-project
 	@echo "✅ Setlist new tests finished."
 
+test-setlist-duplicate: test-up run-playwright-setlist-duplicate test-down docker-clean-project
+	@echo "✅ Setlist duplicate test finished."
+
 test-song: test-up run-playwright-song test-down docker-clean-project
 	@echo "✅ Song tests finished."
 
@@ -147,6 +150,10 @@ run-playwright-setlist-add:
 run-playwright-setlist-new:
 	@echo "--- Running SETLIST NEW Playwright tests ---"
 	@cd frontend && npx playwright test tests/setlist/new.spec.ts
+
+run-playwright-setlist-duplicate:
+	@echo "--- Running SETLIST DUPLICATE Playwright test ---"
+	@cd frontend && npx playwright test tests/setlist/duplicate.spec.ts
 
 run-playwright-song:
 	@echo "--- Running SONG Playwright tests ---"
