@@ -48,9 +48,15 @@
                 if (updatedItem.item_type === 'interlude') {
                     updatedItem.title.String = form.interlude.title;
                     updatedItem.speaker = form.interlude.speaker;
-                    updatedItem.script = form.interlude.script;
                     updatedItem.duration_seconds = form.interlude.duration_seconds;
                     items[index] = updatedItem;
+                }
+            }
+
+            if (form.item) {
+                const index = items.findIndex((i: SetlistItemType) => i.id === form.item.id);
+                if (index !== -1) {
+                    items[index].notes = form.item.notes;
                 }
             }
         }

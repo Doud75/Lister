@@ -11,7 +11,7 @@
     }>();
 </script>
 
-<li class="flex items-center justify-between gap-3 py-4">
+<li class="flex items-center justify-between gap-3 py-4 data-item-id={item.id}">
     <div class="flex min-w-0 flex-grow items-start gap-4">
         <div class="flex-shrink-0 pt-1">
             <div
@@ -94,9 +94,9 @@
                         {/if}
                         <span>Duration: {formatItemDuration(item.duration_seconds.Int32)}</span>
                     </div>
-                    {#if item.script?.Valid && item.script.String}
+                    {#if item.notes?.Valid && item.notes.String}
                         <p class="mt-2 whitespace-pre-wrap pl-8 text-xs italic text-teal-800 dark:text-teal-200">
-                            {item.script.String}
+                            {item.notes.String}
                         </p>
                     {/if}
                 </div>

@@ -13,7 +13,6 @@
     let modalTitle = $state(item.title.String || '');
     let modalSpeaker = $state(item.speaker?.String || '');
     let modalDuration = $state(item.duration_seconds?.Int32?.toString() || '');
-    let modalScript = $state(item.script?.String || '');
     let modalNotes = $state(item.notes?.String || '');
 
     const commonEnhance = () => {
@@ -54,6 +53,7 @@
             class="mt-4 space-y-4"
     >
         <input type="hidden" name="interludeId" value={item.interlude_id.Int32} />
+        <input type="hidden" name="itemId" value={item.id} />
         <Input label="Title" id="title" name="title" bind:value={modalTitle} required />
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="Speaker" id="speaker" name="speaker" bind:value={modalSpeaker} />
@@ -65,7 +65,7 @@
                     bind:value={modalDuration}
             />
         </div>
-        <Textarea label="Script" id="script" name="script" bind:value={modalScript} />
+        <Textarea label="Script" id="script" name="script" bind:value={modalNotes} />
         <div class="flex justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onclick={close} autoWidth>Cancel</Button>
             <Button type="submit" autoWidth>Save Interlude</Button>

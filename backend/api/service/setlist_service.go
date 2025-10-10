@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"setlist/api/middleware"
 	"setlist/api/model"
 	"setlist/api/repository"
 )
 
 type SetlistService struct {
-	SetlistRepo repository.SetlistRepository
+	SetlistRepo   repository.SetlistRepository
+	InterludeRepo repository.InterludeRepository
 }
 
 type CreateSetlistPayload struct {
@@ -114,6 +116,15 @@ func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddI
 		item.SongID = sql.NullInt32{Int32: int32(payload.ItemID), Valid: true}
 	} else if payload.ItemType == "interlude" {
 		item.InterludeID = sql.NullInt32{Int32: int32(payload.ItemID), Valid: true}
+		bandID, ok := ctx.Value(middleware.BandIDKey).(int)
+		if !ok {
+			return model.SetlistItem{}, errors.New("band ID not found in context")
+		}
+		interlude, err := s.InterludeRepo.GetInterludeByID(ctx, payload.ItemID, bandID)
+		if err != nil {
+			return model.SetlistItem{}, fmt.Errorf("could not retrieve interlude: %w", err)
+		}
+		item.Notes = interlude.Script
 	} else {
 		return model.SetlistItem{}, errors.New("invalid item type")
 	}
