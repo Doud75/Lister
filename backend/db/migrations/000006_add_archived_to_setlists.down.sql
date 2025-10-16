@@ -1,0 +1,1 @@
+ALTER TABLE setlists DROP COLUMN is_archived;

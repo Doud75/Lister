@@ -110,5 +110,43 @@ export const actions: Actions = {
 
         const newSetlist = await response.json();
         throw redirect(303, `/setlist/${newSetlist.id}`);
+    },
+    deleteSetlist: async ({ params, fetch, locals }) => {
+        if (locals.user?.role !== 'admin') {
+            return fail(403, { error: 'Forbidden' });
+        }
+
+        const response = await fetch(`/api/setlist/${params.id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            return fail(response.status, { error: 'Failed to delete the setlist.' });
+        }
+
+        throw redirect(303, '/');
+    },
+    toggleArchiveStatus: async ({ request, params, fetch, locals }) => {
+        if (locals.user?.role !== 'admin') {
+            return fail(403, { error: 'Forbidden' });
+        }
+
+        const data = await request.formData();
+        const isArchived = data.get('is_archived') === 'true';
+
+        const response = await fetch(`/api/setlist/${params.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_archived: !isArchived })
+        });
+
+        if (!response.ok) {
+            const result = await response.json();
+            return fail(response.status, {
+                error: result.error || 'Failed to update archive status.'
+            });
+        }
+
+        return { toggledArchive: true };
     }
 };

@@ -68,6 +68,29 @@ func (h SetlistHandler) UpdateSetlist(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(setlist)
 }
 
+func (h SetlistHandler) DeleteSetlist(w http.ResponseWriter, r *http.Request) {
+	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
+	if !ok {
+		writeError(w, "Could not identify band from token", http.StatusInternalServerError)
+		return
+	}
+
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		writeError(w, "Invalid setlist ID", http.StatusBadRequest)
+		return
+	}
+
+	err = h.SetlistService.Delete(r.Context(), id, bandID)
+	if err != nil {
+		writeError(w, "Failed to delete setlist", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h SetlistHandler) GetSetlists(w http.ResponseWriter, r *http.Request) {
 	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
 	if !ok {
@@ -150,7 +173,6 @@ func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Order updated successfully"})
 }
 
 func (h SetlistHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
