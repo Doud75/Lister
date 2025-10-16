@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { generateSetlistPdf } from '$lib/utils/pdfGenerator';
+import { generateSetlistPdf, generateLivePdf } from '$lib/utils/pdfGenerator';
 import type { SetlistDetails } from '$lib/types';
 
 const mockSave = vi.fn();
@@ -17,6 +17,7 @@ vi.mock('jspdf', () => ({
         splitTextToSize: (text: string) => [text],
         getTextWidth: mockGetTextWidth,
         setFillColor: vi.fn(),
+        setTextColor: vi.fn(),
         internal: {
             pageSize: {
                 getWidth: () => 210,
@@ -30,7 +31,7 @@ beforeEach(() => {
     vi.clearAllMocks();
 });
 
-describe('generateSetlistPdf', () => {
+describe('PDF Generation', () => {
     const mockSetlist: SetlistDetails = {
         id: 1,
         name: 'My Awesome Setlist!',
@@ -48,7 +49,6 @@ describe('generateSetlistPdf', () => {
                 item_type: 'interlude',
                 title: { String: 'A quick talk', Valid: true },
                 speaker: { String: 'Lead', Valid: true },
-                script: { String: 'This is the original template script.', Valid: true },
                 notes: { String: 'Hello PDF world', Valid: true }
             },
             {
@@ -60,25 +60,45 @@ describe('generateSetlistPdf', () => {
         ]
     } as SetlistDetails;
 
-    it('should generate the PDF with the correct filename and content', () => {
-        generateSetlistPdf(mockSetlist, 300);
+    describe('Standard PDF (generateSetlistPdf)', () => {
+        it('should generate the PDF with notes and speaker-only format for interludes', () => {
+            generateSetlistPdf(mockSetlist, 300);
 
-        expect(mockSave).toHaveBeenCalledTimes(1);
+            expect(mockSave).toHaveBeenCalledWith('my_awesome_setlist_.pdf');
 
-        expect(mockSave).toHaveBeenCalledWith('my_awesome_setlist_.pdf');
+            const capturedTexts = mockText.mock.calls.map(call => call[0]).join('\n');
 
-        const capturedTexts = mockText.mock.calls.map(call => call[0]).join('\n');
+            expect(capturedTexts).toContain('My Awesome Setlist!');
+            expect(capturedTexts).toContain('Durée totale : 5m 00s');
+            expect(capturedTexts).toContain('1. First Song');
+            expect(capturedTexts).toContain('2. Second Song');
 
-        expect(capturedTexts).toContain('My Awesome Setlist!');
-        expect(capturedTexts).toContain('Durée totale : 5m 00s');
+            expect(capturedTexts).toContain('A little note');
+            expect(capturedTexts).toContain('Hello PDF world');
 
-        expect(capturedTexts).toContain('1. First Song');
-        expect(capturedTexts).toContain('A little note');
-        expect(capturedTexts).toContain('2. Second Song');
+            expect(capturedTexts).toContain('Lead');
+            expect(capturedTexts).not.toContain('A quick talk');
+            expect(capturedTexts).not.toContain('Lead:');
+        });
+    });
 
-        expect(capturedTexts).toContain('Lead');
-        expect(capturedTexts).toContain('Hello PDF world');
-        expect(capturedTexts).not.toContain('This is the original template script.');
-        expect(capturedTexts).not.toContain('A quick talk');
+    describe('Live PDF (generateLivePdf)', () => {
+        it('should generate a PDF with no notes and "speaker: title" format for interludes', () => {
+            generateLivePdf(mockSetlist, 300);
+
+            expect(mockSave).toHaveBeenCalledWith('my_awesome_setlist__live.pdf');
+
+            const capturedTexts = mockText.mock.calls.map(call => call[0]).join('\n');
+
+            expect(capturedTexts).toContain('My Awesome Setlist!');
+            expect(capturedTexts).toContain('Durée totale : 5m 00s');
+            expect(capturedTexts).toContain('1. First Song');
+            expect(capturedTexts).toContain('2. Second Song');
+
+            expect(capturedTexts).not.toContain('A little note');
+            expect(capturedTexts).not.toContain('Hello PDF world');
+
+            expect(capturedTexts).toContain('Lead: A quick talk');
+        });
     });
 });
