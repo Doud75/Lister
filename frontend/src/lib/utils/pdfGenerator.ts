@@ -2,7 +2,20 @@ import jsPDF from 'jspdf';
 import { formatDuration } from '$lib/utils/utils';
 import type { SetlistDetails } from '$lib/types';
 
-export function generateSetlistPdf(setlist: SetlistDetails, totalDurationSeconds: number) {
+interface PdfOptions {
+    includeNotes: boolean;
+    fontSizes: {
+        mainTitle: number;
+        duration: number;
+        itemTitle: number;
+        itemNotes: number;
+    };
+    fileNameSuffix: string;
+    lineHeightMultiplier: number;
+    interludeFormat: 'speakerOnly' | 'speakerAndTitle';
+}
+
+function generatePdf(setlist: SetlistDetails, totalDurationSeconds: number, options: PdfOptions) {
     const doc = new jsPDF();
 
     const margin = 15;
@@ -10,7 +23,7 @@ export function generateSetlistPdf(setlist: SetlistDetails, totalDurationSeconds
     const pageHeight = doc.internal.pageSize.getHeight();
     let yPos = margin;
 
-    const highlightColors = ['#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'];
+    const highlightColors = ['#6EE7B7', '#FBBF24', '#F87171', '#60A5FA', '#A78BFA', '#F472B6'];
     const speakerColors = new Map<string, string>();
     let songCounter = 1;
 
@@ -21,56 +34,64 @@ export function generateSetlistPdf(setlist: SetlistDetails, totalDurationSeconds
         }
     };
 
-    doc.setFontSize(20);
+    doc.setFontSize(options.fontSizes.mainTitle);
     doc.setFont('helvetica', 'bold');
     doc.text(setlist.name, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
     yPos += lineHeight * 1.5;
 
-    doc.setFontSize(11);
+    doc.setFontSize(options.fontSizes.duration);
     doc.setFont('helvetica', 'normal');
     doc.text(`Durée totale : ${formatDuration(totalDurationSeconds)}`, doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
     yPos += lineHeight * 2;
 
     setlist.items.forEach((item) => {
-        checkPageBreak(20);
+        checkPageBreak(20 * options.lineHeightMultiplier);
 
         if (item.item_type === 'song') {
-            doc.setFontSize(16);
+            doc.setFontSize(options.fontSizes.itemTitle);
             doc.setFont('helvetica', 'bold');
             doc.text(`${songCounter}. ${item.title.String}`, margin, yPos);
             songCounter++;
-            yPos += lineHeight * 1.2;
+            yPos += lineHeight * options.lineHeightMultiplier;
 
-            if (item.notes?.Valid && item.notes.String) {
-                doc.setFontSize(11);
+            if (options.includeNotes && item.notes?.Valid && item.notes.String) {
+                doc.setFontSize(options.fontSizes.itemNotes);
                 doc.setFont('helvetica', 'italic');
                 const notesLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
                 checkPageBreak(notesLines.length * lineHeight * 0.8);
                 doc.text(notesLines, margin + 5, yPos);
                 yPos += notesLines.length * lineHeight * 0.9;
             }
-
         } else if (item.item_type === 'interlude') {
-            const speakerName = (item.speaker?.Valid && item.speaker.String) ? item.speaker.String : "Interlude";
+            const speakerName = (item.speaker?.Valid && item.speaker.String) ? item.speaker.String : null;
+            const title = item.title.String || 'Interlude';
+            let interludeText: string;
 
-            if (!speakerColors.has(speakerName)) {
-                const color = highlightColors[speakerColors.size % highlightColors.length];
-                speakerColors.set(speakerName, color);
+            if (options.interludeFormat === 'speakerAndTitle') {
+                interludeText = speakerName ? `${speakerName}: ${title}` : title;
+            } else {
+                interludeText = speakerName || title;
             }
-            const highlightColor = speakerColors.get(speakerName)!;
 
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'normal');
+            const colorKey = speakerName || title;
+            if (!speakerColors.has(colorKey)) {
+                const color = highlightColors[speakerColors.size % highlightColors.length];
+                speakerColors.set(colorKey, color);
+            }
+            const highlightColor = speakerColors.get(colorKey)!;
 
-            const textWidth = doc.getTextWidth(speakerName);
+            doc.setFontSize(options.fontSizes.itemTitle);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+
+            const textWidth = doc.getTextWidth(interludeText);
             doc.setFillColor(highlightColor);
-            doc.rect(margin, yPos - 4.5, textWidth + 4, lineHeight + 1, 'F');
+            doc.rect(margin, yPos - (lineHeight * options.lineHeightMultiplier * 0.7), textWidth + 4, lineHeight * options.lineHeightMultiplier, 'F');
+            doc.text(interludeText, margin + 2, yPos);
+            yPos += lineHeight * options.lineHeightMultiplier;
 
-            doc.text(speakerName, margin + 2, yPos);
-            yPos += lineHeight * 1.2;
-
-            if (item.notes?.Valid && item.notes.String) {
-                doc.setFontSize(11);
+            if (options.includeNotes && item.notes?.Valid && item.notes.String) {
+                doc.setFontSize(options.fontSizes.itemNotes);
                 doc.setFont('helvetica', 'italic');
                 const scriptLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
                 checkPageBreak(scriptLines.length * lineHeight * 0.8);
@@ -78,9 +99,31 @@ export function generateSetlistPdf(setlist: SetlistDetails, totalDurationSeconds
                 yPos += scriptLines.length * lineHeight * 0.9;
             }
         }
-        yPos += lineHeight * 1.8;
+        yPos += lineHeight * 1.8 * options.lineHeightMultiplier;
     });
 
-    const sanitizedFileName = `${setlist.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+    const sanitizedFileName = `${setlist.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}${options.fileNameSuffix}.pdf`;
     doc.save(sanitizedFileName);
+}
+
+export function generateSetlistPdf(setlist: SetlistDetails, totalDurationSeconds: number) {
+    const options: PdfOptions = {
+        includeNotes: true,
+        fontSizes: { mainTitle: 20, duration: 11, itemTitle: 14, itemNotes: 11 },
+        fileNameSuffix: '',
+        lineHeightMultiplier: 1.2,
+        interludeFormat: 'speakerOnly'
+    };
+    generatePdf(setlist, totalDurationSeconds, options);
+}
+
+export function generateLivePdf(setlist: SetlistDetails, totalDurationSeconds: number) {
+    const options: PdfOptions = {
+        includeNotes: false,
+        fontSizes: { mainTitle: 24, duration: 12, itemTitle: 20, itemNotes: 0 },
+        fileNameSuffix: '_live',
+        lineHeightMultiplier: 1.5,
+        interludeFormat: 'speakerAndTitle'
+    };
+    generatePdf(setlist, totalDurationSeconds, options);
 }
