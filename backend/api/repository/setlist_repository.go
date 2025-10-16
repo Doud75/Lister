@@ -6,36 +6,43 @@ import (
 	"setlist/api/model"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+type DBTX interface {
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	CopyFrom(context.Context, pgx.Identifier, []string, pgx.CopyFromSource) (int64, error)
+}
 
 type SetlistRepository struct {
 	DB *pgxpool.Pool
 }
 
-func (r SetlistRepository) CreateSetlist(ctx context.Context, name, color string, bandID int) (model.Setlist, error) {
+func (r SetlistRepository) CreateSetlist(ctx context.Context, db DBTX, name, color string, bandID int) (model.Setlist, error) {
 	var setlist model.Setlist
 	query := `
 		INSERT INTO setlists (name, color, band_id)
 		VALUES ($1, $2, $3)
-		RETURNING id, band_id, name, color, created_at
+		RETURNING id, band_id, name, color, is_archived, created_at
 	`
-	err := r.DB.QueryRow(ctx, query, name, color, bandID).Scan(
-		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt,
+	err := db.QueryRow(ctx, query, name, color, bandID).Scan(
+		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.IsArchived, &setlist.CreatedAt,
 	)
 	return setlist, err
 }
 
-func (r SetlistRepository) UpdateSetlist(ctx context.Context, id int, bandID int, name, color string) (model.Setlist, error) {
-	var setlist model.Setlist
+func (r SetlistRepository) UpdateSetlist(ctx context.Context, setlist model.Setlist) (model.Setlist, error) {
 	query := `
 		UPDATE setlists
-		SET name = $1, color = $2
-		WHERE id = $3 AND band_id = $4
-		RETURNING id, band_id, name, color, created_at
+		SET name = $1, color = $2, is_archived = $3
+		WHERE id = $4 AND band_id = $5
+		RETURNING id, band_id, name, color, is_archived, created_at
 	`
-	err := r.DB.QueryRow(ctx, query, name, color, id, bandID).Scan(
-		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt,
+	err := r.DB.QueryRow(ctx, query, setlist.Name, setlist.Color, setlist.IsArchived, setlist.ID, setlist.BandID).Scan(
+		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.IsArchived, &setlist.CreatedAt,
 	)
 	return setlist, err
 }
@@ -43,7 +50,7 @@ func (r SetlistRepository) UpdateSetlist(ctx context.Context, id int, bandID int
 func (r SetlistRepository) GetSetlistsByBandID(ctx context.Context, bandID int) ([]model.Setlist, error) {
 	setlists := make([]model.Setlist, 0)
 	query := `
-		SELECT id, band_id, name, color, created_at
+		SELECT id, band_id, name, color, is_archived, created_at
 		FROM setlists
 		WHERE band_id = $1
 		ORDER BY created_at DESC
@@ -56,24 +63,32 @@ func (r SetlistRepository) GetSetlistsByBandID(ctx context.Context, bandID int) 
 
 	for rows.Next() {
 		var setlist model.Setlist
-		if err := rows.Scan(&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt); err != nil {
+		if err := rows.Scan(&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.IsArchived, &setlist.CreatedAt); err != nil {
 			return setlists, err
 		}
 		setlists = append(setlists, setlist)
 	}
 
-	if err := rows.Err(); err != nil {
-		return setlists, err
-	}
-
-	return setlists, nil
+	return setlists, rows.Err()
 }
 
 func (r SetlistRepository) GetSetlistByID(ctx context.Context, id int, bandID int) (model.Setlist, error) {
 	var setlist model.Setlist
-	query := `SELECT id, band_id, name, color, created_at FROM setlists WHERE id = $1 AND band_id = $2`
-	err := r.DB.QueryRow(ctx, query, id, bandID).Scan(&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt)
+	query := `SELECT id, band_id, name, color, is_archived, created_at FROM setlists WHERE id = $1 AND band_id = $2`
+	err := r.DB.QueryRow(ctx, query, id, bandID).Scan(&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.IsArchived, &setlist.CreatedAt)
 	return setlist, err
+}
+
+func (r SetlistRepository) DeleteSetlist(ctx context.Context, setlistID int, bandID int) error {
+	query := `DELETE FROM setlists WHERE id = $1 AND band_id = $2`
+	cmdTag, err := r.DB.Exec(ctx, query, setlistID, bandID)
+	if err != nil {
+		return err
+	}
+	if cmdTag.RowsAffected() == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setlistID int) ([]model.SetlistItem, error) {
@@ -115,10 +130,7 @@ func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setli
 		}
 		items = append(items, item)
 	}
-	if err := rows.Err(); err != nil {
-		return items, err
-	}
-	return items, nil
+	return items, rows.Err()
 }
 
 func (r SetlistRepository) AddItemToSetlist(ctx context.Context, item model.SetlistItem) (model.SetlistItem, error) {
@@ -199,20 +211,7 @@ func (r SetlistRepository) DeleteSetlistItem(ctx context.Context, itemID int, ba
 	return nil
 }
 
-func (r SetlistRepository) CreateSetlistInTx(ctx context.Context, tx pgx.Tx, name, color string, bandID int) (model.Setlist, error) {
-	var setlist model.Setlist
-	query := `
-		INSERT INTO setlists (name, color, band_id)
-		VALUES ($1, $2, $3)
-		RETURNING id, band_id, name, color, created_at
-	`
-	err := tx.QueryRow(ctx, query, name, color, bandID).Scan(
-		&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.CreatedAt,
-	)
-	return setlist, err
-}
-
-func (r SetlistRepository) CopyItemsToNewSetlist(ctx context.Context, tx pgx.Tx, newSetlistID int, items []model.SetlistItem) error {
+func (r SetlistRepository) CopyItemsToNewSetlist(ctx context.Context, tx DBTX, newSetlistID int, items []model.SetlistItem) error {
 	if len(items) == 0 {
 		return nil
 	}

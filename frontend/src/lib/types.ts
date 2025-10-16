@@ -50,6 +50,7 @@ export type SetlistSummary = {
     id: number;
     name: string;
     color: string;
+    is_archived: boolean;
     created_at: string;
 };
 

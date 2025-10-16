@@ -44,7 +44,6 @@ func main() {
 
 	mux.HandleFunc("POST /api/auth/signup", userHandler.Signup)
 	mux.HandleFunc("POST /api/auth/login", userHandler.Login)
-
 	mux.Handle("PUT /api/user/password", authMiddleware(http.HandlerFunc(userHandler.UpdatePassword)))
 	mux.Handle("GET /api/user/info", authMiddleware(http.HandlerFunc(infoHandler.GetCurrentUserInfo)))
 	mux.Handle("GET /api/user/search", authMiddleware(http.HandlerFunc(userHandler.SearchUsers)))
@@ -56,8 +55,10 @@ func main() {
 	mux.Handle("POST /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.CreateSetlist)))
 	mux.Handle("GET /api/setlist", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlists)))
 	mux.Handle("GET /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.GetSetlistDetails)))
-	mux.Handle("PUT /api/setlist/{id}", authMiddleware(http.HandlerFunc(setlistHandler.UpdateSetlist)))
-	mux.Handle("POST /api/setlist/{id}/duplicate", authMiddleware(http.HandlerFunc(setlistHandler.DuplicateSetlist)))
+	mux.Handle("PUT /api/setlist/{id}", authMiddleware(adminMiddleware(http.HandlerFunc(setlistHandler.UpdateSetlist))))
+	mux.Handle("DELETE /api/setlist/{id}", authMiddleware(adminMiddleware(http.HandlerFunc(setlistHandler.DeleteSetlist))))
+
+	mux.Handle("POST /api/setlist/{id}/duplicate", authMiddleware(adminMiddleware(http.HandlerFunc(setlistHandler.DuplicateSetlist))))
 	mux.Handle("POST /api/setlist/{id}/items", authMiddleware(http.HandlerFunc(setlistHandler.AddItem)))
 	mux.Handle("PUT /api/setlist/{id}/items/order", authMiddleware(http.HandlerFunc(setlistHandler.UpdateItemOrder)))
 	mux.Handle("PUT /api/setlist/item/{itemId}", authMiddleware(http.HandlerFunc(setlistHandler.UpdateItem)))
@@ -77,7 +78,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status": "ok"}`))
 	})
-
+	
 	port := "8089"
 	address := fmt.Sprintf("0.0.0.0:%s", port)
 	fmt.Printf("Backend server starting on %s\n", address)

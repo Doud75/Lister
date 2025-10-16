@@ -22,8 +22,9 @@ type CreateSetlistPayload struct {
 }
 
 type UpdateSetlistPayload struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
+	Name       *string `json:"name"`
+	Color      *string `json:"color"`
+	IsArchived *bool   `json:"is_archived"`
 }
 
 type SetlistDetails struct {
@@ -56,32 +57,44 @@ func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload
 	if payload.Name == "" {
 		return model.Setlist{}, errors.New("setlist name cannot be empty")
 	}
-
-	if payload.Color == "" {
-		return model.Setlist{}, errors.New("color cannot be empty")
-	}
-
-	if !hexColorRegex.MatchString(payload.Color) {
-		return model.Setlist{}, fmt.Errorf("invalid color format: %s (must be hex like #RRGGBB or #RGB)", payload.Color)
-	}
-
-	return s.SetlistRepo.CreateSetlist(ctx, payload.Name, payload.Color, bandID)
-}
-
-func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) (model.Setlist, error) {
-	if payload.Name == "" {
-		return model.Setlist{}, errors.New("setlist name cannot be empty")
-	}
-
-	if payload.Color == "" {
-		return model.Setlist{}, errors.New("color cannot be empty")
-	}
-
-	if !hexColorRegex.MatchString(payload.Color) {
+	if payload.Color == "" || !hexColorRegex.MatchString(payload.Color) {
 		return model.Setlist{}, fmt.Errorf("invalid color format: %s", payload.Color)
 	}
 
-	return s.SetlistRepo.UpdateSetlist(ctx, id, bandID, payload.Name, payload.Color)
+	return s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.DB, payload.Name, payload.Color, bandID)
+}
+
+func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) (model.Setlist, error) {
+	setlist, err := s.SetlistRepo.GetSetlistByID(ctx, id, bandID)
+	if err != nil {
+		return model.Setlist{}, errors.New("setlist not found or does not belong to user's band")
+	}
+
+	if payload.Name != nil {
+		if *payload.Name == "" {
+			return model.Setlist{}, errors.New("setlist name cannot be empty")
+		}
+		setlist.Name = *payload.Name
+	}
+	if payload.Color != nil {
+		if *payload.Color == "" || !hexColorRegex.MatchString(*payload.Color) {
+			return model.Setlist{}, fmt.Errorf("invalid color format")
+		}
+		setlist.Color = *payload.Color
+	}
+	if payload.IsArchived != nil {
+		setlist.IsArchived = *payload.IsArchived
+	}
+
+	return s.SetlistRepo.UpdateSetlist(ctx, setlist)
+}
+
+func (s SetlistService) Delete(ctx context.Context, setlistID int, bandID int) error {
+	_, err := s.SetlistRepo.GetSetlistByID(ctx, setlistID, bandID)
+	if err != nil {
+		return errors.New("setlist not found or does not belong to the user's band")
+	}
+	return s.SetlistRepo.DeleteSetlist(ctx, setlistID, bandID)
 }
 
 func (s SetlistService) GetAllForBand(ctx context.Context, bandID int) ([]model.Setlist, error) {
@@ -93,16 +106,11 @@ func (s SetlistService) GetDetails(ctx context.Context, id int, bandID int) (Set
 	if err != nil {
 		return SetlistDetails{}, err
 	}
-
 	items, err := s.SetlistRepo.GetSetlistItemsBySetlistID(ctx, id)
 	if err != nil {
 		return SetlistDetails{}, err
 	}
-
-	return SetlistDetails{
-		Setlist: setlist,
-		Items:   items,
-	}, nil
+	return SetlistDetails{Setlist: setlist, Items: items}, nil
 }
 
 func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddItemPayload) (model.SetlistItem, error) {
@@ -128,7 +136,6 @@ func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddI
 	} else {
 		return model.SetlistItem{}, errors.New("invalid item type")
 	}
-
 	return s.SetlistRepo.AddItemToSetlist(ctx, item)
 }
 
@@ -165,7 +172,7 @@ func (s SetlistService) Duplicate(ctx context.Context, originalSetlistID int, ba
 		return model.Setlist{}, err
 	}
 
-	newSetlist, err := s.SetlistRepo.CreateSetlistInTx(ctx, tx, newName, newColor, bandID)
+	newSetlist, err := s.SetlistRepo.CreateSetlist(ctx, tx, newName, newColor, bandID)
 	if err != nil {
 		return model.Setlist{}, err
 	}
@@ -174,9 +181,5 @@ func (s SetlistService) Duplicate(ctx context.Context, originalSetlistID int, ba
 		return model.Setlist{}, err
 	}
 
-	if err := tx.Commit(ctx); err != nil {
-		return model.Setlist{}, err
-	}
-
-	return newSetlist, nil
+	return newSetlist, tx.Commit(ctx)
 }
