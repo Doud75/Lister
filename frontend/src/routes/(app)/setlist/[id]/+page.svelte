@@ -6,27 +6,20 @@
     import type {ActionData, PageData} from './$types';
     import {generateSetlistPdf, generateLivePdf} from '$lib/utils/pdfGenerator';
     import SetlistItem from '$lib/components/setlist/SetlistItem.svelte';
-    import Modal from '$lib/components/ui/Modal.svelte';
     import EditItemForm from '$lib/components/setlist/EditItemForm.svelte';
     import type {SetlistItem as SetlistItemType} from '$lib/types';
     import DuplicateSetlistForm from '$lib/components/setlist/DuplicateSetlistForm.svelte';
     import {beforeNavigate, invalidateAll} from "$app/navigation";
     import ActionDropdown from '$lib/components/ui/ActionDropdown.svelte';
     import DeleteSetlistForm from "$lib/components/setlist/DeleteSetlistForm.svelte";
+    import { modalStore } from '$lib/stores/modalStore';
 
     let {data, form}: { data: PageData; form: ActionData } = $props();
     const setlistId = $page.params.id;
-
     let items = $state<SetlistItemType[]>(data.setlistDetails.items);
-    let isModalOpen = $state(false);
-    let editingItem = $state<SetlistItemType | null>(null);
-    let isDuplicateModalOpen = $state(false);
-    let isDeleteModalOpen = $state(false);
 
     beforeNavigate(() => {
-        isModalOpen = false;
-        isDuplicateModalOpen = false;
-        isDeleteModalOpen = false;
+        modalStore.close();
     });
 
     $effect(() => {
@@ -81,13 +74,20 @@
     }
 
     function openEditModal(item: SetlistItemType) {
-        editingItem = item;
-        isModalOpen = true;
+        modalStore.open(EditItemForm, { item });
     }
 
-    function closeEditModal() {
-        isModalOpen = false;
-        editingItem = null;
+    function openDuplicateModal() {
+        modalStore.open(DuplicateSetlistForm, {
+            setlistName: data.setlistDetails.name,
+            setColor: data.setlistDetails.color
+        });
+    }
+
+    function openDeleteModal() {
+        modalStore.open(DeleteSetlistForm, {
+            setlistName: data.setlistDetails.name
+        });
     }
 
     function downloadStandardPdf() {
@@ -144,7 +144,7 @@
                             </a>
                             <button
                                 onclick={() => {
-                                    isDuplicateModalOpen = true;
+                                    openDuplicateModal();
                                     close();
                                 }}
                                 class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
@@ -202,7 +202,7 @@
                                 <div class="border-t border-slate-200 py-1 dark:border-slate-700">
                                     <button
                                         onclick={() => {
-                                            isDeleteModalOpen = true;
+                                            openDeleteModal();
                                             close();
                                         }}
                                         class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
@@ -274,23 +274,3 @@
         {/if}
     </div>
 </div>
-
-<Modal isOpen={isDuplicateModalOpen} onClose={() => (isDuplicateModalOpen = false)}>
-    <DuplicateSetlistForm
-            setlistName={data.setlistDetails.name}
-            setColor={data.setlistDetails.color}
-            close={() => (isDuplicateModalOpen = false)}
-    />
-</Modal>
-<Modal isOpen={isModalOpen} onClose={closeEditModal}>
-    {#if editingItem}
-        <EditItemForm item={editingItem} close={closeEditModal}/>
-    {/if}
-</Modal>
-
-<Modal isOpen={isDeleteModalOpen} onClose={() => (isDeleteModalOpen = false)}>
-    <DeleteSetlistForm
-            setlistName={data.setlistDetails.name}
-            close={() => (isDeleteModalOpen = false)}
-    />
-</Modal>

@@ -2,6 +2,8 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import PWABadge from '$lib/components/PWABadge.svelte';
+	import { modalStore } from '$lib/stores/modalStore';
+	import Modal from '$lib/components/ui/Modal.svelte';
 
 	let { children } = $props();
 </script>
@@ -13,3 +15,10 @@
 <PWABadge/>
 
 {@render children?.()}
+
+{#if $modalStore.isOpen && $modalStore.component}
+	<Modal isOpen={$modalStore.isOpen} onClose={modalStore.close}>
+		{@const Component = $modalStore.component}
+		<Component {...$modalStore.props} close={modalStore.close} />
+	</Modal>
+{/if}
