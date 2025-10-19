@@ -4,6 +4,8 @@ up:
 down:
 	docker compose down
 
+deploy: migrate up
+
 logs:
 	docker compose logs -f backend frontend db
 
