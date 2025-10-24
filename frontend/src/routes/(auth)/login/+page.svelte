@@ -16,7 +16,7 @@
 
     <form method="POST" use:enhance class="space-y-6">
         <Input label="Username" id="username" name="username" required />
-        <Input label="Password" id="password" name="password" type="password" required />
+        <Input label="Password" id="password" name="password" type="password" required togglePasswordVisibility={true}/>
 
         {#if form?.error}
             <p class="text-center text-sm text-red-500">{form.error}</p>

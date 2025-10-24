@@ -20,7 +20,7 @@
     <form method="POST" use:enhance class="space-y-6">
         <Input label="Band Name" id="bandName" name="bandName" placeholder="The Rolling Scones" required />
         <Input label="Your Username" id="username" name="username" placeholder="your_nickname" required />
-        <Input label="Password" id="password" name="password" type="password" required />
+        <Input label="Password" id="password" name="password" type="password" required togglePasswordVisibility={true}/>
 
         {#if form?.error}
             <p class="text-center text-sm text-red-500">{form.error}</p>
@@ -36,6 +36,6 @@
     </form>
 
     <p class="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        Looking to join a band? <a href="/join" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">Join an existing one</a>.
+        Déjà un compte ? <a href="/login" class="font-semibold leading-6 text-indigo-500 hover:text-indigo-400">Login</a>.
     </p>
 </div>
