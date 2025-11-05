@@ -7,26 +7,13 @@ import (
 )
 
 type JWTClaims struct {
-	UserID   int    `json:"user_id"`
-	Username string `json:"username"`
-	BandName string `json:"band_name"`
-	Role     string `json:"role"`
+	UserID int `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-type UserForToken struct {
-	ID       int
-	Username string
-	BandName string
-	Role     string
-}
-
-func GenerateJWT(secretKey string, user UserForToken) (string, error) {
+func GenerateJWT(secretKey string, userID int) (string, error) {
 	claims := JWTClaims{
-		UserID:   user.ID,
-		Username: user.Username,
-		BandName: user.BandName,
-		Role:     user.Role,
+		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

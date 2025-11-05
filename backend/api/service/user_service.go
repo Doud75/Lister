@@ -52,14 +52,7 @@ func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResp
 		return nil, err
 	}
 
-	userInfoForToken := auth.UserForToken{
-        ID:       user.ID,
-        Username: user.Username,
-        BandName: band.Name,
-        Role:     "admin",
-    }
-
-    token, err := auth.GenerateJWT(s.JWTSecret, userInfoForToken)
+	token, err := auth.GenerateJWT(s.JWTSecret, user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -88,19 +81,7 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 		return nil, errors.New("user is not part of any band")
 	}
 
-	role, err := s.UserRepo.GetUserRoleInBand(ctx, user.ID, bands[0].ID)
-    if err != nil {
-        return nil, err
-    }
-
-    userInfoForToken := auth.UserForToken{
-        ID:       user.ID,
-        Username: user.Username,
-        BandName: bands[0].Name,
-        Role:     role,
-    }
-
-    token, err := auth.GenerateJWT(s.JWTSecret, userInfoForToken)
+	token, err := auth.GenerateJWT(s.JWTSecret, user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +162,6 @@ func (s UserService) RemoveMember(ctx context.Context, bandID int, userID int) e
 }
 
 func (s UserService) SearchUsers(ctx context.Context, query string) ([]model.User, error) {
-
 	if len(query) < 3 {
 		return []model.User{}, nil
 	}
