@@ -1,5 +1,6 @@
 <script lang="ts">
     import { navigating } from '$app/stores';
+    import { enhance } from '$app/forms';
     import { browser } from '$app/environment';
     import type { PageData } from './$types';
     import type {Snippet} from "svelte";
@@ -76,7 +77,7 @@
 
                 {#if data.userBands && data.userBands.length > 1}
                     <div class="ml-4">
-                        <form method="POST" action="/switch-band">
+                        <form method="POST" action="/switch-band" use:enhance>
                             <select
                                     name="bandId"
                                     class="p-2 rounded-md border-slate-300 text-sm font-medium shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
