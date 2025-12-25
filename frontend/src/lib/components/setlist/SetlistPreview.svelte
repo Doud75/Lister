@@ -20,7 +20,7 @@
 
     function handleDndFinalize(e: CustomEvent) {
         items = e.detail.items;
-        document.getElementById('order-form')?.requestSubmit();
+        document.getElementById('order-form-add-page')?.requestSubmit();
     }
 </script>
 
