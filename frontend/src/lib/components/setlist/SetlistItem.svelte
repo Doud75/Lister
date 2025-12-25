@@ -4,9 +4,9 @@
     import { dragHandle } from 'svelte-dnd-action';
     import { formatItemDuration } from '$lib/utils/utils';
 
-    let { item, index, onEdit } = $props<{
+    let { item, songNumber, onEdit } = $props<{
         item: SetlistItem;
-        index: number;
+        songNumber?: number | null;
         onEdit: (item: SetlistItem) => void;
     }>();
 </script>
@@ -34,7 +34,9 @@
         <div class="min-w-0 flex-grow">
             {#if item.item_type === 'song'}
                 <div class="flex items-center gap-3">
-                    <span class="text-lg font-bold text-slate-400 dark:text-slate-500">{index + 1}.</span>
+                    {#if songNumber}
+                        <span class="text-lg font-bold text-slate-400 dark:text-slate-500">{songNumber}.</span>
+                    {/if}
                     <p class="truncate font-semibold text-slate-800 dark:text-slate-100">
                         {item.title.String}
                     </p>

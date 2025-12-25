@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatDuration, formatItemDuration, calculateTotalDuration } from '$lib/utils/utils';
+import { formatDuration, formatItemDuration, calculateTotalDuration, getSongNumber } from '$lib/utils/utils';
 import type { SetlistItem } from '$lib/types';
 
 describe('formatDuration', () => {
@@ -64,5 +64,38 @@ describe('calculateTotalDuration', () => {
         ] as SetlistItem[];
 
         expect(calculateTotalDuration(items)).toBe(210);
+    });
+});
+
+describe('getSongNumber', () => {
+    const song1 = { id: 1, item_type: 'song' } as SetlistItem;
+    const interlude1 = { id: 2, item_type: 'interlude' } as SetlistItem;
+    const song2 = { id: 3, item_type: 'song' } as SetlistItem;
+    const song3 = { id: 4, item_type: 'song' } as SetlistItem;
+    const interlude2 = { id: 5, item_type: 'interlude' } as SetlistItem;
+
+    const mixedList = [song1, interlude1, song2, song3, interlude2];
+
+    it('should return 1 for the first song', () => {
+        expect(getSongNumber(song1, mixedList)).toBe(1);
+    });
+
+    it('should return null for an interlude', () => {
+        expect(getSongNumber(interlude1, mixedList)).toBeNull();
+        expect(getSongNumber(interlude2, mixedList)).toBeNull();
+    });
+
+    it('should return correct sequential number for subsequent songs, skipping interludes', () => {
+        expect(getSongNumber(song2, mixedList)).toBe(2);
+        expect(getSongNumber(song3, mixedList)).toBe(3);
+    });
+
+    it('should return null if the song is not found in the list', () => {
+        const unknownSong = { id: 99, item_type: 'song' } as SetlistItem;
+        expect(getSongNumber(unknownSong, mixedList)).toBeNull();
+    });
+
+    it('should work correctly with an empty list', () => {
+        expect(getSongNumber(song1, [])).toBeNull();
     });
 });

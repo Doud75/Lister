@@ -1,6 +1,6 @@
 <script lang="ts">
     import {page} from '$app/stores';
-    import {calculateTotalDuration, formatDuration} from '$lib/utils/utils';
+    import {calculateTotalDuration, formatDuration, getSongNumber} from '$lib/utils/utils';
     import {dragHandleZone} from 'svelte-dnd-action';
     import {enhance} from '$app/forms';
     import type {ActionData, PageData} from './$types';
@@ -97,7 +97,6 @@
     function downloadLivePdf() {
         generateLivePdf({...data.setlistDetails, items}, totalDurationSeconds);
     }
-
 </script>
 
 <div class="container mx-auto px-4 sm:px-6">
@@ -221,7 +220,7 @@
 
             </div>
             <div class="mt-2 flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                <a href="/" class="hover:underline">&larr; Back to Home</a>
+                <a href="/" class="hover:underline">&larr; Retour</a>
                 <span>&bull;</span>
                 <span
                 >Total Duration: <span class="font-semibold"
@@ -245,8 +244,12 @@
                     onconsider={handleDndConsider}
                     onfinalize={handleDndFinalize}
             >
-                {#each items as item, index (item.id)}
-                    <SetlistItem {item} {index} onEdit={openEditModal}/>
+                {#each items as item (item.id)}
+                    <SetlistItem
+                            {item}
+                            songNumber={getSongNumber(item, items)}
+                            onEdit={openEditModal}
+                    />
                 {/each}
             </ul>
         {:else}

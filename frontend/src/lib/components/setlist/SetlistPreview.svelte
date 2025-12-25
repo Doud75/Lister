@@ -1,7 +1,7 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
     import { dragHandle, dragHandleZone } from 'svelte-dnd-action';
-    import { formatDuration } from '$lib/utils/utils';
+    import { formatDuration, getSongNumber } from '$lib/utils/utils';
     import type { SetlistItem } from '$lib/types';
 
     let {
@@ -70,12 +70,12 @@
                             <div class="flex-grow">
                                 {#if item.item_type === 'song'}
                                     <div class="flex items-center gap-4 rounded-md bg-slate-100 p-3 dark:bg-slate-700">
-										<span class="font-bold text-slate-400 dark:text-slate-500"
-                                        >{items.findIndex((i) => i.id === item.id) + 1}.</span
-                                        >
-                                        <span class="font-medium text-slate-800 dark:text-slate-100"
-                                        >{item.title.String}</span
-                                        >
+										<span class="font-bold text-slate-400 dark:text-slate-500">
+                                            {getSongNumber(item, items)}.
+                                        </span>
+                                        <span class="font-medium text-slate-800 dark:text-slate-100">
+                                            {item.title.String}
+                                        </span>
                                     </div>
                                 {:else}
                                     <div
