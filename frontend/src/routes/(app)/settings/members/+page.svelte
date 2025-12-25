@@ -1,17 +1,17 @@
 <script lang="ts">
-    import { enhance } from '$app/forms';
-    import { invalidateAll } from '$app/navigation';
-    import type { ActionData, PageData } from './$types';
+    import {enhance} from '$app/forms';
+    import {invalidateAll} from '$app/navigation';
+    import type {ActionData, PageData} from './$types';
     import Input from '$lib/components/ui/Input.svelte';
     import Button from '$lib/components/ui/Button.svelte';
-    import { onMount } from 'svelte';
+    import {onMount} from 'svelte';
 
     type UserSearchResult = {
         id: number;
         username: string;
     };
 
-    let { data, form }: { data: PageData; form: ActionData } = $props();
+    let {data, form}: { data: PageData; form: ActionData } = $props();
 
     let members = $derived(data.members);
     let isInviting = $state(false);
@@ -114,22 +114,31 @@
                     <ul class="mt-4 divide-y divide-slate-200 dark:divide-slate-700">
                         {#each members as member (member.id)}
                             <li class="flex items-center justify-between gap-3 py-4">
-                                <div>
-                                    <p class="font-semibold text-slate-800 dark:text-slate-100">
-                                        {member.username}
-                                    </p>
+                                <div class="flex items-center gap-3">
                                     <span
-                                            class="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {member.role ===
-										'admin'
-											? 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20'
-											: 'bg-slate-50 text-slate-600 ring-slate-500/20 dark:bg-slate-500/10 dark:text-slate-400 dark:ring-slate-500/20'}"
+                                            class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-xs font-bold text-slate-900 dark:border-slate-600"
+                                            style="background-color: {member.color || '#cccccc'};"
+                                            title="Couleur du membre"
                                     >
-										{member.role}
-									</span>
+                                        {member.username.substring(0, 1).toUpperCase()}
+                                    </span>
+                                    <div>
+                                        <p class="font-semibold text-slate-800 dark:text-slate-100">
+                                            {member.username}
+                                        </p>
+                                        <span
+                                                class="mt-1 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset {member.role ===
+                                                'admin'
+                                                    ? 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20'
+                                                    : 'bg-slate-50 text-slate-600 ring-slate-500/20 dark:bg-slate-500/10 dark:text-slate-400 dark:ring-slate-500/20'}"
+                                        >
+                                            {member.role}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <form method="POST" action="?/removeMember" use:enhance>
-                                    <input type="hidden" name="userId" value={member.id} />
+                                    <input type="hidden" name="userId" value={member.id}/>
                                     <button
                                             type="submit"
                                             class="rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400"
@@ -144,11 +153,13 @@
                                                 stroke-width="1.5"
                                                 stroke="currentColor"
                                                 class="h-5 w-5"
-                                        ><path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.033-2.134H8.033C6.91 2.75 6 3.704 6 4.874v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                                        /></svg
+                                        >
+                                            <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.033-2.134H8.033C6.91 2.75 6 3.704 6 4.874v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                            />
+                                        </svg
                                         >
                                     </button>
                                 </form>
@@ -192,7 +203,8 @@
                                 <ul class="absolute z-10 mt-1 w-full rounded-md border border-slate-300 bg-white py-1 text-sm shadow-lg dark:border-slate-600 dark:bg-slate-700">
                                     {#each searchResults as user (user.id)}
                                         <li>
-                                            <button type="button" onclick={() => selectUser(user.username)} class="w-full px-4 py-2 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-600">
+                                            <button type="button" onclick={() => selectUser(user.username)}
+                                                    class="w-full px-4 py-2 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-600">
                                                 {user.username}
                                             </button>
                                         </li>

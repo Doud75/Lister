@@ -72,4 +72,5 @@ export type BandMember = {
     id: number;
     username: string;
     role: string;
+    color: string;
 };

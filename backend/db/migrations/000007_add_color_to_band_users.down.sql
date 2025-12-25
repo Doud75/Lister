@@ -1,0 +1,1 @@
+ALTER TABLE band_users DROP COLUMN color;
