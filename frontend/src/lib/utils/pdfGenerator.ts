@@ -19,6 +19,7 @@ function generatePdf(setlist: SetlistDetails, totalDurationSeconds: number, opti
     const doc = new jsPDF();
 
     const margin = 15;
+    const bottomMargin = 5; // Marge réduite en bas de page
     const lineHeight = 6;
     const pageHeight = doc.internal.pageSize.getHeight();
     let yPos = margin;
@@ -28,7 +29,7 @@ function generatePdf(setlist: SetlistDetails, totalDurationSeconds: number, opti
     let songCounter = 1;
 
     const checkPageBreak = (spaceNeeded: number) => {
-        if (yPos + spaceNeeded > pageHeight - margin) {
+        if (yPos + spaceNeeded > pageHeight - bottomMargin) {
             doc.addPage();
             yPos = margin;
         }
@@ -86,7 +87,8 @@ function generatePdf(setlist: SetlistDetails, totalDurationSeconds: number, opti
 
             const textWidth = doc.getTextWidth(interludeText);
             doc.setFillColor(highlightColor);
-            doc.rect(margin, yPos - (lineHeight * options.lineHeightMultiplier * 0.7), textWidth + 4, lineHeight * options.lineHeightMultiplier, 'F');
+            const rectHeight = Math.max(lineHeight * options.lineHeightMultiplier, lineHeight * 1.2);
+            doc.rect(margin, yPos - (rectHeight * 0.7), textWidth + 4, rectHeight, 'F');
             doc.text(interludeText, margin + 2, yPos);
             yPos += lineHeight * options.lineHeightMultiplier;
 
@@ -122,7 +124,7 @@ export function generateLivePdf(setlist: SetlistDetails, totalDurationSeconds: n
         includeNotes: false,
         fontSizes: { mainTitle: 24, duration: 12, itemTitle: 20, itemNotes: 0 },
         fileNameSuffix: '_live',
-        lineHeightMultiplier: 0.75,
+        lineHeightMultiplier: 1.0,
         interludeFormat: 'speakerAndTitle'
     };
     generatePdf(setlist, totalDurationSeconds, options);
