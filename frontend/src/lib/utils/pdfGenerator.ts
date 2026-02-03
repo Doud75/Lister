@@ -122,7 +122,7 @@ export function generateLivePdf(setlist: SetlistDetails, totalDurationSeconds: n
         includeNotes: false,
         fontSizes: { mainTitle: 24, duration: 12, itemTitle: 20, itemNotes: 0 },
         fileNameSuffix: '_live',
-        lineHeightMultiplier: 1.5,
+        lineHeightMultiplier: 0.75,
         interludeFormat: 'speakerAndTitle'
     };
     generatePdf(setlist, totalDurationSeconds, options);
