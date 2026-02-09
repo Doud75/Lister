@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import type { Component } from 'svelte';
 
 type ModalState = {
-    component: Component<any> | null;
+    component: Component<Record<string, unknown>> | null;
     props: Record<string, unknown>;
     isOpen: boolean;
 };
@@ -25,7 +25,7 @@ function createModalStore() {
             props: Omit<P, 'close'>
         ) => {
             set({
-                component,
+                component: component as unknown as Component<Record<string, unknown>>,
                 props: { ...props, close },
                 isOpen: true,
             });
