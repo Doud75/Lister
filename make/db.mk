@@ -2,7 +2,7 @@ db-up:
 	docker compose up -d db
 
 migrate:
-	docker compose up migrator
+	docker compose up --build migrator
 
 migrate-create:
 	@if [ -z "$(name)" ]; then \
