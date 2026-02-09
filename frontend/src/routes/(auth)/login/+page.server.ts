@@ -27,6 +27,13 @@ export const actions: Actions = {
         };
 
         cookies.set('jwt_token', result.token, cookieOptions);
+        
+        if (result.refresh_token) {
+            cookies.set('refresh_token', result.refresh_token, {
+                ...cookieOptions,
+                maxAge: 60 * 60 * 24 * 30
+            });
+        }
 
         if (result.bands && result.bands.length > 0) {
             cookies.set('user_bands', JSON.stringify(result.bands), cookieOptions);

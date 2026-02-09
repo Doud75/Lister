@@ -14,12 +14,6 @@ type UserHandler struct {
 	UserService service.UserService
 }
 
-func writeError(w http.ResponseWriter, message string, status int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]string{"error": message})
-}
-
 func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	var payload service.AuthPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {

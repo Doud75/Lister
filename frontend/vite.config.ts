@@ -46,6 +46,12 @@ export default defineConfig({
 						},
 						handler: 'NetworkOnly',
 					},
+					{
+						urlPattern: ({ url }) => {
+							return url.pathname.startsWith('/api/auth');
+						},
+						handler: 'NetworkOnly',
+					},
 				],
 			},
 			devOptions: {
