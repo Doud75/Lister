@@ -6,13 +6,15 @@ import (
 	"setlist/api/model"
 	"setlist/api/repository"
 	"setlist/auth"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
 
 type UserService struct {
-	UserRepo  repository.UserRepository
-	JWTSecret string
+	UserRepo         repository.UserRepository
+	RefreshTokenRepo repository.RefreshTokenRepository
+	JWTSecret        string
 }
 
 type AuthPayload struct {
@@ -37,8 +39,9 @@ type InviteMemberPayload struct {
 }
 
 type AuthResponse struct {
-	Token string       `json:"token"`
-	Bands []model.Band `json:"bands"`
+	Token        string       `json:"token"`
+	RefreshToken string       `json:"refresh_token"`
+	Bands        []model.Band `json:"bands"`
 }
 
 func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResponse, error) {
@@ -57,9 +60,26 @@ func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResp
 		return nil, err
 	}
 
+	refreshToken, err := auth.GenerateRefreshToken()
+	if err != nil {
+		return nil, err
+	}
+
+	tokenHash, err := auth.HashRefreshToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	expiresAt := time.Now().Add(auth.RefreshTokenDuration)
+	err = s.RefreshTokenRepo.StoreRefreshToken(ctx, user.ID, tokenHash, expiresAt)
+	if err != nil {
+		return nil, err
+	}
+
 	return &AuthResponse{
-		Token: token,
-		Bands: []model.Band{band},
+		Token:        token,
+		RefreshToken: refreshToken,
+		Bands:        []model.Band{band},
 	}, nil
 }
 
@@ -86,9 +106,26 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 		return nil, err
 	}
 
+	refreshToken, err := auth.GenerateRefreshToken()
+	if err != nil {
+		return nil, err
+	}
+
+	tokenHash, err := auth.HashRefreshToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	expiresAt := time.Now().Add(auth.RefreshTokenDuration)
+	err = s.RefreshTokenRepo.StoreRefreshToken(ctx, user.ID, tokenHash, expiresAt)
+	if err != nil {
+		return nil, err
+	}
+
 	return &AuthResponse{
-		Token: token,
-		Bands: bands,
+		Token:        token,
+		RefreshToken: refreshToken,
+		Bands:        bands,
 	}, nil
 }
 

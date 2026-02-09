@@ -1,5 +1,5 @@
 up:
-	docker compose up -d --build backend frontend db
+	docker compose up -d --build backend frontend db token-cleaner
 
 down:
 	docker compose down
@@ -7,7 +7,7 @@ down:
 deploy: migrate up
 
 logs:
-	docker compose logs -f backend frontend db
+	docker compose logs -f backend frontend db token-cleaner
 
 shell-front:
 	docker compose exec frontend sh

@@ -18,8 +18,19 @@ func main() {
 	defer dbPool.Close()
 
 	userRepo := repository.UserRepository{DB: dbPool}
-	userService := service.UserService{UserRepo: userRepo, JWTSecret: cfg.JWTSecret}
+	refreshTokenRepo := repository.RefreshTokenRepository{DB: dbPool}
+	userService := service.UserService{
+		UserRepo:         userRepo,
+		RefreshTokenRepo: refreshTokenRepo,
+		JWTSecret:        cfg.JWTSecret,
+	}
+	authService := service.AuthService{
+		UserRepo:         userRepo,
+		RefreshTokenRepo: refreshTokenRepo,
+		JWTSecret:        cfg.JWTSecret,
+	}
 	userHandler := handler.UserHandler{UserService: userService}
+	authHandler := handler.AuthHandler{AuthService: authService}
 	bandHandler := handler.BandHandler{UserService: userService}
 
 	interludeRepo := repository.InterludeRepository{DB: dbPool}
@@ -42,8 +53,10 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /api/auth/signup", userHandler.Signup)
-	mux.HandleFunc("POST /api/auth/login", userHandler.Login)
+	mux.HandleFunc("/api/auth/login", userHandler.Login)
+	mux.HandleFunc("/api/auth/signup", userHandler.Signup)
+	mux.HandleFunc("/api/auth/refresh", authHandler.RefreshToken)
+	mux.HandleFunc("/api/auth/logout", authHandler.Logout)
 	mux.Handle("PUT /api/user/password", authMiddleware(http.HandlerFunc(userHandler.UpdatePassword)))
 	mux.Handle("GET /api/user/info", authMiddleware(http.HandlerFunc(infoHandler.GetCurrentUserInfo)))
 	mux.Handle("GET /api/user/search", authMiddleware(http.HandlerFunc(userHandler.SearchUsers)))
@@ -78,7 +91,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status": "ok"}`))
 	})
-	
+
 	port := "8089"
 	address := fmt.Sprintf("0.0.0.0:%s", port)
 	fmt.Printf("Backend server starting on %s\n", address)

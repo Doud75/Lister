@@ -56,6 +56,25 @@ services:
       - app-network
     command: ["/bin/sh", "-c", "sleep 5 && /go/bin/migrate -path db/migrations -database $DATABASE_URL up"]
 
+  token-cleaner:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    networks:
+      - app-network
+    command: >
+      sh -c "
+      while true; do
+        sleep 86400;
+        echo \"[$(date)] Starting token cleanup...\";
+        psql $$DATABASE_URL -c 'DELETE FROM refresh_tokens WHERE expires_at < NOW();';
+        echo \"[$(date)] Token cleanup completed\";
+      done
+      "
+
 networks:
   app-network:
     driver: bridge
