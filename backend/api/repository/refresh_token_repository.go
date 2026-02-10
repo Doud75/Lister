@@ -60,6 +60,28 @@ func (r *RefreshTokenRepository) DeleteAllUserTokens(ctx context.Context, userID
 	return err
 }
 
+func (r *RefreshTokenRepository) ReplaceUserRefreshToken(ctx context.Context, userID int, tokenHash string, expiresAt time.Time) error {
+	tx, err := r.DB.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	deleteQuery := `DELETE FROM refresh_tokens WHERE user_id = $1`
+	_, err = tx.Exec(ctx, deleteQuery, userID)
+	if err != nil {
+		return err
+	}
+
+	insertQuery := `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`
+	_, err = tx.Exec(ctx, insertQuery, userID, tokenHash, expiresAt)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
 func (r *RefreshTokenRepository) CleanExpiredTokens(ctx context.Context) error {
 	query := `DELETE FROM refresh_tokens WHERE expires_at < NOW()`
 	_, err := r.DB.Exec(ctx, query)
