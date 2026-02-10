@@ -71,7 +71,7 @@ func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResp
 	}
 
 	expiresAt := time.Now().Add(auth.RefreshTokenDuration)
-	err = s.RefreshTokenRepo.StoreRefreshToken(ctx, user.ID, tokenHash, expiresAt)
+	err = s.RefreshTokenRepo.ReplaceUserRefreshToken(ctx, user.ID, tokenHash, expiresAt)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 	}
 
 	expiresAt := time.Now().Add(auth.RefreshTokenDuration)
-	err = s.RefreshTokenRepo.StoreRefreshToken(ctx, user.ID, tokenHash, expiresAt)
+	err = s.RefreshTokenRepo.ReplaceUserRefreshToken(ctx, user.ID, tokenHash, expiresAt)
 	if err != nil {
 		return nil, err
 	}

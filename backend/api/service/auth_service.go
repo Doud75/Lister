@@ -58,11 +58,11 @@ func (s AuthService) RefreshAccessToken(ctx context.Context, refreshToken string
 	}
 
 	newExpiresAt := time.Now().Add(auth.RefreshTokenDuration)
-	err = s.RefreshTokenRepo.StoreRefreshToken(ctx, userID, newRefreshTokenHash, newExpiresAt)
+	err = s.RefreshTokenRepo.ReplaceUserRefreshToken(ctx, userID, newRefreshTokenHash, newExpiresAt)
 	if err != nil {
 		return nil, err
 	}
-	s.RefreshTokenRepo.DeleteRefreshToken(ctx, tokenHash)
+
 	bands, err := s.UserRepo.FindBandsByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
