@@ -94,7 +94,8 @@ export const handle: Handle = async ({ event, resolve }) => {
                     role: userInfo.role
                 };
             }
-        } catch {
+        } catch (error) {
+            console.error('[AUTH] Failed to fetch user info:', error);
         }
     }
 
