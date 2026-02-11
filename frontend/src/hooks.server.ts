@@ -30,12 +30,17 @@ export const handle: Handle = async ({ event, resolve }) => {
             decoded = jwtDecode<UserPayload>(token);
             const expiresIn = decoded.exp * 1000 - Date.now();
             needsRefresh = expiresIn < 5 * 60 * 1000;
-        } catch {
+            console.log('[AUTH] JWT found, expires in:', Math.floor(expiresIn / 1000), 'seconds, needsRefresh:', needsRefresh);
+        } catch (error) {
+            console.log('[AUTH] JWT decode failed:', error);
             needsRefresh = true;
         }
+    } else {
+        console.log('[AUTH] No JWT token found');
     }
 
     if ((!token || needsRefresh) && refreshToken) {
+        console.log('[AUTH] Attempting token refresh...');
         try {
             const refreshResponse = await fetch(`${BACKEND_URL}/auth/refresh`, {
                 method: 'POST',
@@ -45,6 +50,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
             if (refreshResponse.ok) {
                 const refreshData = await refreshResponse.json();
+                console.log('[AUTH] ✅ Token refresh successful');
                 
                 const cookieOptions = {
                     path: '/',
@@ -55,7 +61,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                 
                 event.cookies.set('jwt_token', refreshData.token, {
                     ...cookieOptions,
-                    maxAge: 60 * 60 * 24 * 7
+                    maxAge: 60 * 60 * 24 * 30
                 });
                 
                 event.cookies.set('refresh_token', refreshData.refresh_token, {
@@ -66,10 +72,12 @@ export const handle: Handle = async ({ event, resolve }) => {
                 event.locals.token = refreshData.token;
                 decoded = jwtDecode<UserPayload>(refreshData.token);
             } else {
+                console.log('[AUTH] ❌ Refresh failed with status:', refreshResponse.status);
                 event.cookies.delete('jwt_token', { path: '/' });
                 event.cookies.delete('refresh_token', { path: '/' });
             }
-        } catch {
+        } catch (error) {
+            console.log('[AUTH] ❌ Refresh error:', error);
             event.cookies.delete('jwt_token', { path: '/' });
             event.cookies.delete('refresh_token', { path: '/' });
         }

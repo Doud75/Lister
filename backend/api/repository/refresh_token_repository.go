@@ -67,14 +67,22 @@ func (r *RefreshTokenRepository) ReplaceUserRefreshToken(ctx context.Context, us
 	}
 	defer tx.Rollback(ctx)
 
-	deleteQuery := `DELETE FROM refresh_tokens WHERE user_id = $1`
-	_, err = tx.Exec(ctx, deleteQuery, userID)
+	insertQuery := `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`
+	_, err = tx.Exec(ctx, insertQuery, userID, tokenHash, expiresAt)
 	if err != nil {
 		return err
 	}
 
-	insertQuery := `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`
-	_, err = tx.Exec(ctx, insertQuery, userID, tokenHash, expiresAt)
+	deleteQuery := `
+		DELETE FROM refresh_tokens 
+		WHERE user_id = $1 
+		AND id NOT IN (
+			SELECT id FROM refresh_tokens 
+			WHERE user_id = $1 
+			ORDER BY created_at DESC 
+			LIMIT 3
+		)`
+	_, err = tx.Exec(ctx, deleteQuery, userID)
 	if err != nil {
 		return err
 	}
