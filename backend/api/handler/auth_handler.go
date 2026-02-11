@@ -36,8 +36,6 @@ func (h AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("[AUTH] Token refreshed successfully for user")
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }

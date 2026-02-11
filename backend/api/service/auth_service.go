@@ -7,8 +7,6 @@ import (
 	"setlist/api/repository"
 	"setlist/auth"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type AuthService struct {
@@ -24,21 +22,41 @@ type RefreshTokenResponse struct {
 }
 
 func (s AuthService) RefreshAccessToken(ctx context.Context, refreshToken string) (*RefreshTokenResponse, error) {
-	tokenHash, err := auth.HashRefreshToken(refreshToken)
+	var userID int
+	var expiresAt time.Time
+	var matchedHash string
+
+	query := `SELECT user_id, token_hash, expires_at FROM refresh_tokens WHERE expires_at > NOW()`
+	rows, err := s.RefreshTokenRepo.DB.Query(ctx, query)
 	if err != nil {
-		return nil, errors.New("invalid refresh token")
+		return nil, err
+	}
+	defer rows.Close()
+
+	found := false
+	for rows.Next() {
+		var uid int
+		var hash string
+		var exp time.Time
+		if err := rows.Scan(&uid, &hash, &exp); err != nil {
+			continue
+		}
+
+		if auth.VerifyRefreshToken(refreshToken, hash) {
+			userID = uid
+			expiresAt = exp
+			matchedHash = hash
+			found = true
+			break
+		}
 	}
 
-	userID, expiresAt, err := s.RefreshTokenRepo.FindRefreshToken(ctx, tokenHash)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.New("refresh token not found")
-		}
-		return nil, err
+	if !found {
+		return nil, errors.New("refresh token not found")
 	}
 
 	if time.Now().After(expiresAt) {
-		s.RefreshTokenRepo.DeleteRefreshToken(ctx, tokenHash)
+		s.RefreshTokenRepo.DeleteRefreshToken(ctx, matchedHash)
 		return nil, errors.New("refresh token expired")
 	}
 

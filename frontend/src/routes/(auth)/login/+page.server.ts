@@ -26,6 +26,11 @@ export const actions: Actions = {
             sameSite: 'lax' as const
         };
 
+        cookies.delete('jwt_token', { path: '/' });
+        cookies.delete('refresh_token', { path: '/' });
+        cookies.delete('user_bands', { path: '/' });
+        cookies.delete('active_band_id', { path: '/' });
+
         cookies.set('jwt_token', result.token, cookieOptions);
         
         if (result.refresh_token) {
