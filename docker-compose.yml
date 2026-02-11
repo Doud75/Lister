@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     env_file: .env
     ports:
-      - "8089:8089"
+      - "127.0.0.1:8089:8089"
     networks:
       - app-network
     depends_on:
@@ -18,7 +18,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     environment:
       - PORT=4000
       - VITE_ORIGIN=${VITE_ORIGIN}
@@ -32,8 +32,6 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     env_file: .env
-    ports:
-      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
