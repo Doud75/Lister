@@ -3,7 +3,6 @@
     import Input from '$lib/components/ui/Input.svelte';
     import { enhance } from '$app/forms';
     import { navigating } from '$app/stores';
-    import { validateUsername, validatePassword } from '$lib/validation';
 
     type ActionData = {
         error?: string;

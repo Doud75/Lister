@@ -28,7 +28,7 @@ export const validatePassword = (password: string): ValidationResult => {
     if (!/[0-9]/.test(password)) {
         return { success: false, error: "Le mot de passe doit contenir au moins un chiffre." };
     }
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
         return { success: false, error: "Le mot de passe doit contenir au moins un caractère spécial." };
     }
     return { success: true };
