@@ -151,7 +151,6 @@
                             fill-rule="evenodd"
                             d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM9 10a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z"
                             clip-rule="evenodd"
-                            title="Interlude"
                     /></svg>
                     <p class="truncate font-semibold text-teal-900 dark:text-teal-200">
                         {item.title.String}
