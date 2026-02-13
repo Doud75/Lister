@@ -50,11 +50,12 @@ func main() {
 
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)
 	adminMiddleware := middleware.AdminOnly(userRepo)
+	rateLimiter := middleware.NewRateLimiter()
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/api/auth/login", userHandler.Login)
-	mux.HandleFunc("/api/auth/signup", userHandler.Signup)
+	mux.Handle("/api/auth/login", rateLimiter.LimitMiddleware(http.HandlerFunc(userHandler.Login)))
+	mux.Handle("/api/auth/signup", rateLimiter.LimitMiddleware(http.HandlerFunc(userHandler.Signup)))
 	mux.HandleFunc("/api/auth/refresh", authHandler.RefreshToken)
 	mux.HandleFunc("/api/auth/logout", authHandler.Logout)
 	mux.Handle("PUT /api/user/password", authMiddleware(http.HandlerFunc(userHandler.UpdatePassword)))
