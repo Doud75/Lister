@@ -50,7 +50,7 @@ func main() {
 
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)
 	adminMiddleware := middleware.AdminOnly(userRepo)
-	rateLimiter := middleware.NewRateLimiter()
+	rateLimiter := middleware.NewRateLimiter(cfg.RateLimitEnabled)
 
 	mux := http.NewServeMux()
 

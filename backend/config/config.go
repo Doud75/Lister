@@ -6,8 +6,9 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string
-	JWTSecret   string
+	DatabaseURL      string
+	JWTSecret        string
+	RateLimitEnabled bool
 }
 
 func Load() Config {
@@ -21,8 +22,14 @@ func Load() Config {
 		log.Fatal("JWT_SECRET environment variable is not set")
 	}
 
+	rateLimitEnabled := true
+	if val := os.Getenv("RATE_LIMIT_ENABLED"); val == "false" {
+		rateLimitEnabled = false
+	}
+
 	return Config{
-		DatabaseURL: dbURL,
-		JWTSecret:   jwtSecret,
+		DatabaseURL:      dbURL,
+		JWTSecret:        jwtSecret,
+		RateLimitEnabled: rateLimitEnabled,
 	}
 }

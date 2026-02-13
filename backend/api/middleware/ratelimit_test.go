@@ -10,7 +10,7 @@ import (
 )
 
 func TestRateLimiter(t *testing.T) {
-	rl := NewRateLimiter()
+	rl := NewRateLimiter(true)
 
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		status := http.StatusOK

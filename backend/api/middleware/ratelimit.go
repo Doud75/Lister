@@ -12,8 +12,10 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// RateLimiter holds the state for rate limiting and brute force protection
 type RateLimiter struct {
-	ips sync.Map
+	ips     sync.Map // Map of string (IP) -> *IPState
+	enabled bool
 }
 
 type IPState struct {
@@ -23,9 +25,14 @@ type IPState struct {
 	mu         sync.Mutex
 }
 
-func NewRateLimiter() *RateLimiter {
-	return &RateLimiter{}
+// NewRateLimiter creates a new RateLimiter instance
+func NewRateLimiter(enabled bool) *RateLimiter {
+	return &RateLimiter{
+		enabled: enabled,
+	}
 }
+
+// getIP extracts the client IP address from the request
 func getIP(r *http.Request) string {
 	forwarded := r.Header.Get("X-Forwarded-For")
 	if forwarded != "" {
@@ -34,6 +41,7 @@ func getIP(r *http.Request) string {
 	return strings.Split(r.RemoteAddr, ":")[0]
 }
 
+// statusRecorder is a wrapper around http.ResponseWriter to capture the status code
 type statusRecorder struct {
 	http.ResponseWriter
 	statusCode int
@@ -44,8 +52,14 @@ func (rec *statusRecorder) WriteHeader(code int) {
 	rec.ResponseWriter.WriteHeader(code)
 }
 
+// LimitMiddleware applies rate limiting and brute force protection logic
 func (rl *RateLimiter) LimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !rl.enabled {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		ip := getIP(r)
 
 		stateInterface, _ := rl.ips.LoadOrStore(ip, &IPState{
