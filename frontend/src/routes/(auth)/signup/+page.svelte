@@ -24,6 +24,12 @@
         if (form?.data?.username) username = form.data.username;
     });
 
+    let hasMinLength = $derived(password.length >= 8);
+    let hasUppercase = $derived(/[A-Z]/.test(password));
+    let hasNumber = $derived(/[0-9]/.test(password));
+    // eslint-disable-next-line no-useless-escape
+    let hasSpecial = $derived(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password));
+
 </script>
 
 <div class="space-y-6">
@@ -78,10 +84,10 @@
             {/if}
             
             <ul class="text-xs text-slate-500 list-disc ml-4 space-y-1 mt-2">
-                <li class={password.length >= 8 ? 'text-teal-600 dark:text-teal-400' : ''}>Minimum 8 caractères</li>
-                <li class={/[A-Z]/.test(password) ? 'text-teal-600 dark:text-teal-400' : ''}>Au moins 1 majuscule</li>
-                <li class={/[0-9]/.test(password) ? 'text-teal-600 dark:text-teal-400' : ''}>Au moins 1 chiffre</li>
-                <li class={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) ? 'text-teal-600 dark:text-teal-400' : ''}>Au moins 1 caractère spécial</li>
+                <li class={hasMinLength ? 'text-teal-600 dark:text-teal-400' : ''}>Minimum 8 caractères</li>
+                <li class={hasUppercase ? 'text-teal-600 dark:text-teal-400' : ''}>Au moins 1 majuscule</li>
+                <li class={hasNumber ? 'text-teal-600 dark:text-teal-400' : ''}>Au moins 1 chiffre</li>
+                <li class={hasSpecial ? 'text-teal-600 dark:text-teal-400' : ''}>Au moins 1 caractère spécial</li>
             </ul>
         </div>
 
