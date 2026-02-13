@@ -10,7 +10,6 @@ async function login(page: Page) {
     await page.waitForURL('/');
 }
 
-// AJOUT: On utilise .serial pour garantir l'ordre d'exécution
 test.describe.serial('Settings - Members Page (Admin)', () => {
     test.beforeEach(async ({ page }) => {
         await login(page);
@@ -26,7 +25,6 @@ test.describe.serial('Settings - Members Page (Admin)', () => {
 
         const memberUserRow = page.locator('li', { hasText: 'memberuser' });
         await expect(memberUserRow).toBeVisible();
-        // CORRECTION: Utilisation de { exact: true } pour cibler uniquement le rôle "member" et pas le nom "memberuser"
         await expect(memberUserRow.getByText('member', { exact: true })).toBeVisible();
     });
 
@@ -38,7 +36,6 @@ test.describe.serial('Settings - Members Page (Admin)', () => {
 
         await expect(memberUserRow).toBeHidden();
 
-        // Verify persistence
         await page.reload();
         await expect(page.locator('li', { hasText: 'memberuser' })).toBeHidden();
         await expect(page.locator('li', { hasText: 'testuser' })).toBeVisible();
@@ -59,7 +56,7 @@ test.describe.serial('Settings - Members Page (Admin)', () => {
 
         await expect(page.getByText('Utilisateur non trouvé. Veuillez définir un mot de passe pour créer son compte.')).toBeVisible();
 
-        await page.getByLabel('Mot de passe temporaire').fill('password123');
+        await page.getByLabel('Mot de passe temporaire').fill('StrongPass1!');
         await page.getByRole('button', { name: 'Créer et Inviter' }).click();
 
         await expect(page.locator('li', { hasText: newUser })).toBeVisible();

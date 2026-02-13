@@ -42,7 +42,7 @@ test.describe.serial('Settings - Account Page', () => {
     });
 
     test('should successfully change password and allow re-login', async ({ page }) => {
-        const newPassword = 'newpassword456';
+        const newPassword = 'NewPassword123!';
 
         await page.getByLabel('Ancien mot de passe').fill('password123');
         await page.getByLabel('Nouveau mot de passe', { exact: true }).fill(newPassword);

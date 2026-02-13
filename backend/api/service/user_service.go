@@ -45,6 +45,16 @@ type AuthResponse struct {
 }
 
 func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResponse, error) {
+	if err := ValidateUsername(payload.Username); err != nil {
+		return nil, err
+	}
+	if err := ValidatePassword(payload.Password); err != nil {
+		return nil, err
+	}
+
+	payload.Username = SanitizeString(payload.Username)
+	payload.BandName = SanitizeString(payload.BandName)
+
 	hashedPassword, err := auth.HashPassword(payload.Password)
 	if err != nil {
 		return nil, err
@@ -139,6 +149,10 @@ func (s UserService) UpdatePassword(ctx context.Context, userID int, payload Upd
 		return errors.New("invalid current password")
 	}
 
+	if err := ValidatePassword(payload.NewPassword); err != nil {
+		return err
+	}
+
 	newHashedPassword, err := auth.HashPassword(payload.NewPassword)
 	if err != nil {
 		return errors.New("failed to hash new password")
@@ -155,6 +169,10 @@ func (s UserService) InviteMember(ctx context.Context, bandID int, payload Invit
 	if payload.Username == "" {
 		return model.User{}, errors.New("username is required")
 	}
+	if err := ValidateUsername(payload.Username); err != nil {
+		return model.User{}, err
+	}
+	payload.Username = SanitizeString(payload.Username)
 
 	existingUser, err := s.UserRepo.FindUserByUsername(ctx, payload.Username)
 	if err == nil {
@@ -179,6 +197,9 @@ func (s UserService) InviteMember(ctx context.Context, bandID int, payload Invit
 
 	if payload.Password == nil || *payload.Password == "" {
 		return model.User{}, errors.New("user not found, and password is required to create a new one")
+	}
+	if err := ValidatePassword(*payload.Password); err != nil {
+		return model.User{}, err
 	}
 
 	hashedPassword, err := auth.HashPassword(*payload.Password)
