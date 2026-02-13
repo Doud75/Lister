@@ -8,9 +8,16 @@
     import {calculateTotalDuration} from "$lib/utils/utils";
 
     let { data } = $props<{ data: PageData }>();
-    let { setlist, songs, interludes } = data;
+    
+    let setlist = $derived(data.setlist);
+    let songs = $derived(data.songs);
+    let interludes = $derived(data.interludes);
 
-    let items = $derived(data.setlist.items);
+    let items = $state(data.setlist.items);
+    $effect(() => {
+        items = data.setlist.items;
+    });
+
     let addingItemId = $state<number | null>(null);
 
     const totalDurationSeconds = $derived(calculateTotalDuration(items));

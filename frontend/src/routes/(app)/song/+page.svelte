@@ -7,6 +7,9 @@
     let { data, form }: { data: PageData; form: ActionData } = $props();
 
     let songs = $state<Song[]>(data.songs || []);
+    $effect(() => {
+        songs = data.songs || [];
+    });
 
     const songsByAlbum = $derived.by(() => {
         const grouped: Record<string, Song[]> = {};

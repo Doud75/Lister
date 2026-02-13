@@ -15,6 +15,12 @@
 
     let newSetName = $state(`Copie de ${setlistName}`);
     let newSetColor = $state(setColor);
+
+    $effect(() => {
+        newSetName = `Copie de ${setlistName}`;
+        newSetColor = setColor;
+    });
+
     let isSubmitting = $state(false);
 </script>
 

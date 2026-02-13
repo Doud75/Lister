@@ -38,6 +38,16 @@
         lyrics: song?.lyrics?.String ?? '',
         links: song?.links?.String ?? ''
     });
+
+    $effect(() => {
+        formData.title = song?.title ?? '';
+        formData.album_name = song?.album_name?.String ?? '';
+        formData.song_key = song?.song_key?.String ?? '';
+        formData.duration_seconds = song?.duration_seconds?.Int32?.toString() ?? '';
+        formData.tempo = song?.tempo?.Int32?.toString() ?? '';
+        formData.lyrics = song?.lyrics?.String ?? '';
+        formData.links = song?.links?.String ?? '';
+    });
 </script>
 
 <form method="POST" use:enhance class="mt-8 space-y-6 rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">

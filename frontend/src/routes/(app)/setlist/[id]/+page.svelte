@@ -18,6 +18,10 @@
     const setlistId = $page.params.id;
     let items = $state<SetlistItemType[]>(data.setlistDetails.items);
 
+    $effect(() => {
+        items = data.setlistDetails.items;
+    });
+
     beforeNavigate(() => {
         modalStore.close();
     });
@@ -70,7 +74,7 @@
 
     function handleDndFinalize(e: CustomEvent) {
         items = e.detail.items;
-        document.getElementById('order-form')?.requestSubmit();
+        (document.getElementById('order-form') as HTMLFormElement)?.requestSubmit();
     }
 
     function openEditModal(item: SetlistItemType) {

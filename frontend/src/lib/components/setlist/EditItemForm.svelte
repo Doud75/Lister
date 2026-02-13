@@ -15,6 +15,13 @@
     let modalDuration = $state(item.duration_seconds?.Int32?.toString() || '');
     let modalNotes = $state(item.notes?.String || '');
 
+    $effect(() => {
+        modalTitle = item.title.String || '';
+        modalSpeaker = item.speaker?.String || '';
+        modalDuration = item.duration_seconds?.Int32?.toString() || '';
+        modalNotes = item.notes?.String || '';
+    });
+
     const commonEnhance = () => {
         /* eslint-disable  @typescript-eslint/no-explicit-any */
         return async ({ update }: { update: any }) => {
