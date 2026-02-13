@@ -95,25 +95,21 @@
 {/snippet}
 
 <li
-        class="flex flex-col sm:flex-row items-stretch sm:items-start gap-2 sm:gap-3 py-2 sm:py-4 data-item-id={item.id}"
+        class="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto] gap-2 sm:gap-4 py-2 sm:py-4 items-start data-item-id={item.id}"
 >
-    {#if item.item_type === 'song'}
-        <!-- Mobile: Header (Drag + Actions) -->
-        <div class="flex w-full items-center justify-between sm:hidden">
-            <div class="-ml-2">
-                {@render dragHandleSnippet()}
-            </div>
-            <div class="flex items-center gap-2">
-                {@render actionButtonsSnippet()}
-            </div>
-        </div>
+    <!-- Drag Handle: Row 1 Col 1 (Mobile & Desktop) -->
+    <div class="col-start-1 row-start-1 pt-1">
+        {@render dragHandleSnippet()}
+    </div>
 
-        <!-- Desktop: Drag Handle -->
-        <div class="hidden sm:block flex-shrink-0 pt-1">
-            {@render dragHandleSnippet()}
-        </div>
+    <!-- Actions: Row 1 Col 2 (Mobile), Row 1 Col 3 (Desktop) -->
+    <div class="col-start-2 row-start-1 justify-self-end sm:col-start-3 sm:justify-self-start sm:pl-2">
+        {@render actionButtonsSnippet()}
+    </div>
 
-        <div class="w-full flex-grow min-w-0">
+    <!-- Content: Row 2 Col 1-2 (Mobile), Row 1 Col 2 (Desktop) -->
+    <div class="col-span-2 row-start-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 flex flex-col min-w-0">
+        {#if item.item_type === 'song'}
             <div class="flex items-center gap-3">
                 {#if songNumber}
                     <span class="text-lg font-bold text-slate-400 dark:text-slate-500">{songNumber}.</span>
@@ -122,9 +118,7 @@
                     {item.title.String}
                 </p>
             </div>
-            <div
-                    class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400"
-            >
+            <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400">
                 {#if item.duration_seconds?.Valid}
                     <span>Durée: {formatItemDuration(item.duration_seconds.Int32)}</span>
                 {/if}
@@ -138,42 +132,15 @@
                 {/if}
                 {#if item.links?.Valid}
                     <span class="hidden sm:inline">&bull;</span>
-                    <a href={item.links.String} target="_blank" rel="noopener noreferrer" class="hover:underline"
-                    >Lien</a
-                    >
+                    <a href={item.links.String} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
                 {/if}
             </div>
             {#if item.notes?.Valid && item.notes.String}
                 {@render notesSnippet(item.notes.String, 'text-slate-500 dark:text-slate-400')}
             {/if}
-        </div>
 
-        <!-- Desktop: Actions -->
-        <div class="hidden sm:flex flex-shrink-0 items-center gap-2 pl-4">
-            {@render actionButtonsSnippet()}
-        </div>
-
-    {:else if item.item_type === 'interlude'}
-        <!-- Mobile: Header (Drag + Actions) -->
-        <div class="flex w-full items-center justify-between sm:hidden">
-            <div class="-ml-2">
-                {@render dragHandleSnippet()}
-            </div>
-            <div class="flex items-center gap-2">
-                {@render actionButtonsSnippet()}
-            </div>
-        </div>
-
-        <!-- Desktop: Drag Handle -->
-        <div class="hidden sm:block flex-shrink-0 pt-1">
-            {@render dragHandleSnippet()}
-        </div>
-
-        <!-- Content -->
-        <div class="w-full flex-grow min-w-0">
-            <div
-                    class="w-full rounded-md border-l-4 border-teal-500 bg-teal-50 p-3 dark:border-teal-400 dark:bg-slate-700/50"
-            >
+        {:else if item.item_type === 'interlude'}
+            <div class="w-full rounded-md border-l-4 border-teal-500 bg-teal-50 p-3 dark:border-teal-400 dark:bg-slate-700/50">
                 <div class="flex items-center gap-3">
                     <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -184,15 +151,13 @@
                             fill-rule="evenodd"
                             d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM9 10a1 1 0 11-2 0 1 1 0 012 0zm5 0a1 1 0 11-2 0 1 1 0 012 0z"
                             clip-rule="evenodd"
-                    /></svg
-                    >
+                            title="Interlude"
+                    /></svg>
                     <p class="truncate font-semibold text-teal-900 dark:text-teal-200">
                         {item.title.String}
                     </p>
                 </div>
-                <div
-                        class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-teal-700 dark:text-teal-300"
-                >
+                <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-teal-700 dark:text-teal-300">
                     {#if item.speaker?.Valid && item.speaker.String}
                         <span>Intervenant : <span class="font-medium">{item.speaker.String}</span></span>
                         <span class="hidden sm:inline">&bull;</span>
@@ -203,11 +168,6 @@
                     {@render notesSnippet(item.notes.String, 'text-teal-800 dark:text-teal-200')}
                 {/if}
             </div>
-        </div>
-
-        <!-- Desktop: Actions -->
-        <div class="hidden sm:flex flex-shrink-0 items-center gap-2 pl-4">
-            {@render actionButtonsSnippet()}
-        </div>
-    {/if}
+        {/if}
+    </div>
 </li>

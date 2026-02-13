@@ -96,12 +96,12 @@ test.describe('Interlude Behavior in Setlists', () => {
         await modal.getByRole('button', { name: 'Save Interlude' }).click();
         await expect(modal).toBeHidden();
 
-        await expect(interludeItemA).toContainText(`Speaker: ${newSpeaker}`);
+        await expect(interludeItemA).toContainText(`Intervenant : ${newSpeaker}`);
 
         await page.goto(`/setlist/${setlistB_Id}`);
         const interludeItemB = page.locator('li').filter({ hasText: interludeTitle });
         await expect(interludeItemB).toBeVisible();
-        await expect(interludeItemB).toContainText(`Speaker: ${newSpeaker}`);
+        await expect(interludeItemB).toContainText(`Intervenant : ${newSpeaker}`);
     });
 
     test('should delete an item from a setlist without affecting other setlists', async ({ page }) => {
