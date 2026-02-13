@@ -30,6 +30,9 @@
     // eslint-disable-next-line no-useless-escape
     let hasSpecial = $derived(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password));
 
+    let usernameLengthValid = $derived(username.length >= 3 && username.length <= 50);
+    let usernamePatternValid = $derived(/^[a-zA-Z0-9_]+$/.test(username));
+
 </script>
 
 <div class="space-y-6">
@@ -64,9 +67,10 @@
             {#if form?.errors?.username}
                 <p class="text-sm text-red-500 font-medium">{form.errors.username}</p>
             {/if}
-            <p class="text-xs text-slate-500">
-                3-50 caractères, alphanumérique & underscore uniquement.
-            </p>
+            <ul class="text-xs text-slate-500 list-disc ml-4 space-y-1 mt-2">
+                <li class={usernameLengthValid ? 'text-teal-600 dark:text-teal-400' : ''}>3-50 caractères</li>
+                <li class={usernamePatternValid ? 'text-teal-600 dark:text-teal-400' : ''}>Alphanumérique & underscore uniquement</li>
+            </ul>
         </div>
 
         <div class="space-y-1">
