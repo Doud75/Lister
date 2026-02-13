@@ -9,6 +9,7 @@
     import EditItemForm from '$lib/components/setlist/EditItemForm.svelte';
     import type {SetlistItem as SetlistItemType} from '$lib/types';
     import DuplicateSetlistForm from '$lib/components/setlist/DuplicateSetlistForm.svelte';
+    import {untrack} from 'svelte';
     import {beforeNavigate, invalidateAll} from "$app/navigation";
     import ActionDropdown from '$lib/components/ui/ActionDropdown.svelte';
     import DeleteSetlistForm from "$lib/components/setlist/DeleteSetlistForm.svelte";
@@ -16,7 +17,11 @@
 
     let {data, form}: { data: PageData; form: ActionData } = $props();
     const setlistId = $page.params.id;
-    let items = $state<SetlistItemType[]>(data.setlistDetails.items);
+    let items = $state<SetlistItemType[]>(untrack(() => data.setlistDetails.items));
+
+    $effect(() => {
+        items = data.setlistDetails.items;
+    });
 
     beforeNavigate(() => {
         modalStore.close();
@@ -70,7 +75,7 @@
 
     function handleDndFinalize(e: CustomEvent) {
         items = e.detail.items;
-        document.getElementById('order-form')?.requestSubmit();
+        (document.getElementById('order-form') as HTMLFormElement)?.requestSubmit();
     }
 
     function openEditModal(item: SetlistItemType) {

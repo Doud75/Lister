@@ -2,6 +2,7 @@
     import { enhance } from '$app/forms';
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
+    import { untrack } from 'svelte';
 
     let {
         setlistName,
@@ -13,8 +14,8 @@
         close: () => void;
     }>();
 
-    let newSetName = $state(`Copie de ${setlistName}`);
-    let newSetColor = $state(setColor);
+    let newSetName = $state(untrack(() => `Copie de ${setlistName}`));
+    let newSetColor = $state(untrack(() => setColor));
     let isSubmitting = $state(false);
 </script>
 
