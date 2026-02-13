@@ -4,16 +4,19 @@
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
     import Textarea from '$lib/components/ui/Textarea.svelte';
+    import { untrack } from 'svelte';
 
     let { item, close } = $props<{
         item: SetlistItem;
         close: () => void;
     }>();
 
-    let modalTitle = $state(item.title.String || '');
-    let modalSpeaker = $state(item.speaker?.String || '');
-    let modalDuration = $state(item.duration_seconds?.Int32?.toString() || '');
-    let modalNotes = $state(item.notes?.String || '');
+    let modalTitle = $state(untrack(() => item.title.String || ''));
+    let modalSpeaker = $state(untrack(() => item.speaker?.String || ''));
+    let modalDuration = $state(untrack(() => item.duration_seconds?.Int32?.toString() || ''));
+    let modalNotes = $state(untrack(() => item.notes?.String || ''));
+    
+
 
     const commonEnhance = () => {
         /* eslint-disable  @typescript-eslint/no-explicit-any */

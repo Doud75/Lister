@@ -81,7 +81,7 @@
                                 />
                                 <button
                                         type="submit"
-                                        disabled={$navigating || addingItemId !== null}
+                                        disabled={!!$navigating || addingItemId !== null}
                                         class="flex w-full items-center justify-between rounded-md p-3 text-left text-slate-800 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-200 dark:hover:bg-slate-700"
                                 >
                                     <span>{song.title}</span>
@@ -125,7 +125,7 @@
                                 />
                                 <button
                                         type="submit"
-                                        disabled={$navigating || addingItemId !== null}
+                                        disabled={!!$navigating || addingItemId !== null}
                                         class="flex w-full items-center justify-between rounded-md p-3 text-left text-slate-800 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-200 dark:hover:bg-slate-700"
                                 >
                                     <span>{interlude.title}</span>
