@@ -1,17 +1,22 @@
 # make/tests.mk - Toutes les commandes de test
 
 # Cible principale pour lancer tous les tests
-test-all: test-unit test
+test-all: test-unit test-backend test
 	@echo "✅ All tests (Unit & E2E) finished successfully."
 
 # ==============================================================================
-# --- TESTS UNITAIRES (Vitest) ---
+# --- TESTS UNITAIRES (Vitest & Go) ---
 # ==============================================================================
 
 test-unit:
-	@echo "--- Running Unit Tests ---"
+	@echo "--- Running Frontend Unit Tests ---"
 	@cd frontend && npx vitest run
-	@echo "✅ Unit Tests finished."
+	@echo "✅ Frontend Unit Tests finished."
+
+test-backend:
+	@echo "--- Running Backend Unit Tests ---"
+	@cd backend && go test -v ./...
+	@echo "✅ Backend Unit Tests finished."
 
 test-unit-watch:
 	@echo "--- Running Unit Tests in watch mode ---"
