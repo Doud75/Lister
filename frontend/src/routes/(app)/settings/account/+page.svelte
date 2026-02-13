@@ -7,6 +7,24 @@
     let { form }: { form: ActionData } = $props();
 
     let isSubmitting = $state(false);
+    let newPassword = $state('');
+    let confirmPassword = $state('');
+    let validationError = $state('');
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
+    function validateForm() {
+        if (!passwordRegex.test(newPassword)) {
+            validationError = "Le nouveau mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.";
+            return false;
+        }
+        if (newPassword !== confirmPassword) {
+            validationError = "Les mots de passe ne correspondent pas.";
+            return false;
+        }
+        validationError = '';
+        return true;
+    }
 </script>
 
 <div class="container mx-auto px-4 sm:px-6">
@@ -24,7 +42,11 @@
         <form
                 method="POST"
                 class="mt-6 space-y-6"
-                use:enhance={() => {
+                use:enhance={({ cancel }) => {
+                if (!validateForm()) {
+                    cancel();
+                    return;
+                }
                 isSubmitting = true;
                 return async ({ update }) => {
                     await update();
@@ -48,6 +70,8 @@
                         type="password"
                         required
                         togglePasswordVisibility={true}
+                        bind:value={newPassword}
+                        oninput={() => validationError = ''}
                 />
                 <Input
                         label="Confirmer le nouveau mot de passe"
@@ -56,8 +80,14 @@
                         type="password"
                         required
                         togglePasswordVisibility={true}
+                        bind:value={confirmPassword}
+                        oninput={() => validationError = ''}
                 />
             </fieldset>
+
+            {#if validationError}
+                <p class="text-sm text-red-500">{validationError}</p>
+            {/if}
 
             {#if form?.error}
                 <p class="text-sm text-red-500">{form.error}</p>

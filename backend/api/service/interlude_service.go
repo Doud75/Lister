@@ -6,6 +6,7 @@ import (
 	"errors"
 	"setlist/api/model"
 	"setlist/api/repository"
+	"setlist/api/validator"
 )
 
 type CreateInterludePayload struct {
@@ -33,14 +34,14 @@ func (s InterludeService) Create(ctx context.Context, payload CreateInterludePay
 
 	interlude := model.Interlude{
 		BandID: bandID,
-		Title:  payload.Title,
+		Title:  validator.Sanitize(payload.Title),
 	}
 
 	if payload.Speaker != nil {
-		interlude.Speaker = sql.NullString{String: *payload.Speaker, Valid: true}
+		interlude.Speaker = sql.NullString{String: validator.Sanitize(*payload.Speaker), Valid: true}
 	}
 	if payload.Script != nil {
-		interlude.Script = sql.NullString{String: *payload.Script, Valid: true}
+		interlude.Script = sql.NullString{String: validator.Sanitize(*payload.Script), Valid: true}
 	}
 	if payload.DurationSeconds != nil {
 		interlude.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}
@@ -60,13 +61,13 @@ func (s InterludeService) Update(ctx context.Context, id int, bandID int, payloa
 	}
 
 	if payload.Title != "" {
-		interlude.Title = payload.Title
+		interlude.Title = validator.Sanitize(payload.Title)
 	} else {
 		return model.Interlude{}, errors.New("interlude title cannot be empty")
 	}
 
 	if payload.Speaker != nil {
-		interlude.Speaker = sql.NullString{String: *payload.Speaker, Valid: true}
+		interlude.Speaker = sql.NullString{String: validator.Sanitize(*payload.Speaker), Valid: true}
 	}
 	if payload.DurationSeconds != nil {
 		interlude.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}

@@ -20,7 +20,7 @@ test.describe.serial('Settings - Account Page', () => {
     const userForTest = 'passwordChangeUser';
 
     test.beforeEach(async ({ page }) => {
-        await login(page, userForTest, 'password123');
+        await login(page, userForTest, 'Password123!');
         await page.goto('/settings/account');
     });
 
@@ -33,8 +33,8 @@ test.describe.serial('Settings - Account Page', () => {
 
     test('should show an error for incorrect current password', async ({ page }) => {
         await page.getByLabel('Ancien mot de passe').fill('wrongpassword');
-        await page.getByLabel('Nouveau mot de passe', { exact: true }).fill('newpassword123');
-        await page.getByLabel('Confirmer le nouveau mot de passe').fill('newpassword123');
+        await page.getByLabel('Nouveau mot de passe', { exact: true }).fill('NewPassword123!');
+        await page.getByLabel('Confirmer le nouveau mot de passe').fill('NewPassword123!');
         await page.getByRole('button', { name: 'Sauvegarder' }).click();
 
         await expect(page.getByText('Votre ancien mot de passe est incorrect.')).toBeVisible();
@@ -42,9 +42,9 @@ test.describe.serial('Settings - Account Page', () => {
     });
 
     test('should successfully change password and allow re-login', async ({ page }) => {
-        const newPassword = 'newpassword456';
+        const newPassword = 'NewPassword456!';
 
-        await page.getByLabel('Ancien mot de passe').fill('password123');
+        await page.getByLabel('Ancien mot de passe').fill('Password123!');
         await page.getByLabel('Nouveau mot de passe', { exact: true }).fill(newPassword);
         await page.getByLabel('Confirmer le nouveau mot de passe').fill(newPassword);
         await page.getByRole('button', { name: 'Sauvegarder' }).click();
@@ -55,7 +55,7 @@ test.describe.serial('Settings - Account Page', () => {
         await logout(page);
 
         await page.getByLabel('Username').fill(userForTest);
-        await page.getByLabel('Password').fill('password123');
+        await page.getByLabel('Password').fill('Password123!');
         await page.getByRole('button', { name: 'Log In' }).click();
         await expect(page.getByText('invalid credentials')).toBeVisible();
 

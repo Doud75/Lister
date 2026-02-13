@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"setlist/api/model"
 	"setlist/api/repository"
+	"setlist/api/validator"
 )
 
 type CreateSongPayload struct {
@@ -28,7 +29,7 @@ type SongService struct {
 func (s SongService) Create(ctx context.Context, payload CreateSongPayload, bandID int) (model.Song, error) {
 	song := model.Song{
 		BandID: bandID,
-		Title:  payload.Title,
+		Title:  validator.Sanitize(payload.Title),
 	}
 
 	if payload.DurationSeconds != nil {
@@ -41,10 +42,10 @@ func (s SongService) Create(ctx context.Context, payload CreateSongPayload, band
 		song.SongKey = sql.NullString{String: *payload.SongKey, Valid: true}
 	}
 	if payload.Lyrics != nil {
-		song.Lyrics = sql.NullString{String: *payload.Lyrics, Valid: true}
+		song.Lyrics = sql.NullString{String: validator.Sanitize(*payload.Lyrics), Valid: true}
 	}
 	if payload.AlbumName != nil {
-		song.AlbumName = sql.NullString{String: *payload.AlbumName, Valid: true}
+		song.AlbumName = sql.NullString{String: validator.Sanitize(*payload.AlbumName), Valid: true}
 	}
 	if payload.Instrumentation != nil {
 		song.Instrumentation = *payload.Instrumentation
@@ -52,7 +53,7 @@ func (s SongService) Create(ctx context.Context, payload CreateSongPayload, band
 		song.Instrumentation = json.RawMessage("null")
 	}
 	if payload.Links != nil {
-		song.Links = sql.NullString{String: *payload.Links, Valid: true}
+		song.Links = sql.NullString{String: validator.Sanitize(*payload.Links), Valid: true}
 	}
 
 	return s.SongRepo.CreateSong(ctx, song)
@@ -70,7 +71,7 @@ func (s SongService) Update(ctx context.Context, id int, bandID int, payload Upd
 	song := model.Song{
 		ID:     id,
 		BandID: bandID,
-		Title:  payload.Title,
+		Title:  validator.Sanitize(payload.Title),
 	}
 
 	if payload.DurationSeconds != nil {
@@ -83,10 +84,10 @@ func (s SongService) Update(ctx context.Context, id int, bandID int, payload Upd
 		song.SongKey = sql.NullString{String: *payload.SongKey, Valid: true}
 	}
 	if payload.Lyrics != nil {
-		song.Lyrics = sql.NullString{String: *payload.Lyrics, Valid: true}
+		song.Lyrics = sql.NullString{String: validator.Sanitize(*payload.Lyrics), Valid: true}
 	}
 	if payload.AlbumName != nil {
-		song.AlbumName = sql.NullString{String: *payload.AlbumName, Valid: true}
+		song.AlbumName = sql.NullString{String: validator.Sanitize(*payload.AlbumName), Valid: true}
 	}
 	if payload.Instrumentation != nil {
 		song.Instrumentation = *payload.Instrumentation
@@ -94,7 +95,7 @@ func (s SongService) Update(ctx context.Context, id int, bandID int, payload Upd
 		song.Instrumentation = json.RawMessage("null")
 	}
 	if payload.Links != nil {
-		song.Links = sql.NullString{String: *payload.Links, Valid: true}
+		song.Links = sql.NullString{String: validator.Sanitize(*payload.Links), Valid: true}
 	}
 
 	return s.SongRepo.UpdateSong(ctx, song)

@@ -18,6 +18,7 @@
     let usernameInput = $state('');
     let passwordInput = $state('');
     let showPassword = $state(false);
+    let inviteError = $state('');
 
     let searchResults = $state<UserSearchResult[]>([]);
     let isSearching = $state(false);
@@ -168,14 +169,34 @@
                         method="POST"
                         action="?/inviteMember"
                         class="mt-6 space-y-6"
-                        use:enhance={() => {
-						isInviting = true;
-						return async ({ update }) => {
-                            showResults = false;
-							await update();
-							isInviting = false;
-						};
-					}}
+						use:enhance={({ cancel }) => {
+                            if (showPassword) {
+                                // Validate password if we appear to be creating a new user
+                                const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+                                if (!passwordRegex.test(passwordInput)) {
+                                     // We need to show this error somehow. Since we don't have a local error state for this specific form in the original code,
+                                     // I will add one or use the form prop if possible, but form prop is server side.
+                                     // Let's add a local error state `inviteError`.
+                                     inviteError = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.";
+                                     cancel();
+                                     return;
+                                }
+                            }
+                             const usernameRegex = /^[a-zA-Z0-9_]{3,50}$/;
+                             if (!usernameRegex.test(usernameInput)) {
+                                 inviteError = "Le nom d'utilisateur doit contenir entre 3 et 50 caractères alphanumériques ou underscore.";
+                                 cancel();
+                                 return;
+                             }
+                            inviteError = '';
+
+							isInviting = true;
+							return async ({ update }) => {
+                                showResults = false;
+								await update();
+								isInviting = false;
+							};
+						}}
                 >
                     <fieldset disabled={isInviting} class="contents">
                         <div class="relative">
@@ -184,7 +205,7 @@
                                     id="username"
                                     name="username"
                                     bind:value={usernameInput}
-                                    oninput={handleUsernameInput}
+                                    oninput={(e) => { handleUsernameInput(e); inviteError = ''; }}
                                     autocomplete="off"
                                     required
                             />
@@ -212,10 +233,15 @@
                                     name="password"
                                     type="password"
                                     bind:value={passwordInput}
+                                    oninput={() => inviteError = ''}
                                     required
                             />
                         {/if}
                     </fieldset>
+
+                    {#if inviteError}
+                        <p class="text-sm text-red-500">{inviteError}</p>
+                    {/if}
 
                     {#if form?.error}
                         <p class="text-sm text-red-500">

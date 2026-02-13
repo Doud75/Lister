@@ -5,7 +5,7 @@ import { test, expect, type Page } from '@playwright/test';
 async function login(page: Page) {
     await page.goto('/login');
     await page.getByLabel('Username').fill('testuser');
-    await page.getByLabel('Password').fill('password123');
+    await page.getByLabel('Password').fill('Password123!');
     await page.getByRole('button', { name: 'Log In' }).click();
     await page.waitForURL('/');
 }
@@ -59,7 +59,7 @@ test.describe.serial('Settings - Members Page (Admin)', () => {
 
         await expect(page.getByText('Utilisateur non trouvé. Veuillez définir un mot de passe pour créer son compte.')).toBeVisible();
 
-        await page.getByLabel('Mot de passe temporaire').fill('password123');
+        await page.getByLabel('Mot de passe temporaire').fill('Password123!');
         await page.getByRole('button', { name: 'Créer et Inviter' }).click();
 
         await expect(page.locator('li', { hasText: newUser })).toBeVisible();

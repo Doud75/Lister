@@ -5,6 +5,7 @@ import (
 	"errors"
 	"setlist/api/model"
 	"setlist/api/repository"
+	"setlist/api/validator"
 	"setlist/auth"
 	"time"
 
@@ -45,6 +46,13 @@ type AuthResponse struct {
 }
 
 func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResponse, error) {
+	if err := validator.ValidateUsername(payload.Username); err != nil {
+		return nil, err
+	}
+	if err := validator.ValidatePassword(payload.Password); err != nil {
+		return nil, err
+	}
+
 	hashedPassword, err := auth.HashPassword(payload.Password)
 	if err != nil {
 		return nil, err
@@ -139,6 +147,10 @@ func (s UserService) UpdatePassword(ctx context.Context, userID int, payload Upd
 		return errors.New("invalid current password")
 	}
 
+	if err := validator.ValidatePassword(payload.NewPassword); err != nil {
+		return err
+	}
+
 	newHashedPassword, err := auth.HashPassword(payload.NewPassword)
 	if err != nil {
 		return errors.New("failed to hash new password")
@@ -179,6 +191,13 @@ func (s UserService) InviteMember(ctx context.Context, bandID int, payload Invit
 
 	if payload.Password == nil || *payload.Password == "" {
 		return model.User{}, errors.New("user not found, and password is required to create a new one")
+	}
+
+	if err := validator.ValidateUsername(payload.Username); err != nil {
+		return model.User{}, err
+	}
+	if err := validator.ValidatePassword(*payload.Password); err != nil {
+		return model.User{}, err
 	}
 
 	hashedPassword, err := auth.HashPassword(*payload.Password)

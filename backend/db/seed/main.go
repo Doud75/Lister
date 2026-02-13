@@ -53,7 +53,7 @@ func seed(db *pgxpool.Pool) {
 	checkErr(err, "Failed to seed band 'The Testers'")
 
 	// Admin user "testuser"
-	hashedPasswordAdmin, _ := auth.HashPassword("password123")
+	hashedPasswordAdmin, _ := auth.HashPassword("Password123!")
 	var adminUserID int
 	err = db.QueryRow(ctx, "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id",
 		"testuser", hashedPasswordAdmin).Scan(&adminUserID)
@@ -62,7 +62,7 @@ func seed(db *pgxpool.Pool) {
 	checkErr(err, "Failed to link admin user to band")
 
 	// Member user "memberuser"
-	hashedPasswordMember, _ := auth.HashPassword("password123")
+	hashedPasswordMember, _ := auth.HashPassword("Password123!")
 	var memberUserID int
 	err = db.QueryRow(ctx, "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id",
 		"memberuser", hashedPasswordMember).Scan(&memberUserID)
@@ -71,7 +71,7 @@ func seed(db *pgxpool.Pool) {
 	checkErr(err, "Failed to link member user to band")
 
 	// **NOUVEAU** : Utilisateur dédié pour le test de changement de mot de passe
-	passwordChangeUserHash, _ := auth.HashPassword("password123")
+	passwordChangeUserHash, _ := auth.HashPassword("Password123!")
 	var passwordChangeUserID int
 	err = db.QueryRow(ctx, "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id",
 		"passwordChangeUser", passwordChangeUserHash).Scan(&passwordChangeUserID)
@@ -112,7 +112,7 @@ func seed(db *pgxpool.Pool) {
 	// --- Scénario Multi-Groupes ---
 	log.Println("Seeding data for multi-group test...")
 
-	multiGroupHashedPassword, _ := auth.HashPassword("password123")
+	multiGroupHashedPassword, _ := auth.HashPassword("Password123!")
 	var multiGroupUserID int
 	err = db.QueryRow(ctx, "INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id", "multiGroupUser", multiGroupHashedPassword).Scan(&multiGroupUserID)
 	checkErr(err, "Failed to seed multiGroupUser")

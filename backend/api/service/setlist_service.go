@@ -9,6 +9,7 @@ import (
 	"setlist/api/middleware"
 	"setlist/api/model"
 	"setlist/api/repository"
+	"setlist/api/validator"
 )
 
 type SetlistService struct {
@@ -61,7 +62,7 @@ func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload
 		return model.Setlist{}, fmt.Errorf("invalid color format: %s", payload.Color)
 	}
 
-	return s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.DB, payload.Name, payload.Color, bandID)
+	return s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.DB, validator.Sanitize(payload.Name), payload.Color, bandID)
 }
 
 func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) (model.Setlist, error) {
@@ -74,7 +75,7 @@ func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload 
 		if *payload.Name == "" {
 			return model.Setlist{}, errors.New("setlist name cannot be empty")
 		}
-		setlist.Name = *payload.Name
+		setlist.Name = validator.Sanitize(*payload.Name)
 	}
 	if payload.Color != nil {
 		if *payload.Color == "" || !hexColorRegex.MatchString(*payload.Color) {
@@ -117,7 +118,7 @@ func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddI
 	item := model.SetlistItem{
 		SetlistID: setlistID,
 		ItemType:  payload.ItemType,
-		Notes:     sql.NullString{String: payload.Notes, Valid: payload.Notes != ""},
+		Notes:     sql.NullString{String: validator.Sanitize(payload.Notes), Valid: payload.Notes != ""},
 	}
 
 	if payload.ItemType == "song" {
@@ -147,7 +148,7 @@ func (s SetlistService) UpdateOrder(ctx context.Context, setlistID int, payload 
 }
 
 func (s SetlistService) UpdateItem(ctx context.Context, itemID int, bandID int, payload UpdateItemPayload) (model.SetlistItem, error) {
-	notes := sql.NullString{String: payload.Notes, Valid: payload.Notes != ""}
+	notes := sql.NullString{String: validator.Sanitize(payload.Notes), Valid: payload.Notes != ""}
 	return s.SetlistRepo.UpdateSetlistItem(ctx, itemID, bandID, notes)
 }
 
