@@ -22,7 +22,7 @@ test.describe.serial('Setlist Admin Actions [As Admin]', () => {
     let setlistName: string;
 
     test.beforeEach(async ({ page }) => {
-        await login(page, 'testuser', 'password123');
+        await login(page, 'testuser', 'Password123!');
         const uniqueName = `Setlist for Actions Test ${Date.now()}`;
         const createdSetlist = await createSetlist(page, uniqueName);
         setlistId = createdSetlist.id;
@@ -82,14 +82,14 @@ test.describe('Setlist Admin Actions [As Member]', () => {
 
     test.beforeAll(async ({ browser }) => {
         const page = await browser.newPage();
-        await login(page, 'testuser', 'password123');
+        await login(page, 'testuser', 'Password123!');
         const createdSetlist = await createSetlist(page, `Setlist for Member View ${Date.now()}`);
         setlistId = createdSetlist.id;
         await page.close();
     });
 
     test('should not show admin actions for a non-admin user', async ({ page }) => {
-        await login(page, 'memberuser', 'password123');
+        await login(page, 'memberuser', 'Password123!');
         await page.goto(`/setlist/${setlistId}`);
 
         await page.getByRole('button', { name: "Ouvrir le menu d'actions" }).click();
