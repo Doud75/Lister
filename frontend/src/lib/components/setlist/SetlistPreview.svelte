@@ -13,6 +13,7 @@
     }>();
 
     let items = $derived(initialItems);
+    let form = $state<HTMLFormElement>();
 
     function handleDndConsider(e: CustomEvent) {
         items = e.detail.items;
@@ -20,7 +21,7 @@
 
     function handleDndFinalize(e: CustomEvent) {
         items = e.detail.items;
-        document.getElementById('order-form-add-page')?.requestSubmit();
+        form?.requestSubmit();
     }
 </script>
 
@@ -33,7 +34,13 @@
     </div>
     <div class="flex-grow overflow-y-auto px-6 pb-6">
         {#if items.length > 0}
-            <form id="order-form-add-page" method="POST" action="?/updateOrder" use:enhance>
+            <form
+                bind:this={form}
+                id="order-form-add-page"
+                method="POST"
+                action="?/updateOrder"
+                use:enhance
+            >
                 <input
                         type="hidden"
                         name="itemIds"

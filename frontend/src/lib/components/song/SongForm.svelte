@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { untrack } from 'svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import Input from '$lib/components/ui/Input.svelte';
     import Textarea from '$lib/components/ui/Textarea.svelte';
@@ -29,14 +30,23 @@
         isEditing?: boolean;
     } = $props();
 
-    let formData = $state<FormSong>({
-        title: song?.title ?? '',
-        album_name: song?.album_name?.String ?? '',
-        song_key: song?.song_key?.String ?? '',
-        duration_seconds: song?.duration_seconds?.Int32?.toString() ?? '',
-        tempo: song?.tempo?.Int32?.toString() ?? '',
-        lyrics: song?.lyrics?.String ?? '',
-        links: song?.links?.String ?? ''
+
+    function getFormValues(s: Partial<Song>): FormSong {
+        return {
+            title: s?.title ?? '',
+            album_name: s?.album_name?.String ?? '',
+            song_key: s?.song_key?.String ?? '',
+            duration_seconds: s?.duration_seconds?.Int32?.toString() ?? '',
+            tempo: s?.tempo?.Int32?.toString() ?? '',
+            lyrics: s?.lyrics?.String ?? '',
+            links: s?.links?.String ?? ''
+        };
+    }
+
+    let formData = $state<FormSong>(untrack(() => getFormValues(song)));
+
+    $effect(() => {
+        Object.assign(formData, getFormValues(song));
     });
 </script>
 

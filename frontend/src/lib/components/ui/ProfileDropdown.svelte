@@ -24,7 +24,13 @@
     </button>
 
     {#if isOpen}
-        <div onclick={close} class="fixed inset-0 z-10 h-full w-full"></div>
+        <button
+            type="button"
+            onclick={close}
+            class="fixed inset-0 z-10 h-full w-full cursor-default"
+            tabindex="-1"
+            aria-hidden="true"
+        ></button>
 
         <div
                 class="absolute right-0 z-20 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-slate-800 dark:ring-slate-700"
