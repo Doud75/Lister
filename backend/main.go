@@ -17,8 +17,8 @@ func main() {
 	dbPool := db.NewConnection(cfg.DatabaseURL)
 	defer dbPool.Close()
 
-	userRepo := repository.UserRepository{DB: dbPool}
-	refreshTokenRepo := repository.RefreshTokenRepository{DB: dbPool}
+	userRepo := &repository.PgUserRepository{DB: dbPool}
+	refreshTokenRepo := &repository.PgRefreshTokenRepository{DB: dbPool}
 	userService := service.UserService{
 		UserRepo:         userRepo,
 		RefreshTokenRepo: refreshTokenRepo,
@@ -33,18 +33,18 @@ func main() {
 	authHandler := handler.AuthHandler{AuthService: authService}
 	bandHandler := handler.BandHandler{UserService: userService}
 
-	interludeRepo := repository.InterludeRepository{DB: dbPool}
+	interludeRepo := &repository.PgInterludeRepository{DB: dbPool}
 	interludeService := service.InterludeService{InterludeRepo: interludeRepo}
 	interludeHandler := handler.InterludeHandler{InterludeService: interludeService}
 
-	infoRepo := repository.InfoRepository{DB: dbPool}
+	infoRepo := &repository.PgInfoRepository{DB: dbPool}
 	infoHandler := handler.InfoHandler{InfoRepo: infoRepo, UserRepo: userRepo}
 
-	setlistRepo := repository.SetlistRepository{DB: dbPool}
+	setlistRepo := &repository.PgSetlistRepository{DB: dbPool}
 	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo}
 	setlistHandler := handler.SetlistHandler{SetlistService: setlistService}
 
-	songRepo := repository.SongRepository{DB: dbPool}
+	songRepo := &repository.PgSongRepository{DB: dbPool}
 	songService := service.SongService{SongRepo: songRepo}
 	songHandler := handler.SongHandler{SongService: songService}
 

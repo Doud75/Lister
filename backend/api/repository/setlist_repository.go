@@ -17,11 +17,35 @@ type DBTX interface {
 	CopyFrom(context.Context, pgx.Identifier, []string, pgx.CopyFromSource) (int64, error)
 }
 
-type SetlistRepository struct {
+type SetlistRepository interface {
+	CreateSetlist(ctx context.Context, db DBTX, name, color string, bandID int) (model.Setlist, error)
+	UpdateSetlist(ctx context.Context, setlist model.Setlist) (model.Setlist, error)
+	GetSetlistsByBandID(ctx context.Context, bandID int) ([]model.Setlist, error)
+	GetSetlistByID(ctx context.Context, id int, bandID int) (model.Setlist, error)
+	DeleteSetlist(ctx context.Context, setlistID int, bandID int) error
+	GetSetlistItemsBySetlistID(ctx context.Context, setlistID int) ([]model.SetlistItem, error)
+	AddItemToSetlist(ctx context.Context, item model.SetlistItem) (model.SetlistItem, error)
+	UpdateItemOrder(ctx context.Context, setlistID int, itemIDs []int) error
+	UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes sql.NullString) (model.SetlistItem, error)
+	DeleteSetlistItem(ctx context.Context, itemID int, bandID int) error
+	CopyItemsToNewSetlist(ctx context.Context, tx DBTX, newSetlistID int, items []model.SetlistItem) error
+	BeginTx(ctx context.Context) (pgx.Tx, error)
+	GetDB() *pgxpool.Pool
+}
+
+type PgSetlistRepository struct {
 	DB *pgxpool.Pool
 }
 
-func (r SetlistRepository) CreateSetlist(ctx context.Context, db DBTX, name, color string, bandID int) (model.Setlist, error) {
+func (r PgSetlistRepository) BeginTx(ctx context.Context) (pgx.Tx, error) {
+	return r.DB.Begin(ctx)
+}
+
+func (r PgSetlistRepository) GetDB() *pgxpool.Pool {
+	return r.DB
+}
+
+func (r PgSetlistRepository) CreateSetlist(ctx context.Context, db DBTX, name, color string, bandID int) (model.Setlist, error) {
 	var setlist model.Setlist
 	query := `
 		INSERT INTO setlists (name, color, band_id)
@@ -34,7 +58,7 @@ func (r SetlistRepository) CreateSetlist(ctx context.Context, db DBTX, name, col
 	return setlist, err
 }
 
-func (r SetlistRepository) UpdateSetlist(ctx context.Context, setlist model.Setlist) (model.Setlist, error) {
+func (r PgSetlistRepository) UpdateSetlist(ctx context.Context, setlist model.Setlist) (model.Setlist, error) {
 	query := `
 		UPDATE setlists
 		SET name = $1, color = $2, is_archived = $3
@@ -47,7 +71,7 @@ func (r SetlistRepository) UpdateSetlist(ctx context.Context, setlist model.Setl
 	return setlist, err
 }
 
-func (r SetlistRepository) GetSetlistsByBandID(ctx context.Context, bandID int) ([]model.Setlist, error) {
+func (r PgSetlistRepository) GetSetlistsByBandID(ctx context.Context, bandID int) ([]model.Setlist, error) {
 	setlists := make([]model.Setlist, 0)
 	query := `
 		SELECT id, band_id, name, color, is_archived, created_at
@@ -72,14 +96,14 @@ func (r SetlistRepository) GetSetlistsByBandID(ctx context.Context, bandID int) 
 	return setlists, rows.Err()
 }
 
-func (r SetlistRepository) GetSetlistByID(ctx context.Context, id int, bandID int) (model.Setlist, error) {
+func (r PgSetlistRepository) GetSetlistByID(ctx context.Context, id int, bandID int) (model.Setlist, error) {
 	var setlist model.Setlist
 	query := `SELECT id, band_id, name, color, is_archived, created_at FROM setlists WHERE id = $1 AND band_id = $2`
 	err := r.DB.QueryRow(ctx, query, id, bandID).Scan(&setlist.ID, &setlist.BandID, &setlist.Name, &setlist.Color, &setlist.IsArchived, &setlist.CreatedAt)
 	return setlist, err
 }
 
-func (r SetlistRepository) DeleteSetlist(ctx context.Context, setlistID int, bandID int) error {
+func (r PgSetlistRepository) DeleteSetlist(ctx context.Context, setlistID int, bandID int) error {
 	query := `DELETE FROM setlists WHERE id = $1 AND band_id = $2`
 	cmdTag, err := r.DB.Exec(ctx, query, setlistID, bandID)
 	if err != nil {
@@ -91,7 +115,7 @@ func (r SetlistRepository) DeleteSetlist(ctx context.Context, setlistID int, ban
 	return nil
 }
 
-func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setlistID int) ([]model.SetlistItem, error) {
+func (r PgSetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setlistID int) ([]model.SetlistItem, error) {
 	items := make([]model.SetlistItem, 0)
 	query := `
 		SELECT
@@ -133,7 +157,7 @@ func (r SetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, setli
 	return items, rows.Err()
 }
 
-func (r SetlistRepository) AddItemToSetlist(ctx context.Context, item model.SetlistItem) (model.SetlistItem, error) {
+func (r PgSetlistRepository) AddItemToSetlist(ctx context.Context, item model.SetlistItem) (model.SetlistItem, error) {
 	var maxPosition sql.NullInt32
 	posQuery := `SELECT MAX(position) FROM setlist_items WHERE setlist_id = $1`
 	r.DB.QueryRow(ctx, posQuery, item.SetlistID).Scan(&maxPosition)
@@ -161,7 +185,7 @@ func (r SetlistRepository) AddItemToSetlist(ctx context.Context, item model.Setl
 	return item, err
 }
 
-func (r SetlistRepository) UpdateItemOrder(ctx context.Context, setlistID int, itemIDs []int) error {
+func (r PgSetlistRepository) UpdateItemOrder(ctx context.Context, setlistID int, itemIDs []int) error {
 	tx, err := r.DB.Begin(ctx)
 	if err != nil {
 		return err
@@ -183,7 +207,7 @@ func (r SetlistRepository) UpdateItemOrder(ctx context.Context, setlistID int, i
 	return tx.Commit(ctx)
 }
 
-func (r SetlistRepository) UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes sql.NullString) (model.SetlistItem, error) {
+func (r PgSetlistRepository) UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes sql.NullString) (model.SetlistItem, error) {
 	var item model.SetlistItem
 	query := `
 		UPDATE setlist_items si SET notes = $1
@@ -195,7 +219,7 @@ func (r SetlistRepository) UpdateSetlistItem(ctx context.Context, itemID int, ba
 	return item, err
 }
 
-func (r SetlistRepository) DeleteSetlistItem(ctx context.Context, itemID int, bandID int) error {
+func (r PgSetlistRepository) DeleteSetlistItem(ctx context.Context, itemID int, bandID int) error {
 	query := `
 		DELETE FROM setlist_items si
 		USING setlists s
@@ -211,7 +235,7 @@ func (r SetlistRepository) DeleteSetlistItem(ctx context.Context, itemID int, ba
 	return nil
 }
 
-func (r SetlistRepository) CopyItemsToNewSetlist(ctx context.Context, tx DBTX, newSetlistID int, items []model.SetlistItem) error {
+func (r PgSetlistRepository) CopyItemsToNewSetlist(ctx context.Context, tx DBTX, newSetlistID int, items []model.SetlistItem) error {
 	if len(items) == 0 {
 		return nil
 	}
