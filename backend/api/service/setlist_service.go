@@ -61,7 +61,7 @@ func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload
 		return model.Setlist{}, fmt.Errorf("invalid color format: %s", payload.Color)
 	}
 
-	return s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.DB, payload.Name, payload.Color, bandID)
+	return s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.GetDB(), payload.Name, payload.Color, bandID)
 }
 
 func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) (model.Setlist, error) {
@@ -156,7 +156,7 @@ func (s SetlistService) DeleteItem(ctx context.Context, itemID int, bandID int) 
 }
 
 func (s SetlistService) Duplicate(ctx context.Context, originalSetlistID int, bandID int, newName, newColor string) (model.Setlist, error) {
-	tx, err := s.SetlistRepo.DB.Begin(ctx)
+	tx, err := s.SetlistRepo.BeginTx(ctx)
 	if err != nil {
 		return model.Setlist{}, err
 	}

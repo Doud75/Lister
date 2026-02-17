@@ -8,11 +8,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type SongRepository struct {
+type SongRepository interface {
+	CreateSong(ctx context.Context, song model.Song) (model.Song, error)
+	GetAllSongsByBandID(ctx context.Context, bandID int) ([]model.Song, error)
+	GetSongByID(ctx context.Context, id int, bandID int) (model.Song, error)
+	UpdateSong(ctx context.Context, song model.Song) (model.Song, error)
+	SoftDeleteSong(ctx context.Context, id int, bandID int) error
+}
+
+type PgSongRepository struct {
 	DB *pgxpool.Pool
 }
 
-func (r SongRepository) CreateSong(ctx context.Context, song model.Song) (model.Song, error) {
+func (r PgSongRepository) CreateSong(ctx context.Context, song model.Song) (model.Song, error) {
 	query := `
 		INSERT INTO songs (
 			band_id, title, duration_seconds, tempo, song_key, lyrics, album_name, instrumentation, links
@@ -35,7 +43,7 @@ func (r SongRepository) CreateSong(ctx context.Context, song model.Song) (model.
 	return song, err
 }
 
-func (r SongRepository) GetAllSongsByBandID(ctx context.Context, bandID int) ([]model.Song, error) {
+func (r PgSongRepository) GetAllSongsByBandID(ctx context.Context, bandID int) ([]model.Song, error) {
 	songs := make([]model.Song, 0)
 	query := `SELECT id, title, album_name, duration_seconds, tempo, song_key, links FROM songs WHERE band_id = $1 AND is_deleted = FALSE ORDER BY album_name ASC, title ASC`
 
@@ -55,7 +63,7 @@ func (r SongRepository) GetAllSongsByBandID(ctx context.Context, bandID int) ([]
 	return songs, rows.Err()
 }
 
-func (r SongRepository) GetSongByID(ctx context.Context, id int, bandID int) (model.Song, error) {
+func (r PgSongRepository) GetSongByID(ctx context.Context, id int, bandID int) (model.Song, error) {
 	var song model.Song
 	query := `
 		SELECT 
@@ -70,7 +78,7 @@ func (r SongRepository) GetSongByID(ctx context.Context, id int, bandID int) (mo
 	return song, err
 }
 
-func (r SongRepository) UpdateSong(ctx context.Context, song model.Song) (model.Song, error) {
+func (r PgSongRepository) UpdateSong(ctx context.Context, song model.Song) (model.Song, error) {
 	query := `
 		UPDATE songs SET
 			title = $1, duration_seconds = $2, tempo = $3, song_key = $4, lyrics = $5,
@@ -87,7 +95,7 @@ func (r SongRepository) UpdateSong(ctx context.Context, song model.Song) (model.
 	return song, err
 }
 
-func (r SongRepository) SoftDeleteSong(ctx context.Context, id int, bandID int) error {
+func (r PgSongRepository) SoftDeleteSong(ctx context.Context, id int, bandID int) error {
 	query := `UPDATE songs SET is_deleted = TRUE WHERE id = $1 AND band_id = $2`
 	cmdTag, err := r.DB.Exec(ctx, query, id, bandID)
 	if err != nil {

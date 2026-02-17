@@ -15,11 +15,26 @@ var (
 	ErrDuplicateUsername = errors.New("username already exists")
 )
 
-type UserRepository struct {
+type UserRepository interface {
+	CreateBandAndUser(ctx context.Context, bandName, username, passwordHash string) (model.User, model.Band, error)
+	CreateUserAndAddToBand(ctx context.Context, bandID int, username, passwordHash, role string) (model.User, error)
+	GetMembersByBandID(ctx context.Context, bandID int) ([]model.BandMember, error)
+	RemoveUserFromBand(ctx context.Context, bandID int, userID int) error
+	GetUserRoleInBand(ctx context.Context, userID int, bandID int) (string, error)
+	FindUserByUsername(ctx context.Context, username string) (model.User, error)
+	FindUserByID(ctx context.Context, id int) (model.User, error)
+	UpdatePassword(ctx context.Context, userID int, newHash string) error
+	FindBandsByUserID(ctx context.Context, userID int) ([]model.Band, error)
+	IsUserInBand(ctx context.Context, userID int, bandID int) (bool, error)
+	AddUserToBand(ctx context.Context, userID, bandID int, role string) error
+	SearchUsersByUsername(ctx context.Context, usernameQuery string) ([]model.User, error)
+}
+
+type PgUserRepository struct {
 	DB *pgxpool.Pool
 }
 
-func (r *UserRepository) CreateBandAndUser(ctx context.Context, bandName, username, passwordHash string) (model.User, model.Band, error) {
+func (r *PgUserRepository) CreateBandAndUser(ctx context.Context, bandName, username, passwordHash string) (model.User, model.Band, error) {
 	tx, err := r.DB.Begin(ctx)
 	if err != nil {
 		return model.User{}, model.Band{}, err
@@ -57,7 +72,7 @@ func (r *UserRepository) CreateBandAndUser(ctx context.Context, bandName, userna
 	return user, band, tx.Commit(ctx)
 }
 
-func (r *UserRepository) CreateUserAndAddToBand(ctx context.Context, bandID int, username, passwordHash, role string) (model.User, error) {
+func (r *PgUserRepository) CreateUserAndAddToBand(ctx context.Context, bandID int, username, passwordHash, role string) (model.User, error) {
 	tx, err := r.DB.Begin(ctx)
 	if err != nil {
 		return model.User{}, err
@@ -84,7 +99,7 @@ func (r *UserRepository) CreateUserAndAddToBand(ctx context.Context, bandID int,
 	return user, tx.Commit(ctx)
 }
 
-func (r *UserRepository) GetMembersByBandID(ctx context.Context, bandID int) ([]model.BandMember, error) {
+func (r *PgUserRepository) GetMembersByBandID(ctx context.Context, bandID int) ([]model.BandMember, error) {
 	members := make([]model.BandMember, 0)
 	query := `
 		SELECT u.id, u.username, bu.role
@@ -109,7 +124,7 @@ func (r *UserRepository) GetMembersByBandID(ctx context.Context, bandID int) ([]
 	return members, rows.Err()
 }
 
-func (r *UserRepository) RemoveUserFromBand(ctx context.Context, bandID int, userID int) error {
+func (r *PgUserRepository) RemoveUserFromBand(ctx context.Context, bandID int, userID int) error {
 	var adminCount int
 	countQuery := `SELECT COUNT(*) FROM band_users WHERE band_id = $1 AND role = 'admin'`
 	err := r.DB.QueryRow(ctx, countQuery, bandID).Scan(&adminCount)
@@ -140,14 +155,14 @@ func (r *UserRepository) RemoveUserFromBand(ctx context.Context, bandID int, use
 	return nil
 }
 
-func (r *UserRepository) GetUserRoleInBand(ctx context.Context, userID int, bandID int) (string, error) {
+func (r *PgUserRepository) GetUserRoleInBand(ctx context.Context, userID int, bandID int) (string, error) {
 	var role string
 	query := `SELECT role FROM band_users WHERE user_id = $1 AND band_id = $2`
 	err := r.DB.QueryRow(ctx, query, userID, bandID).Scan(&role)
 	return role, err
 }
 
-func (r *UserRepository) FindUserByUsername(ctx context.Context, username string) (model.User, error) {
+func (r *PgUserRepository) FindUserByUsername(ctx context.Context, username string) (model.User, error) {
 	var user model.User
 	query := `SELECT id, password_hash, username FROM users WHERE username = $1`
 	err := r.DB.QueryRow(ctx, query, username).Scan(&user.ID, &user.PasswordHash, &user.Username)
@@ -157,7 +172,7 @@ func (r *UserRepository) FindUserByUsername(ctx context.Context, username string
 	return user, nil
 }
 
-func (r *UserRepository) FindUserByID(ctx context.Context, id int) (model.User, error) {
+func (r *PgUserRepository) FindUserByID(ctx context.Context, id int) (model.User, error) {
 	var user model.User
 	query := `SELECT id, password_hash, username FROM users WHERE id = $1`
 	err := r.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.PasswordHash, &user.Username)
@@ -167,7 +182,7 @@ func (r *UserRepository) FindUserByID(ctx context.Context, id int) (model.User, 
 	return user, nil
 }
 
-func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, newHash string) error {
+func (r *PgUserRepository) UpdatePassword(ctx context.Context, userID int, newHash string) error {
 	query := `UPDATE users SET password_hash = $1 WHERE id = $2`
 	cmdTag, err := r.DB.Exec(ctx, query, newHash, userID)
 	if err != nil {
@@ -179,7 +194,7 @@ func (r *UserRepository) UpdatePassword(ctx context.Context, userID int, newHash
 	return nil
 }
 
-func (r *UserRepository) FindBandsByUserID(ctx context.Context, userID int) ([]model.Band, error) {
+func (r *PgUserRepository) FindBandsByUserID(ctx context.Context, userID int) ([]model.Band, error) {
 	var bands []model.Band
 	query := `
 		SELECT b.id, b.name FROM bands b
@@ -204,20 +219,20 @@ func (r *UserRepository) FindBandsByUserID(ctx context.Context, userID int) ([]m
 	return bands, rows.Err()
 }
 
-func (r *UserRepository) IsUserInBand(ctx context.Context, userID int, bandID int) (bool, error) {
+func (r *PgUserRepository) IsUserInBand(ctx context.Context, userID int, bandID int) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM band_users WHERE user_id = $1 AND band_id = $2)`
 	err := r.DB.QueryRow(ctx, query, userID, bandID).Scan(&exists)
 	return exists, err
 }
 
-func (r *UserRepository) AddUserToBand(ctx context.Context, userID, bandID int, role string) error {
+func (r *PgUserRepository) AddUserToBand(ctx context.Context, userID, bandID int, role string) error {
 	query := `INSERT INTO band_users (user_id, band_id, role) VALUES ($1, $2, $3)`
 	_, err := r.DB.Exec(ctx, query, userID, bandID, role)
 	return err
 }
 
-func (r *UserRepository) SearchUsersByUsername(ctx context.Context, usernameQuery string) ([]model.User, error) {
+func (r *PgUserRepository) SearchUsersByUsername(ctx context.Context, usernameQuery string) ([]model.User, error) {
 	users := make([]model.User, 0)
 	query := `SELECT id, username FROM users WHERE username ILIKE $1 LIMIT 10`
 

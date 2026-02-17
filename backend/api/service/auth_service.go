@@ -26,26 +26,17 @@ func (s AuthService) RefreshAccessToken(ctx context.Context, refreshToken string
 	var expiresAt time.Time
 	var matchedHash string
 
-	query := `SELECT user_id, token_hash, expires_at FROM refresh_tokens WHERE expires_at > NOW()`
-	rows, err := s.RefreshTokenRepo.DB.Query(ctx, query)
+	tokens, err := s.RefreshTokenRepo.GetAllValidTokens(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
 	found := false
-	for rows.Next() {
-		var uid int
-		var hash string
-		var exp time.Time
-		if err := rows.Scan(&uid, &hash, &exp); err != nil {
-			continue
-		}
-
-		if auth.VerifyRefreshToken(refreshToken, hash) {
-			userID = uid
-			expiresAt = exp
-			matchedHash = hash
+	for _, token := range tokens {
+		if auth.VerifyRefreshToken(refreshToken, token.TokenHash) {
+			userID = token.UserID
+			expiresAt = token.ExpiresAt
+			matchedHash = token.TokenHash
 			found = true
 			break
 		}

@@ -18,6 +18,12 @@ test-backend:
 	@cd backend && go test -v ./...
 	@echo "✅ Backend Unit Tests finished."
 
+test-backend-cover:
+	@echo "--- Running Backend Unit Tests with Coverage ---"
+	@cd backend && go test -v -coverprofile=coverage.out ./...
+	@cd backend && go tool cover -html=coverage.out -o coverage.html
+	@echo "✅ Backend Unit Tests Coverage finished. Report available in backend/coverage.html"
+
 test-unit-watch:
 	@echo "--- Running Unit Tests in watch mode ---"
 	@cd frontend && npx vitest

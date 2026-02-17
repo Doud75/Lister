@@ -22,9 +22,15 @@ jobs:
         working-directory: ./backend
         run: go build -v ./...
 
-      - name: Run Backend Unit Tests
-        working-directory: ./backend
-        run: go test -v ./...
+      - name: Run Backend Unit Tests with Coverage
+        run: make test-backend-cover
+
+      - name: Upload Backend Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage.html
+          retention-days: 30
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
