@@ -6,8 +6,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/lister-backend
-  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/lister-frontend
+  IMAGE_BACKEND: ghcr.io/doud75/lister-backend
+  IMAGE_FRONTEND: ghcr.io/doud75/lister-frontend
 
 jobs:
   build-and-push:
