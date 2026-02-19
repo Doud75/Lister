@@ -100,7 +100,13 @@ jobs:
             echo "🚀 [$(date)] Starting deployment (sha: ${{ github.sha }})"
             cd /home/deploy/Lister
 
-            echo "📦 Pulling latest Docker images..."
+            echo "� Pulling latest code (for migrations)..."
+            git pull
+
+            echo "🗄️ Running database migrations..."
+            docker compose up --build migrator
+
+            echo "�📦 Pulling latest Docker images..."
             docker compose -f docker-compose.yml -f /home/deploy/Lister/docker-compose.prod.yml pull
 
             echo "🔄 Restarting services..."
@@ -120,6 +126,7 @@ jobs:
           SSH_PORT: ${{ secrets.SSH_PORT }}
         run: |
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" << 'EOF'
+            cd /home/deploy/Lister
             echo "--- Recent backend logs ---"
             docker compose -f docker-compose.yml -f /home/deploy/Lister/docker-compose.prod.yml logs backend --tail=20
             echo "--- Recent frontend logs ---"
