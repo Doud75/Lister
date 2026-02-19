@@ -1,0 +1,8 @@
+services:
+  backend:
+    image: ghcr.io/doud75/lister-backend:latest
+    build: null
+
+  frontend:
+    image: ghcr.io/doud75/lister-frontend:latest
+    build: null
