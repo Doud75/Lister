@@ -80,6 +80,9 @@ test-song-new: test-up run-playwright-song-new test-down
 test-song-edit: test-up run-playwright-song-edit test-down
 	@echo "✅ Song edit tests finished."
 
+test-song-detail: test-up run-playwright-song-detail test-down
+	@echo "✅ Song detail tests finished."
+
 test-settings-account: test-up run-playwright-settings-account test-down
 	@echo "✅ Settings account test finished."
 
@@ -162,6 +165,10 @@ run-playwright-song-edit:
 	@echo "--- Running SONG EDIT Playwright tests ---"
 	@cd frontend && npx playwright test tests/song/edit.spec.ts
 
+run-playwright-song-detail:
+	@echo "--- Running SONG DETAIL Playwright tests ---"
+	@cd frontend && npx playwright test tests/song/detail.spec.ts
+
 run-playwright-multi-group:
 	@echo "--- Running MULTI-GROUP Playwright test ---"
 	@cd frontend && npx playwright test tests/group/multi-group.spec.ts
@@ -193,13 +200,13 @@ run-playwright-interlude-behavior:
 # --- Déclaration .PHONY pour toutes les cibles ---
 .PHONY: test-all test-unit test-unit-watch test test-setlist test-song test-settings test-interlude test-multi-group \
 		test-setlist-actions test-setlist-detail test-setlist-add test-setlist-new test-setlist-duplicate \
-		test-song-list test-song-new test-song-edit \
+		test-song-list test-song-new test-song-edit test-song-detail \
 		test-settings-account test-settings-members \
 		test-interlude-new test-interlude-behavior \
 		test-up test-down \
 		run-playwright run-playwright-setlist-actions run-playwright-setlist run-playwright-setlist-detail \
 		run-playwright-setlist-add run-playwright-setlist-new run-playwright-setlist-duplicate \
-		run-playwright-song run-playwright-song-list run-playwright-song-new run-playwright-song-edit \
+		run-playwright-song run-playwright-song-list run-playwright-song-new run-playwright-song-edit run-playwright-song-detail \
 		run-playwright-multi-group \
 		run-playwright-settings run-playwright-settings-account run-playwright-settings-members \
 		run-playwright-interlude run-playwright-interlude-new run-playwright-interlude-behavior
