@@ -1,8 +1,8 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import type { SongPayload } from '$lib/types';
 
-export async function extractSongData(event: RequestEvent): Promise<SongPayload> {
-    const data = await event.request.formData();
+export async function extractSongData(event: RequestEvent, existingFormData?: FormData): Promise<SongPayload> {
+    const data = existingFormData ?? await event.request.formData();
 
     return {
         title: data.get('title') as string,

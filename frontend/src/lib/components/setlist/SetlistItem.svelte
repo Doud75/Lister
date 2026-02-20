@@ -3,6 +3,7 @@
     import { enhance } from '$app/forms';
     import { dragHandle } from 'svelte-dnd-action';
     import { formatItemDuration } from '$lib/utils/utils';
+    import { page } from '$app/stores';
 
     let { item, songNumber, onEdit } = $props<{
         item: SetlistItem;
@@ -114,9 +115,12 @@
                 {#if songNumber}
                     <span class="text-lg font-bold text-slate-400 dark:text-slate-500">{songNumber}.</span>
                 {/if}
-                <p class="truncate font-semibold text-slate-800 dark:text-slate-100">
+                <a
+                    href="/song/{item.song_id?.Int32}?from={$page.url.pathname}"
+                    class="truncate font-semibold text-slate-800 hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400"
+                >
                     {item.title.String}
-                </p>
+                </a>
             </div>
             <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400">
                 {#if item.duration_seconds?.Valid}

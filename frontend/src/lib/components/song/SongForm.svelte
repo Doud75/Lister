@@ -22,12 +22,14 @@
         song = {} as Partial<Song>,
         form,
         cancelHref,
-        isEditing = false
+        isEditing = false,
+        hiddenFrom = ''
     }: {
         song?: Partial<Song>;
         form: ActionData;
         cancelHref: string;
         isEditing?: boolean;
+        hiddenFrom?: string;
     } = $props();
 
 
@@ -51,6 +53,9 @@
 </script>
 
 <form method="POST" use:enhance class="mt-8 space-y-6 rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
+    {#if hiddenFrom}
+        <input type="hidden" name="from" value={hiddenFrom} />
+    {/if}
     <Input label="Song Title" id="title" name="title" bind:value={formData.title} required />
 
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">

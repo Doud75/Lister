@@ -1,12 +1,12 @@
 <script lang="ts">
-    import type { ActionData, PageData } from './$types';
-    import { enhance } from '$app/forms';
+    import type { PageData } from './$types';
     import { formatDuration } from '$lib/utils/utils';
     import type {Song} from "$lib/types";
+    import { enhance } from '$app/forms';
 
-    let { data, form }: { data: PageData; form: ActionData } = $props();
+    let { data }: { data: PageData } = $props();
 
-    let songs = $state<Song[]>(data.songs || []);
+    let songs = $derived(data.songs ?? []);
 
     const songsByAlbum = $derived.by(() => {
         const grouped: Record<string, Song[]> = {};
@@ -29,14 +29,7 @@
         return sortedGrouped;
     });
 
-    $effect(() => {
-        if (form?.deleted) {
-            const index = songs.findIndex((s) => s.id === form.songId);
-            if (index !== -1) {
-                songs.splice(index, 1);
-            }
-        }
-    });
+
 </script>
 
 <div class="container mx-auto px-4 sm:px-6">
@@ -69,7 +62,7 @@
                             <li class="flex items-center justify-between gap-3 py-3">
                                 <div class="min-w-0 flex-grow">
                                     <div class="flex items-center gap-3">
-                                        <p class="truncate font-semibold text-slate-800 dark:text-slate-100">{song.title}</p>
+                                        <a href="/song/{song.id}" class="truncate font-semibold text-slate-800 hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400">{song.title}</a>
                                     </div>
                                     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                                         {#if song.duration_seconds.Valid}

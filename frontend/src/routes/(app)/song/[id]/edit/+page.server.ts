@@ -4,9 +4,11 @@ import {extractSongData} from "$lib/server/songActions";
 
 export const actions: Actions = {
     default: async (event) => {
-        const { fetch, params } = event;
+        const { fetch, params, request } = event;
         const { id } = params;
-        const payload = await extractSongData(event);
+        const formData = await request.formData();
+        const from = formData.get('from')?.toString() ?? '';
+        const payload = await extractSongData(event, formData);
 
         const response = await fetch(`/api/song/${id}`, {
             method: 'PUT',
@@ -19,6 +21,7 @@ export const actions: Actions = {
             return fail(response.status, { error: result.error });
         }
 
-        throw redirect(303, '/song');
+        const redirectTo = from && from.startsWith('/') ? from : '/song';
+        throw redirect(303, redirectTo);
     }
 };
