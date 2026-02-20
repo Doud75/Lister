@@ -47,7 +47,7 @@ test.describe('Song Detail Page', () => {
         await expect(page.getByRole('heading', { name: 'Bibliothèque de chansons' })).toBeVisible();
 
         const songItem = page.locator('li', { hasText: 'Song Title 1' });
-        const songLink = songItem.getByRole('link', { name: 'Song Title 1' });
+        const songLink = songItem.getByRole('link', { name: 'Song Title 1', exact: true });
         await expect(songLink).toBeVisible();
         await songLink.click();
 

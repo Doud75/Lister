@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { ActionData, PageData } from './$types';
-    import { enhance } from '$app/forms';
+    import type { PageData } from './$types';
     import { formatDuration } from '$lib/utils/utils';
     import type {Song} from "$lib/types";
+    import { enhance } from '$app/forms';
 
-    let { data, form }: { data: PageData; form: ActionData } = $props();
+    let { data }: { data: PageData } = $props();
 
     let songs = $derived(data.songs ?? []);
 
