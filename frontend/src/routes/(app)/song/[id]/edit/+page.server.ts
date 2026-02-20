@@ -8,7 +8,7 @@ export const actions: Actions = {
         const { id } = params;
         const formData = await request.formData();
         const from = formData.get('from')?.toString() ?? '';
-        const payload = await extractSongData(event);
+        const payload = await extractSongData(event, formData);
 
         const response = await fetch(`/api/song/${id}`, {
             method: 'PUT',
