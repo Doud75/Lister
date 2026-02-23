@@ -117,7 +117,7 @@
                 {/if}
                 <a
                     href="/song/{item.song_id?.Int32}?from={$page.url.pathname}"
-                    class="truncate font-semibold text-slate-800 hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400"
+                    class="truncate font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
                 >
                     {item.title.String}
                 </a>

@@ -44,8 +44,11 @@ export const actions: Actions = {
 
         const result = await response.json();
         if (!response.ok) {
-            if (result.error?.includes('username')) {
+            if (result.code === 'USERNAME_TAKEN') {
                 return fail(409, { data: { bandName, username }, errors: { username: result.error } });
+            }
+            if (result.code === 'BAND_NAME_TAKEN') {
+                return fail(409, { data: { bandName, username }, errors: { bandName: result.error } });
             }
             return fail(response.status, { data: { bandName, username }, error: result.error });
         }

@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"setlist/api/apierror"
 	"setlist/api/middleware"
 	"setlist/api/repository"
 )
@@ -16,25 +17,25 @@ func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) 
 	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
 	bandID, ok2 := r.Context().Value(middleware.BandIDKey).(int)
 	if !ok || !ok2 {
-		writeError(w, "Could not identify user from token", http.StatusInternalServerError)
+		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier l'utilisateur depuis le token."))
 		return
 	}
 
 	user, err := h.InfoRepo.GetUserByID(r.Context(), userID)
 	if err != nil {
-		writeError(w, "User not found", http.StatusNotFound)
+		writeAppError(w, apierror.NotFound("Utilisateur"))
 		return
 	}
 
 	band, err := h.InfoRepo.GetBandByID(r.Context(), bandID)
 	if err != nil {
-		writeError(w, "Band not found", http.StatusNotFound)
+		writeAppError(w, apierror.NotFound("Groupe"))
 		return
 	}
 
 	role, err := h.UserRepo.GetUserRoleInBand(r.Context(), userID, bandID)
 	if err != nil {
-		writeError(w, "Could not determine user role", http.StatusNotFound)
+		writeAppError(w, apierror.NotFound("Rôle utilisateur"))
 		return
 	}
 

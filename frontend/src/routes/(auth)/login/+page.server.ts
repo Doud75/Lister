@@ -15,7 +15,7 @@ export const actions: Actions = {
 
         const result = await response.json();
         if (!response.ok) {
-            return fail(response.status, { error: result.error });
+            return fail(response.status, { error: result.error, code: result.code });
         }
 
         const cookieOptions = {

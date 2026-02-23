@@ -2,9 +2,9 @@ import { test, expect, type Page } from '@playwright/test';
 
 async function login(page: Page, user: string, pass: string) {
     await page.goto('/login');
-    await page.getByLabel('Username').fill(user);
-    await page.getByLabel('Password').fill(pass);
-    await page.getByRole('button', { name: 'Log In' }).click();
+    await page.getByLabel("Nom d'utilisateur").fill(user);
+    await page.locator('#password').fill(pass);
+    await page.getByRole('button', { name: 'Se connecter' }).click();
     await page.waitForURL('/');
 }
 
@@ -54,13 +54,13 @@ test.describe.serial('Settings - Account Page', () => {
 
         await logout(page);
 
-        await page.getByLabel('Username').fill(userForTest);
-        await page.getByLabel('Password').fill('password123');
-        await page.getByRole('button', { name: 'Log In' }).click();
-        await expect(page.getByText('invalid credentials')).toBeVisible();
+        await page.getByLabel("Nom d'utilisateur").fill(userForTest);
+        await page.locator('#password').fill('password123');
+        await page.getByRole('button', { name: 'Se connecter' }).click();
+        await expect(page.getByText('Identifiant ou mot de passe incorrect.')).toBeVisible();
 
-        await page.getByLabel('Password').fill(newPassword);
-        await page.getByRole('button', { name: 'Log In' }).click();
+        await page.locator('#password').fill(newPassword);
+        await page.getByRole('button', { name: 'Se connecter' }).click();
         await page.waitForURL('/');
         await expect(page.getByRole('heading', { name: 'The Testers' })).toBeVisible();
     });

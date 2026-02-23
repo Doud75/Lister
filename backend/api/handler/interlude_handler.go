@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"setlist/api/apierror"
 	"setlist/api/middleware"
 	"setlist/api/service"
 	"strconv"
@@ -17,13 +18,13 @@ func (h InterludeHandler) CreateInterlude(w http.ResponseWriter, r *http.Request
 
 	var payload service.CreateInterludePayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	createdInterlude, err := h.InterludeService.Create(r.Context(), payload, bandID)
 	if err != nil {
-		writeError(w, "Failed to create interlude", http.StatusInternalServerError)
+		writeAppError(w, apierror.InternalError("création d'interlude"))
 		return
 	}
 
@@ -36,7 +37,7 @@ func (h InterludeHandler) GetInterludes(w http.ResponseWriter, r *http.Request) 
 	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
 	interludes, err := h.InterludeService.GetAllForBand(r.Context(), bandID)
 	if err != nil {
-		writeError(w, "Failed to retrieve interludes", http.StatusInternalServerError)
+		writeAppError(w, apierror.InternalError("récupération des interludes"))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -50,13 +51,13 @@ func (h InterludeHandler) UpdateInterlude(w http.ResponseWriter, r *http.Request
 
 	var payload service.UpdateInterludePayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	updatedInterlude, err := h.InterludeService.Update(r.Context(), id, bandID, payload)
 	if err != nil {
-		writeError(w, "Failed to update interlude", http.StatusNotFound)
+		writeAppError(w, apierror.NotFound("Interlude"))
 		return
 	}
 

@@ -2,9 +2,9 @@ import { test, expect, type Page } from '@playwright/test';
 
 async function loginMultiGroupUser(page: Page) {
     await page.goto('/login');
-    await page.getByLabel('Username').fill('multiGroupUser');
-    await page.getByLabel('Password').fill('password123');
-    await page.getByRole('button', { name: 'Log In' }).click();
+    await page.getByLabel("Nom d'utilisateur").fill('multiGroupUser');
+    await page.locator('#password').fill('password123');
+    await page.getByRole('button', { name: 'Se connecter' }).click();
     await page.waitForURL('/');
 }
 

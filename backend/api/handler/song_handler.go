@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"setlist/api/apierror"
 	"setlist/api/middleware"
 	"setlist/api/service"
 	"strconv"
@@ -17,13 +18,13 @@ func (h SongHandler) CreateSong(w http.ResponseWriter, r *http.Request) {
 
 	var payload service.CreateSongPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	createdSong, err := h.SongService.Create(r.Context(), payload, bandID)
 	if err != nil {
-		writeError(w, "Failed to create song", http.StatusInternalServerError)
+		writeAppError(w, apierror.InternalError("création de chanson"))
 		return
 	}
 
@@ -36,7 +37,7 @@ func (h SongHandler) GetSongs(w http.ResponseWriter, r *http.Request) {
 	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
 	songs, err := h.SongService.GetAllForBand(r.Context(), bandID)
 	if err != nil {
-		writeError(w, "Failed to retrieve songs", http.StatusInternalServerError)
+		writeAppError(w, apierror.InternalError("récupération des chansons"))
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -48,13 +49,13 @@ func (h SongHandler) GetSong(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeError(w, "Invalid song ID", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Identifiant de chanson invalide."))
 		return
 	}
 
 	song, err := h.SongService.GetByID(r.Context(), id, bandID)
 	if err != nil {
-		writeError(w, "Song not found", http.StatusNotFound)
+		writeAppError(w, apierror.NotFound("Chanson"))
 		return
 	}
 
@@ -67,19 +68,19 @@ func (h SongHandler) UpdateSong(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeError(w, "Invalid song ID", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Identifiant de chanson invalide."))
 		return
 	}
 
 	var payload service.UpdateSongPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	updatedSong, err := h.SongService.Update(r.Context(), id, bandID, payload)
 	if err != nil {
-		writeError(w, "Failed to update song", http.StatusInternalServerError)
+		writeAppError(w, apierror.InternalError("mise à jour de chanson"))
 		return
 	}
 
@@ -92,13 +93,13 @@ func (h SongHandler) DeleteSong(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		writeError(w, "Invalid song ID", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Identifiant de chanson invalide."))
 		return
 	}
 
 	err = h.SongService.SoftDelete(r.Context(), id, bandID)
 	if err != nil {
-		writeError(w, "Song not found or could not be deleted", http.StatusNotFound)
+		writeAppError(w, apierror.NotFound("Chanson"))
 		return
 	}
 
