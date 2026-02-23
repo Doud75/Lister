@@ -4,29 +4,48 @@
     import { enhance } from '$app/forms';
     import { navigating } from '$app/stores';
 
-    let { form } = $props();
+    type ActionData = {
+        error?: string;
+        code?: string;
+    } | null;
+
+    let { form }: { form: ActionData } = $props();
+
+    const errorMessages: Record<string, string> = {
+        INVALID_CREDENTIALS: 'Identifiant ou mot de passe incorrect.',
+        INVALID_REQUEST: 'Requête invalide. Vérifiez vos informations.',
+        INTERNAL_ERROR: 'Une erreur serveur s\'est produite. Réessayez dans un instant.',
+    };
+
+    const errorMessage = $derived(
+        form
+            ? (form.code && errorMessages[form.code]) ?? form.error ?? 'Une erreur inattendue s\'est produite.'
+            : null
+    );
 </script>
 
 <div class="space-y-6">
     <div>
         <h2 class="text-center text-2xl font-bold leading-9 tracking-tight text-slate-900 dark:text-white">
-            Log in to your account
+            Se connecter
         </h2>
     </div>
 
     <form method="POST" use:enhance class="space-y-6">
-        <Input label="Username" id="username" name="username" required />
-        <Input label="Password" id="password" name="password" type="password" required togglePasswordVisibility={true}/>
+        <Input label="Nom d'utilisateur" id="username" name="username" required />
+        <Input label="Mot de passe" id="password" name="password" type="password" required togglePasswordVisibility={true}/>
 
-        {#if form?.error}
-            <p class="text-center text-sm text-red-500">{form.error}</p>
+        {#if errorMessage}
+            <p class="rounded-md bg-red-50 p-3 text-center text-sm font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400">
+                {errorMessage}
+            </p>
         {/if}
 
         <Button isLoading={$navigating?.type === 'form'}>
             {#if $navigating?.type === 'form'}
-                Logging in...
+                Connexion...
             {:else}
-                Log In
+                Se connecter
             {/if}
         </Button>
     </form>

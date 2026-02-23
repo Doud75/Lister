@@ -2,9 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"setlist/api/apierror"
 	"setlist/api/middleware"
 	"setlist/api/model"
+	"setlist/api/repository"
 	"setlist/api/service"
 	"strconv"
 )
@@ -18,7 +21,7 @@ func (h BandHandler) GetMembers(w http.ResponseWriter, r *http.Request) {
 
 	members, err := h.UserService.GetBandMembers(r.Context(), bandID)
 	if err != nil {
-		writeError(w, "Failed to retrieve members", http.StatusInternalServerError)
+		writeAppError(w, apierror.InternalError("récupération des membres"))
 		return
 	}
 	if members == nil {
@@ -34,13 +37,22 @@ func (h BandHandler) InviteMember(w http.ResponseWriter, r *http.Request) {
 
 	var payload service.InviteMemberPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	user, err := h.UserService.InviteMember(r.Context(), bandID, payload)
 	if err != nil {
-		writeError(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, repository.ErrDuplicateUsername) {
+			writeAppError(w, apierror.UsernameTaken())
+			return
+		}
+		var appErr *apierror.AppError
+		if errors.As(err, &appErr) {
+			writeAppError(w, appErr)
+			return
+		}
+		writeAppError(w, apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest))
 		return
 	}
 
@@ -54,13 +66,13 @@ func (h BandHandler) RemoveMember(w http.ResponseWriter, r *http.Request) {
 	userIDStr := r.PathValue("userId")
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
-		writeError(w, "Invalid user ID", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Identifiant utilisateur invalide."))
 		return
 	}
 
 	err = h.UserService.RemoveMember(r.Context(), bandID, userID)
 	if err != nil {
-		writeError(w, err.Error(), http.StatusInternalServerError)
+		writeAppError(w, apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest))
 		return
 	}
 

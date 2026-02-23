@@ -73,3 +73,8 @@ export type BandMember = {
     username: string;
     role: string;
 };
+
+export type ApiError = {
+    error: string;
+    code?: string;
+};

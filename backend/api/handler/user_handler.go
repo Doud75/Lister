@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"setlist/api/apierror"
 	"setlist/api/middleware"
 	"setlist/api/model"
 	"setlist/api/repository"
@@ -17,17 +18,26 @@ type UserHandler struct {
 func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	var payload service.AuthPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	response, err := h.UserService.Signup(r.Context(), payload)
 	if err != nil {
-		if errors.Is(err, repository.ErrDuplicateBand) || errors.Is(err, repository.ErrDuplicateUsername) {
-			writeError(w, err.Error(), http.StatusConflict)
+		if errors.Is(err, repository.ErrDuplicateUsername) {
+			writeAppError(w, apierror.UsernameTaken())
 			return
 		}
-		writeError(w, "Failed to register user", http.StatusInternalServerError)
+		if errors.Is(err, repository.ErrDuplicateBand) {
+			writeAppError(w, apierror.BandNameTaken())
+			return
+		}
+		var appErr *apierror.AppError
+		if errors.As(err, &appErr) {
+			writeAppError(w, appErr)
+			return
+		}
+		writeAppError(w, apierror.InternalError("inscription"))
 		return
 	}
 
@@ -39,13 +49,13 @@ func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var payload service.LoginPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	response, err := h.UserService.Login(r.Context(), payload)
 	if err != nil {
-		writeError(w, err.Error(), http.StatusUnauthorized)
+		writeAppError(w, apierror.InvalidCredentials())
 		return
 	}
 
@@ -56,33 +66,38 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
 	if !ok {
-		writeError(w, "Could not identify user from token", http.StatusInternalServerError)
+		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier l'utilisateur depuis le token."))
 		return
 	}
 
 	var payload service.UpdatePasswordPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeError(w, "Invalid request body", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
 		return
 	}
 
 	if payload.NewPassword == "" {
-		writeError(w, "New password cannot be empty", http.StatusBadRequest)
+		writeAppError(w, apierror.InvalidRequest("Le nouveau mot de passe ne peut pas être vide."))
 		return
 	}
 
 	err := h.UserService.UpdatePassword(r.Context(), userID, payload)
 	if err != nil {
 		if err.Error() == "invalid current password" {
-			writeError(w, err.Error(), http.StatusUnauthorized)
+			writeAppError(w, apierror.WrongCurrentPassword())
 			return
 		}
-		writeError(w, "Failed to update password", http.StatusInternalServerError)
+		var appErr *apierror.AppError
+		if errors.As(err, &appErr) {
+			writeAppError(w, appErr)
+			return
+		}
+		writeAppError(w, apierror.InternalError("mise à jour du mot de passe"))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Password updated successfully"})
+	json.NewEncoder(w).Encode(map[string]string{"message": "Mot de passe mis à jour avec succès."})
 }
 
 func (h UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +105,7 @@ func (h UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
 
 	users, err := h.UserService.SearchUsers(r.Context(), query)
 	if err != nil {
-		writeError(w, "Failed to search users", http.StatusInternalServerError)
+		writeAppError(w, apierror.InternalError("recherche d'utilisateurs"))
 		return
 	}
 	if users == nil {

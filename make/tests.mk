@@ -44,6 +44,12 @@ test-setlist: test-up run-playwright-setlist test-down
 test-song: test-up run-playwright-song test-down
 	@echo "✅ All Song tests finished."
 
+test-auth: test-up run-playwright-auth test-down
+	@echo "✅ All Auth tests finished."
+
+test-auth-login: test-up run-playwright-auth-login test-down
+	@echo "✅ Auth login test finished."
+
 test-settings: test-up run-playwright-settings test-down
 	@echo "✅ All Settings tests finished."
 
@@ -153,6 +159,14 @@ run-playwright-song:
 	@echo "--- Running SONG Playwright tests (directory) ---"
 	@cd frontend && npx playwright test tests/song/
 
+run-playwright-auth:
+	@echo "--- Running AUTH Playwright tests (directory) ---"
+	@cd frontend && npx playwright test tests/auth/
+
+run-playwright-auth-login:
+	@echo "--- Running AUTH LOGIN Playwright test ---"
+	@cd frontend && npx playwright test tests/auth/login.spec.ts
+
 run-playwright-song-list:
 	@echo "--- Running SONG LIST Playwright tests ---"
 	@cd frontend && npx playwright test tests/song/list.spec.ts
@@ -198,7 +212,7 @@ run-playwright-interlude-behavior:
 	@cd frontend && npx playwright test tests/interlude/behavior.spec.ts
 
 # --- Déclaration .PHONY pour toutes les cibles ---
-.PHONY: test-all test-unit test-unit-watch test test-setlist test-song test-settings test-interlude test-multi-group \
+.PHONY: test-all test-unit test-unit-watch test test-setlist test-song test-settings test-interlude test-multi-group test-auth test-auth-login \
 		test-setlist-actions test-setlist-detail test-setlist-add test-setlist-new test-setlist-duplicate \
 		test-song-list test-song-new test-song-edit test-song-detail \
 		test-settings-account test-settings-members \
@@ -209,4 +223,5 @@ run-playwright-interlude-behavior:
 		run-playwright-song run-playwright-song-list run-playwright-song-new run-playwright-song-edit run-playwright-song-detail \
 		run-playwright-multi-group \
 		run-playwright-settings run-playwright-settings-account run-playwright-settings-members \
-		run-playwright-interlude run-playwright-interlude-new run-playwright-interlude-behavior
+		run-playwright-interlude run-playwright-interlude-new run-playwright-interlude-behavior \
+		run-playwright-auth run-playwright-auth-login

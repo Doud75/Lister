@@ -62,7 +62,7 @@
                             <li class="flex items-center justify-between gap-3 py-3">
                                 <div class="min-w-0 flex-grow">
                                     <div class="flex items-center gap-3">
-                                        <a href="/song/{song.id}" class="truncate font-semibold text-slate-800 hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400">{song.title}</a>
+                                        <a href="/song/{song.id}" class="truncate font-semibold text-indigo-600 hover:underline dark:text-indigo-400">{song.title}</a>
                                     </div>
                                     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
                                         {#if song.duration_seconds.Valid}
