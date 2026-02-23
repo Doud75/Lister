@@ -57,7 +57,7 @@ test.describe.serial('Settings - Account Page', () => {
         await page.getByLabel("Nom d'utilisateur").fill(userForTest);
         await page.locator('#password').fill('password123');
         await page.getByRole('button', { name: 'Se connecter' }).click();
-        await expect(page.getByText('invalid credentials')).toBeVisible();
+        await expect(page.getByText('Identifiant ou mot de passe incorrect.')).toBeVisible();
 
         await page.locator('#password').fill(newPassword);
         await page.getByRole('button', { name: 'Se connecter' }).click();
