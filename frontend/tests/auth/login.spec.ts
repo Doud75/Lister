@@ -7,7 +7,7 @@ test.describe('Login Page', () => {
 
     test('should display an error message with invalid credentials', async ({ page }) => {
         await page.getByLabel("Nom d'utilisateur").fill('utilisateur_inexistant');
-        await page.getByLabel('Mot de passe').fill('mauvaisMotDePasse1!');
+        await page.locator('#password').fill('mauvaisMotDePasse1!');
 
         await page.getByRole('button', { name: 'Se connecter' }).click();
 
@@ -18,7 +18,7 @@ test.describe('Login Page', () => {
 
     test('should display an error message with wrong password', async ({ page }) => {
         await page.getByLabel("Nom d'utilisateur").fill('testuser');
-        await page.getByLabel('Mot de passe').fill('WrongPassword9!');
+        await page.locator('#password').fill('WrongPassword9!');
 
         await page.getByRole('button', { name: 'Se connecter' }).click();
 
@@ -29,7 +29,7 @@ test.describe('Login Page', () => {
 
     test('should redirect to home on successful login', async ({ page }) => {
         await page.getByLabel("Nom d'utilisateur").fill('testuser');
-        await page.getByLabel('Mot de passe').fill('password123');
+        await page.locator('#password').fill('password123');
 
         await page.getByRole('button', { name: 'Se connecter' }).click();
 

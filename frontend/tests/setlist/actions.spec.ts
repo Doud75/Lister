@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 async function login(page: Page, user: string, pass: string) {
     await page.goto('/login');
     await page.getByLabel("Nom d'utilisateur").fill(user);
-    await page.getByLabel('Mot de passe').fill(pass);
+    await page.locator('#password').fill(pass);
     await page.getByRole('button', { name: 'Se connecter' }).click();
     await page.waitForURL('/');
 }
