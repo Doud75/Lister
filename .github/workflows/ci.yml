@@ -54,6 +54,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: lint-and-build
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -78,6 +83,8 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run E2E Tests
+        env:
+          REDIS_URL: redis://localhost:6379
         run: make test
 
       - name: Upload Playwright report

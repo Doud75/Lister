@@ -9,6 +9,7 @@ type Config struct {
 	DatabaseURL      string
 	JWTSecret        string
 	RateLimitEnabled bool
+	RedisURL         string
 }
 
 func Load() Config {
@@ -31,5 +32,6 @@ func Load() Config {
 		DatabaseURL:      dbURL,
 		JWTSecret:        jwtSecret,
 		RateLimitEnabled: rateLimitEnabled,
+		RedisURL:         os.Getenv("REDIS_URL"),
 	}
 }
