@@ -48,9 +48,9 @@ describe('calculateTotalDuration', () => {
 
     it('should calculate the total duration of all items', () => {
         const items: SetlistItem[] = [
-            { id: 1, duration_seconds: { Int32: 180, Valid: true } },
-            { id: 2, duration_seconds: { Int32: 240, Valid: true } },
-            { id: 3, duration_seconds: { Int32: 30, Valid: true } },
+            { id: 1, duration_seconds: 180 },
+            { id: 2, duration_seconds: 240 },
+            { id: 3, duration_seconds: 30 },
         ] as SetlistItem[];
 
         expect(calculateTotalDuration(items)).toBe(450);
@@ -58,9 +58,9 @@ describe('calculateTotalDuration', () => {
 
     it('should handle items with no duration', () => {
         const items: SetlistItem[] = [
-            { id: 1, duration_seconds: { Int32: 180, Valid: true } },
-            { id: 2, duration_seconds: { Int32: 0, Valid: false } },
-            { id: 3, duration_seconds: { Int32: 30, Valid: true } },
+            { id: 1, duration_seconds: 180 },
+            { id: 2, duration_seconds: null },
+            { id: 3, duration_seconds: 30 },
         ] as SetlistItem[];
 
         expect(calculateTotalDuration(items)).toBe(210);

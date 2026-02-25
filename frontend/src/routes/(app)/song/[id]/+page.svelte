@@ -33,37 +33,37 @@
         </div>
 
         <div class="mt-4 flex flex-wrap items-center gap-2">
-            {#if song.album_name?.Valid}
+            {#if song.album_name}
                 <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
-                    {song.album_name.String}
+                    {song.album_name}
                 </span>
             {/if}
-            {#if song.song_key?.Valid}
+            {#if song.song_key}
                 <span class="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
-                    Tonalité : {song.song_key.String}
+                    Tonalité : {song.song_key}
                 </span>
             {/if}
-            {#if song.tempo?.Valid}
+            {#if song.tempo !== null}
                 <span class="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
-                    {song.tempo.Int32} BPM
+                    {song.tempo} BPM
                 </span>
             {/if}
-            {#if song.duration_seconds?.Valid}
+            {#if song.duration_seconds !== null}
                 <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
-                    {formatDuration(song.duration_seconds.Int32)}
+                    {formatDuration(song.duration_seconds)}
                 </span>
             {/if}
         </div>
 
-        {#if song.links?.Valid}
+        {#if song.links}
             <div class="mt-3">
                 <a
-                    href={song.links.String}
+                    href={song.links}
                     target="_blank"
                     rel="noopener noreferrer"
                     class="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
                 >
-                    {song.links.String} &nearr;
+                    {song.links} &nearr;
                 </a>
             </div>
         {/if}
@@ -73,9 +73,9 @@
         <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Paroles
         </h2>
-        {#if song.lyrics?.Valid && song.lyrics.String}
+        {#if song.lyrics}
             <p class="whitespace-pre-wrap leading-relaxed text-slate-800 dark:text-slate-100">
-                {song.lyrics.String}
+                {song.lyrics}
             </p>
         {:else}
             <p class="italic text-slate-400 dark:text-slate-500">

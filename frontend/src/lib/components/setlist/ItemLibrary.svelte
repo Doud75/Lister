@@ -77,7 +77,7 @@
                                 <input
                                         type="hidden"
                                         name="duration"
-                                        value={song.duration_seconds?.Int32 ?? 0}
+                                        value={song.duration_seconds ?? 0}
                                 />
                                 <button
                                         type="submit"
@@ -121,7 +121,7 @@
                                 <input
                                         type="hidden"
                                         name="duration"
-                                        value={interlude.duration_seconds?.Int32 ?? 0}
+                                        value={interlude.duration_seconds ?? 0}
                                 />
                                 <button
                                         type="submit"

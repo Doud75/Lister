@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"encoding/json"
 	"time"
 )
@@ -10,14 +9,14 @@ type Song struct {
 	ID              int             `json:"id"`
 	BandID          int             `json:"band_id"`
 	Title           string          `json:"title"`
-	DurationSeconds sql.NullInt32   `json:"duration_seconds"`
-	Tempo           sql.NullInt32   `json:"tempo"`
-	SongKey         sql.NullString  `json:"song_key"`
-	Lyrics          sql.NullString  `json:"lyrics"`
-	Chords          sql.NullString  `json:"chords"`
-	AlbumName       sql.NullString  `json:"album_name"`
+	DurationSeconds *int32          `json:"duration_seconds"`
+	Tempo           *int32          `json:"tempo"`
+	SongKey         *string         `json:"song_key"`
+	Lyrics          *string         `json:"lyrics"`
+	Chords          *string         `json:"chords"`
+	AlbumName       *string         `json:"album_name"`
 	Instrumentation json.RawMessage `json:"instrumentation"`
-	Notes           sql.NullString  `json:"notes"`
-	Links           sql.NullString  `json:"links"`
+	Notes           *string         `json:"notes"`
+	Links           *string         `json:"links"`
 	CreatedAt       time.Time       `json:"created_at"`
 }

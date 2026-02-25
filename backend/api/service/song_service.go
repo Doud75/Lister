@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"setlist/api/model"
 	"setlist/api/repository"
@@ -25,34 +24,30 @@ type SongService struct {
 	SongRepo repository.SongRepository
 }
 
+func ptrInt32(v *int) *int32 {
+	if v == nil {
+		return nil
+	}
+	i := int32(*v)
+	return &i
+}
+
 func (s SongService) Create(ctx context.Context, payload CreateSongPayload, bandID int) (model.Song, error) {
 	song := model.Song{
-		BandID: bandID,
-		Title:  payload.Title,
+		BandID:          bandID,
+		Title:           payload.Title,
+		DurationSeconds: ptrInt32(payload.DurationSeconds),
+		Tempo:           ptrInt32(payload.Tempo),
+		SongKey:         payload.SongKey,
+		Lyrics:          payload.Lyrics,
+		AlbumName:       payload.AlbumName,
+		Links:           payload.Links,
 	}
 
-	if payload.DurationSeconds != nil {
-		song.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}
-	}
-	if payload.Tempo != nil {
-		song.Tempo = sql.NullInt32{Int32: int32(*payload.Tempo), Valid: true}
-	}
-	if payload.SongKey != nil {
-		song.SongKey = sql.NullString{String: *payload.SongKey, Valid: true}
-	}
-	if payload.Lyrics != nil {
-		song.Lyrics = sql.NullString{String: *payload.Lyrics, Valid: true}
-	}
-	if payload.AlbumName != nil {
-		song.AlbumName = sql.NullString{String: *payload.AlbumName, Valid: true}
-	}
 	if payload.Instrumentation != nil {
 		song.Instrumentation = *payload.Instrumentation
 	} else {
 		song.Instrumentation = json.RawMessage("null")
-	}
-	if payload.Links != nil {
-		song.Links = sql.NullString{String: *payload.Links, Valid: true}
 	}
 
 	return s.SongRepo.CreateSong(ctx, song)
@@ -68,33 +63,21 @@ func (s SongService) GetByID(ctx context.Context, id int, bandID int) (model.Son
 
 func (s SongService) Update(ctx context.Context, id int, bandID int, payload UpdateSongPayload) (model.Song, error) {
 	song := model.Song{
-		ID:     id,
-		BandID: bandID,
-		Title:  payload.Title,
+		ID:              id,
+		BandID:          bandID,
+		Title:           payload.Title,
+		DurationSeconds: ptrInt32(payload.DurationSeconds),
+		Tempo:           ptrInt32(payload.Tempo),
+		SongKey:         payload.SongKey,
+		Lyrics:          payload.Lyrics,
+		AlbumName:       payload.AlbumName,
+		Links:           payload.Links,
 	}
 
-	if payload.DurationSeconds != nil {
-		song.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}
-	}
-	if payload.Tempo != nil {
-		song.Tempo = sql.NullInt32{Int32: int32(*payload.Tempo), Valid: true}
-	}
-	if payload.SongKey != nil {
-		song.SongKey = sql.NullString{String: *payload.SongKey, Valid: true}
-	}
-	if payload.Lyrics != nil {
-		song.Lyrics = sql.NullString{String: *payload.Lyrics, Valid: true}
-	}
-	if payload.AlbumName != nil {
-		song.AlbumName = sql.NullString{String: *payload.AlbumName, Valid: true}
-	}
 	if payload.Instrumentation != nil {
 		song.Instrumentation = *payload.Instrumentation
 	} else {
 		song.Instrumentation = json.RawMessage("null")
-	}
-	if payload.Links != nil {
-		song.Links = sql.NullString{String: *payload.Links, Valid: true}
 	}
 
 	return s.SongRepo.UpdateSong(ctx, song)

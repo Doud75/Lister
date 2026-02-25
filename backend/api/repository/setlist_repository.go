@@ -26,7 +26,7 @@ type SetlistRepository interface {
 	GetSetlistItemsBySetlistID(ctx context.Context, setlistID int) ([]model.SetlistItem, error)
 	AddItemToSetlist(ctx context.Context, item model.SetlistItem) (model.SetlistItem, error)
 	UpdateItemOrder(ctx context.Context, setlistID int, itemIDs []int) error
-	UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes sql.NullString) (model.SetlistItem, error)
+	UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes *string) (model.SetlistItem, error)
 	DeleteSetlistItem(ctx context.Context, itemID int, bandID int) error
 	CopyItemsToNewSetlist(ctx context.Context, tx DBTX, newSetlistID int, items []model.SetlistItem) error
 	BeginTx(ctx context.Context) (pgx.Tx, error)
@@ -158,13 +158,13 @@ func (r PgSetlistRepository) GetSetlistItemsBySetlistID(ctx context.Context, set
 }
 
 func (r PgSetlistRepository) AddItemToSetlist(ctx context.Context, item model.SetlistItem) (model.SetlistItem, error) {
-	var maxPosition sql.NullInt32
+	var maxPosition *int32
 	posQuery := `SELECT MAX(position) FROM setlist_items WHERE setlist_id = $1`
 	r.DB.QueryRow(ctx, posQuery, item.SetlistID).Scan(&maxPosition)
 
 	nextPos := 0
-	if maxPosition.Valid {
-		nextPos = int(maxPosition.Int32) + 1
+	if maxPosition != nil {
+		nextPos = int(*maxPosition) + 1
 	}
 	item.Position = nextPos
 
@@ -207,7 +207,7 @@ func (r PgSetlistRepository) UpdateItemOrder(ctx context.Context, setlistID int,
 	return tx.Commit(ctx)
 }
 
-func (r PgSetlistRepository) UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes sql.NullString) (model.SetlistItem, error) {
+func (r PgSetlistRepository) UpdateSetlistItem(ctx context.Context, itemID int, bandID int, notes *string) (model.SetlistItem, error) {
 	var item model.SetlistItem
 	query := `
 		UPDATE setlist_items si SET notes = $1

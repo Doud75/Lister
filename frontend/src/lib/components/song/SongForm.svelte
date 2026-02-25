@@ -36,12 +36,12 @@
     function getFormValues(s: Partial<Song>): FormSong {
         return {
             title: s?.title ?? '',
-            album_name: s?.album_name?.String ?? '',
-            song_key: s?.song_key?.String ?? '',
-            duration_seconds: s?.duration_seconds?.Int32?.toString() ?? '',
-            tempo: s?.tempo?.Int32?.toString() ?? '',
-            lyrics: s?.lyrics?.String ?? '',
-            links: s?.links?.String ?? ''
+            album_name: s?.album_name ?? '',
+            song_key: s?.song_key ?? '',
+            duration_seconds: s?.duration_seconds?.toString() ?? '',
+            tempo: s?.tempo?.toString() ?? '',
+            lyrics: s?.lyrics ?? '',
+            links: s?.links ?? ''
         };
     }
 

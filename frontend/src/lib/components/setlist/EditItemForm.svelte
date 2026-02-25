@@ -11,10 +11,10 @@
         close: () => void;
     }>();
 
-    let modalTitle = $state(untrack(() => item.title.String || ''));
-    let modalSpeaker = $state(untrack(() => item.speaker?.String || ''));
-    let modalDuration = $state(untrack(() => item.duration_seconds?.Int32?.toString() || ''));
-    let modalNotes = $state(untrack(() => item.notes?.String || ''));
+    let modalTitle = $state(untrack(() => item.title ?? ''));
+    let modalSpeaker = $state(untrack(() => item.speaker ?? ''));
+    let modalDuration = $state(untrack(() => item.duration_seconds?.toString() ?? ''));
+    let modalNotes = $state(untrack(() => item.notes ?? ''));
     
 
 
@@ -29,7 +29,7 @@
 
 {#if item.item_type === 'song'}
     <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-        Edit Note for {item.title.String}
+        Edit Note for {item.title ?? ''}
     </h3>
     <form method="POST" action="?/updateSongNotes" use:enhance={commonEnhance} class="mt-4 space-y-4">
         <input type="hidden" name="itemId" value={item.id} />
@@ -55,7 +55,7 @@
             use:enhance={commonEnhance}
             class="mt-4 space-y-4"
     >
-        <input type="hidden" name="interludeId" value={item.interlude_id.Int32} />
+        <input type="hidden" name="interludeId" value={item.interlude_id} />
         <input type="hidden" name="itemId" value={item.id} />
         <Input label="Title" id="title" name="title" bind:value={modalTitle} required />
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -12,6 +11,9 @@ import (
 
 	"go.uber.org/mock/gomock"
 )
+
+func ptr32(v int32) *int32    { return &v }
+func ptrStr(v string) *string { return &v }
 
 func TestSongService_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -37,10 +39,10 @@ func TestSongService_Create(t *testing.T) {
 	expectedSong := model.Song{
 		BandID:          bandID,
 		Title:           payload.Title,
-		DurationSeconds: sql.NullInt32{Int32: int32(duration), Valid: true},
-		Tempo:           sql.NullInt32{Int32: int32(tempo), Valid: true},
-		SongKey:         sql.NullString{String: key, Valid: true},
-		Lyrics:          sql.NullString{String: lyrics, Valid: true},
+		DurationSeconds: ptr32(int32(duration)),
+		Tempo:           ptr32(int32(tempo)),
+		SongKey:         ptrStr(key),
+		Lyrics:          ptrStr(lyrics),
 		Instrumentation: json.RawMessage("null"),
 	}
 
@@ -82,11 +84,11 @@ func TestSongService_GetByID(t *testing.T) {
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		mockRepo.EXPECT().GetSongByID(ctx, songID, bandID).Return(model.Song{}, sql.ErrNoRows)
+		mockRepo.EXPECT().GetSongByID(ctx, songID, bandID).Return(model.Song{}, errors.New("not found"))
 
 		_, err := svc.GetByID(ctx, songID, bandID)
-		if !errors.Is(err, sql.ErrNoRows) {
-			t.Errorf("expected sql.ErrNoRows, got %v", err)
+		if err == nil {
+			t.Errorf("expected error, got nil")
 		}
 	})
 }

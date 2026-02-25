@@ -51,21 +51,21 @@ function generatePdf(setlist: SetlistDetails, totalDurationSeconds: number, opti
         if (item.item_type === 'song') {
             doc.setFontSize(options.fontSizes.itemTitle);
             doc.setFont('helvetica', 'bold');
-            doc.text(`${songCounter}. ${item.title.String}`, margin, yPos);
+            doc.text(`${songCounter}. ${item.title ?? ''}`, margin, yPos);
             songCounter++;
             yPos += lineHeight * options.lineHeightMultiplier;
 
-            if (options.includeNotes && item.notes?.Valid && item.notes.String) {
+            if (options.includeNotes && item.notes) {
                 doc.setFontSize(options.fontSizes.itemNotes);
                 doc.setFont('helvetica', 'italic');
-                const notesLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
+                const notesLines = doc.splitTextToSize(item.notes, doc.internal.pageSize.getWidth() - margin * 2 - 5);
                 checkPageBreak(notesLines.length * lineHeight * 0.8);
                 doc.text(notesLines, margin + 5, yPos);
                 yPos += notesLines.length * lineHeight * 0.9;
             }
         } else if (item.item_type === 'interlude') {
-            const speakerName = (item.speaker?.Valid && item.speaker.String) ? item.speaker.String : null;
-            const title = item.title.String || 'Interlude';
+            const speakerName = item.speaker || null;
+            const title = item.title || 'Interlude';
             let interludeText: string;
 
             if (options.interludeFormat === 'speakerAndTitle') {
@@ -92,10 +92,10 @@ function generatePdf(setlist: SetlistDetails, totalDurationSeconds: number, opti
             doc.text(interludeText, margin + 2, yPos);
             yPos += lineHeight * options.lineHeightMultiplier;
 
-            if (options.includeNotes && item.notes?.Valid && item.notes.String) {
+            if (options.includeNotes && item.notes) {
                 doc.setFontSize(options.fontSizes.itemNotes);
                 doc.setFont('helvetica', 'italic');
-                const scriptLines = doc.splitTextToSize(item.notes.String, doc.internal.pageSize.getWidth() - margin * 2 - 5);
+                const scriptLines = doc.splitTextToSize(item.notes, doc.internal.pageSize.getWidth() - margin * 2 - 5);
                 checkPageBreak(scriptLines.length * lineHeight * 0.8);
                 doc.text(scriptLines, margin + 5, yPos);
                 yPos += scriptLines.length * lineHeight * 0.9;

@@ -11,7 +11,6 @@ package mocks
 
 import (
 	context "context"
-	sql "database/sql"
 	reflect "reflect"
 	model "setlist/api/model"
 	repository "setlist/api/repository"
@@ -320,7 +319,7 @@ func (mr *MockSetlistRepositoryMockRecorder) UpdateSetlist(ctx, setlist any) *go
 }
 
 // UpdateSetlistItem mocks base method.
-func (m *MockSetlistRepository) UpdateSetlistItem(ctx context.Context, itemID, bandID int, notes sql.NullString) (model.SetlistItem, error) {
+func (m *MockSetlistRepository) UpdateSetlistItem(ctx context.Context, itemID, bandID int, notes *string) (model.SetlistItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateSetlistItem", ctx, itemID, bandID, notes)
 	ret0, _ := ret[0].(model.SetlistItem)

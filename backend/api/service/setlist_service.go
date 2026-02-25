@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"regexp"
@@ -114,16 +113,22 @@ func (s SetlistService) GetDetails(ctx context.Context, id int, bandID int) (Set
 }
 
 func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddItemPayload) (model.SetlistItem, error) {
+	var notes *string
+	if payload.Notes != "" {
+		notes = &payload.Notes
+	}
 	item := model.SetlistItem{
 		SetlistID: setlistID,
 		ItemType:  payload.ItemType,
-		Notes:     sql.NullString{String: payload.Notes, Valid: payload.Notes != ""},
+		Notes:     notes,
 	}
 
 	if payload.ItemType == "song" {
-		item.SongID = sql.NullInt32{Int32: int32(payload.ItemID), Valid: true}
+		itemID := int32(payload.ItemID)
+		item.SongID = &itemID
 	} else if payload.ItemType == "interlude" {
-		item.InterludeID = sql.NullInt32{Int32: int32(payload.ItemID), Valid: true}
+		itemID := int32(payload.ItemID)
+		item.InterludeID = &itemID
 		bandID, ok := ctx.Value(middleware.BandIDKey).(int)
 		if !ok {
 			return model.SetlistItem{}, errors.New("band ID not found in context")
@@ -147,7 +152,10 @@ func (s SetlistService) UpdateOrder(ctx context.Context, setlistID int, payload 
 }
 
 func (s SetlistService) UpdateItem(ctx context.Context, itemID int, bandID int, payload UpdateItemPayload) (model.SetlistItem, error) {
-	notes := sql.NullString{String: payload.Notes, Valid: payload.Notes != ""}
+	var notes *string
+	if payload.Notes != "" {
+		notes = &payload.Notes
+	}
 	return s.SetlistRepo.UpdateSetlistItem(ctx, itemID, bandID, notes)
 }
 
