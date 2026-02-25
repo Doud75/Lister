@@ -24,6 +24,7 @@ type SetlistItemBase = {
     title: string | null;
     duration_seconds: number | null;
     notes: string | null;
+    transition_duration_seconds: number;
 };
 
 export type SetlistSongItem = SetlistItemBase & {
