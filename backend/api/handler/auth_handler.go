@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"setlist/api/apierror"
@@ -18,43 +17,37 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func (h AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	var payload RefreshTokenRequest
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+func (h AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) error {
+	payload, err := DecodeJSON[RefreshTokenRequest](r)
+	if err != nil {
+		return err
 	}
 
 	if payload.RefreshToken == "" {
-		writeAppError(w, apierror.InvalidRequest("Le token de rafraîchissement est requis."))
-		return
+		return apierror.InvalidRequest("Le token de rafraîchissement est requis.")
 	}
 
 	response, err := h.AuthService.RefreshAccessToken(r.Context(), payload.RefreshToken)
 	if err != nil {
 		log.Printf("[AUTH] Refresh token failed: %v", err)
-		writeAppError(w, apierror.InvalidRefreshToken())
-		return
+		return apierror.InvalidRefreshToken()
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	RespondOK(w, response)
+	return nil
 }
 
-func (h AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	var payload RefreshTokenRequest
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+func (h AuthHandler) Logout(w http.ResponseWriter, r *http.Request) error {
+	payload, err := DecodeJSON[RefreshTokenRequest](r)
+	if err != nil {
+		return err
 	}
 
 	if payload.RefreshToken != "" {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{"message": "Déconnexion réussie."})
-			return
+			RespondOK(w, map[string]string{"message": "Déconnexion réussie."})
+			return nil
 		}
 
 		tokenString := ""
@@ -78,7 +71,6 @@ func (h AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Déconnexion réussie."})
+	RespondOK(w, map[string]string{"message": "Déconnexion réussie."})
+	return nil
 }

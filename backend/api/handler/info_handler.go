@@ -1,10 +1,8 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 	"setlist/api/apierror"
-	"setlist/api/middleware"
 	"setlist/api/repository"
 )
 
@@ -13,38 +11,35 @@ type InfoHandler struct {
 	UserRepo repository.UserRepository
 }
 
-func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
-	bandID, ok2 := r.Context().Value(middleware.BandIDKey).(int)
-	if !ok || !ok2 {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier l'utilisateur depuis le token."))
-		return
+func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) error {
+	userID, err := GetUserID(r)
+	if err != nil {
+		return err
+	}
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
 	}
 
 	user, err := h.InfoRepo.GetUserByID(r.Context(), userID)
 	if err != nil {
-		writeAppError(w, apierror.NotFound("Utilisateur"))
-		return
+		return apierror.NotFound("Utilisateur")
 	}
 
 	band, err := h.InfoRepo.GetBandByID(r.Context(), bandID)
 	if err != nil {
-		writeAppError(w, apierror.NotFound("Groupe"))
-		return
+		return apierror.NotFound("Groupe")
 	}
 
 	role, err := h.UserRepo.GetUserRoleInBand(r.Context(), userID, bandID)
 	if err != nil {
-		writeAppError(w, apierror.NotFound("Rôle utilisateur"))
-		return
+		return apierror.NotFound("Rôle utilisateur")
 	}
 
-	response := map[string]string{
+	RespondOK(w, map[string]string{
 		"username":  user.Username,
 		"band_name": band.Name,
 		"role":      role,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	})
+	return nil
 }

@@ -1,66 +1,71 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 	"setlist/api/apierror"
-	"setlist/api/middleware"
 	"setlist/api/service"
-	"strconv"
 )
 
 type InterludeHandler struct {
 	InterludeService service.InterludeService
 }
 
-func (h InterludeHandler) CreateInterlude(w http.ResponseWriter, r *http.Request) {
-	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+func (h InterludeHandler) CreateInterlude(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
 
-	var payload service.CreateInterludePayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	payload, err := DecodeJSON[service.CreateInterludePayload](r)
+	if err != nil {
+		return err
 	}
 
 	createdInterlude, err := h.InterludeService.Create(r.Context(), payload, bandID)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("création d'interlude"))
-		return
+		return apierror.InternalError("création d'interlude")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(createdInterlude)
+	RespondCreated(w, createdInterlude)
+	return nil
 }
 
-func (h InterludeHandler) GetInterludes(w http.ResponseWriter, r *http.Request) {
-	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
+func (h InterludeHandler) GetInterludes(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
+
 	interludes, err := h.InterludeService.GetAllForBand(r.Context(), bandID)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("récupération des interludes"))
-		return
+		return apierror.InternalError("récupération des interludes")
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(interludes)
+
+	RespondOK(w, interludes)
+	return nil
 }
 
-func (h InterludeHandler) UpdateInterlude(w http.ResponseWriter, r *http.Request) {
-	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
-	idStr := r.PathValue("id")
-	id, _ := strconv.Atoi(idStr)
+func (h InterludeHandler) UpdateInterlude(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
 
-	var payload service.UpdateInterludePayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	id, err := GetIntParam(r, "id")
+	if err != nil {
+		return apierror.InvalidRequest("Identifiant d'interlude invalide.")
+	}
+
+	payload, err := DecodeJSON[service.UpdateInterludePayload](r)
+	if err != nil {
+		return err
 	}
 
 	updatedInterlude, err := h.InterludeService.Update(r.Context(), id, bandID, payload)
 	if err != nil {
-		writeAppError(w, apierror.NotFound("Interlude"))
-		return
+		return apierror.NotFound("Interlude")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updatedInterlude)
+	RespondOK(w, updatedInterlude)
+	return nil
 }
