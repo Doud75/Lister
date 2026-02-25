@@ -1,11 +1,9 @@
 package handler
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"setlist/api/apierror"
-	"setlist/api/middleware"
 	"setlist/api/model"
 	"setlist/api/repository"
 	"setlist/api/service"
@@ -15,103 +13,85 @@ type UserHandler struct {
 	UserService service.UserService
 }
 
-func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
-	var payload service.AuthPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) error {
+	payload, err := DecodeJSON[service.AuthPayload](r)
+	if err != nil {
+		return err
 	}
 
 	response, err := h.UserService.Signup(r.Context(), payload)
 	if err != nil {
 		if errors.Is(err, repository.ErrDuplicateUsername) {
-			writeAppError(w, apierror.UsernameTaken())
-			return
+			return apierror.UsernameTaken()
 		}
 		if errors.Is(err, repository.ErrDuplicateBand) {
-			writeAppError(w, apierror.BandNameTaken())
-			return
+			return apierror.BandNameTaken()
 		}
-		var appErr *apierror.AppError
-		if errors.As(err, &appErr) {
-			writeAppError(w, appErr)
-			return
+		if appErr := asAppError(err); appErr != nil {
+			return appErr
 		}
-		writeAppError(w, apierror.InternalError("inscription"))
-		return
+		return apierror.InternalError("inscription")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	RespondCreated(w, response)
+	return nil
 }
 
-func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var payload service.LoginPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) error {
+	payload, err := DecodeJSON[service.LoginPayload](r)
+	if err != nil {
+		return err
 	}
 
 	response, err := h.UserService.Login(r.Context(), payload)
 	if err != nil {
-		writeAppError(w, apierror.InvalidCredentials())
-		return
+		return apierror.InvalidCredentials()
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	RespondOK(w, response)
+	return nil
 }
 
-func (h UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
-	if !ok {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier l'utilisateur depuis le token."))
-		return
+func (h UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) error {
+	userID, err := GetUserID(r)
+	if err != nil {
+		return err
 	}
 
-	var payload service.UpdatePasswordPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	payload, err := DecodeJSON[service.UpdatePasswordPayload](r)
+	if err != nil {
+		return err
 	}
 
 	if payload.NewPassword == "" {
-		writeAppError(w, apierror.InvalidRequest("Le nouveau mot de passe ne peut pas être vide."))
-		return
+		return apierror.InvalidRequest("Le nouveau mot de passe ne peut pas être vide.")
 	}
 
-	err := h.UserService.UpdatePassword(r.Context(), userID, payload)
-	if err != nil {
+	if err := h.UserService.UpdatePassword(r.Context(), userID, payload); err != nil {
 		if err.Error() == "invalid current password" {
-			writeAppError(w, apierror.WrongCurrentPassword())
-			return
+			return apierror.WrongCurrentPassword()
 		}
-		var appErr *apierror.AppError
-		if errors.As(err, &appErr) {
-			writeAppError(w, appErr)
-			return
+		if appErr := asAppError(err); appErr != nil {
+			return appErr
 		}
-		writeAppError(w, apierror.InternalError("mise à jour du mot de passe"))
-		return
+		return apierror.InternalError("mise à jour du mot de passe")
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Mot de passe mis à jour avec succès."})
+	RespondOK(w, map[string]string{"message": "Mot de passe mis à jour avec succès."})
+	return nil
 }
 
-func (h UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
+func (h UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) error {
 	query := r.URL.Query().Get("q")
 
 	users, err := h.UserService.SearchUsers(r.Context(), query)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("recherche d'utilisateurs"))
-		return
+		return apierror.InternalError("recherche d'utilisateurs")
 	}
 	if users == nil {
 		users = make([]model.User, 0)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	RespondOK(w, users)
+	return nil
 }

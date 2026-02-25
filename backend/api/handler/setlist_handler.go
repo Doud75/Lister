@@ -1,240 +1,222 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 	"setlist/api/apierror"
-	"setlist/api/middleware"
 	"setlist/api/model"
 	"setlist/api/service"
-	"strconv"
 )
 
 type SetlistHandler struct {
 	SetlistService service.SetlistService
 }
 
-func (h SetlistHandler) CreateSetlist(w http.ResponseWriter, r *http.Request) {
-	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
-	if !ok {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier le groupe depuis le token."))
-		return
+func (h SetlistHandler) CreateSetlist(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
 	}
 
-	var payload service.CreateSetlistPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	payload, err := DecodeJSON[service.CreateSetlistPayload](r)
+	if err != nil {
+		return err
 	}
 
 	setlist, err := h.SetlistService.Create(r.Context(), payload, bandID)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("création de setlist"))
-		return
+		return apierror.InternalError("création de setlist")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(setlist)
+	RespondCreated(w, setlist)
+	return nil
 }
 
-func (h SetlistHandler) UpdateSetlist(w http.ResponseWriter, r *http.Request) {
-	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
-	if !ok {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier le groupe depuis le token."))
-		return
-	}
-
-	idStr := r.PathValue("id")
-	id, err := strconv.Atoi(idStr)
+func (h SetlistHandler) UpdateSetlist(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
 	if err != nil {
-		writeAppError(w, apierror.InvalidRequest("Identifiant de setlist invalide."))
-		return
+		return err
 	}
 
-	var payload service.UpdateSetlistPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	id, err := GetIntParam(r, "id")
+	if err != nil {
+		return apierror.InvalidRequest("Identifiant de setlist invalide.")
+	}
+
+	payload, err := DecodeJSON[service.UpdateSetlistPayload](r)
+	if err != nil {
+		return err
 	}
 
 	setlist, err := h.SetlistService.Update(r.Context(), id, bandID, payload)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("mise à jour de setlist"))
-		return
+		return apierror.InternalError("mise à jour de setlist")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(setlist)
+	RespondOK(w, setlist)
+	return nil
 }
 
-func (h SetlistHandler) DeleteSetlist(w http.ResponseWriter, r *http.Request) {
-	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
-	if !ok {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier le groupe depuis le token."))
-		return
-	}
-
-	idStr := r.PathValue("id")
-	id, err := strconv.Atoi(idStr)
+func (h SetlistHandler) DeleteSetlist(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
 	if err != nil {
-		writeAppError(w, apierror.InvalidRequest("Identifiant de setlist invalide."))
-		return
+		return err
 	}
 
-	err = h.SetlistService.Delete(r.Context(), id, bandID)
+	id, err := GetIntParam(r, "id")
 	if err != nil {
-		writeAppError(w, apierror.InternalError("suppression de setlist"))
-		return
+		return apierror.InvalidRequest("Identifiant de setlist invalide.")
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	if err := h.SetlistService.Delete(r.Context(), id, bandID); err != nil {
+		return apierror.InternalError("suppression de setlist")
+	}
+
+	RespondNoContent(w)
+	return nil
 }
 
-func (h SetlistHandler) GetSetlists(w http.ResponseWriter, r *http.Request) {
-	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
-	if !ok {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier le groupe depuis le token."))
-		return
+func (h SetlistHandler) GetSetlists(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
 	}
 
 	setlists, err := h.SetlistService.GetAllForBand(r.Context(), bandID)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("récupération des setlists"))
-		return
+		return apierror.InternalError("récupération des setlists")
 	}
-
 	if setlists == nil {
 		setlists = make([]model.Setlist, 0)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(setlists)
+	RespondOK(w, setlists)
+	return nil
 }
 
-func (h SetlistHandler) GetSetlistDetails(w http.ResponseWriter, r *http.Request) {
-	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
-	if !ok {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier le groupe depuis le token."))
-		return
+func (h SetlistHandler) GetSetlistDetails(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
 	}
 
-	idStr := r.PathValue("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := GetIntParam(r, "id")
 	if err != nil {
-		writeAppError(w, apierror.InvalidRequest("Identifiant de setlist invalide."))
-		return
+		return apierror.InvalidRequest("Identifiant de setlist invalide.")
 	}
 
 	details, err := h.SetlistService.GetDetails(r.Context(), id, bandID)
 	if err != nil {
-		writeAppError(w, apierror.NotFound("Setlist"))
-		return
+		return apierror.NotFound("Setlist")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(details)
+	RespondOK(w, details)
+	return nil
 }
 
-func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) {
-	setlistIDStr := r.PathValue("id")
-	setlistID, _ := strconv.Atoi(setlistIDStr)
+func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) error {
+	setlistID, err := GetIntParam(r, "id")
+	if err != nil {
+		return apierror.InvalidRequest("Identifiant de setlist invalide.")
+	}
 
-	var payload service.AddItemPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	payload, err := DecodeJSON[service.AddItemPayload](r)
+	if err != nil {
+		return err
 	}
 
 	item, err := h.SetlistService.AddItem(r.Context(), setlistID, payload)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("ajout d'élément à la setlist"))
-		return
+		return apierror.InternalError("ajout d'élément à la setlist")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(item)
+	RespondCreated(w, item)
+	return nil
 }
 
-func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) {
-	setlistIDStr := r.PathValue("id")
-	setlistID, _ := strconv.Atoi(setlistIDStr)
+func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) error {
+	setlistID, err := GetIntParam(r, "id")
+	if err != nil {
+		return apierror.InvalidRequest("Identifiant de setlist invalide.")
+	}
 
-	var payload service.UpdateOrderPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	payload, err := DecodeJSON[service.UpdateOrderPayload](r)
+	if err != nil {
+		return err
 	}
 
 	if err := h.SetlistService.UpdateOrder(r.Context(), setlistID, payload); err != nil {
-		writeAppError(w, apierror.InternalError("mise à jour de l'ordre"))
-		return
+		return apierror.InternalError("mise à jour de l'ordre")
 	}
 
-	w.WriteHeader(http.StatusOK)
+	RespondNoContent(w)
+	return nil
 }
 
-func (h SetlistHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
-	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
-	itemIDStr := r.PathValue("itemId")
-	itemID, _ := strconv.Atoi(itemIDStr)
+func (h SetlistHandler) UpdateItem(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
 
-	var payload service.UpdateItemPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	itemID, err := GetIntParam(r, "itemId")
+	if err != nil {
+		return apierror.InvalidRequest("Identifiant d'élément invalide.")
+	}
+
+	payload, err := DecodeJSON[service.UpdateItemPayload](r)
+	if err != nil {
+		return err
 	}
 
 	item, err := h.SetlistService.UpdateItem(r.Context(), itemID, bandID, payload)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("mise à jour d'élément"))
-		return
+		return apierror.InternalError("mise à jour d'élément")
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(item)
+
+	RespondOK(w, item)
+	return nil
 }
 
-func (h SetlistHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
-	bandID, _ := r.Context().Value(middleware.BandIDKey).(int)
-	itemIDStr := r.PathValue("itemId")
-	itemID, _ := strconv.Atoi(itemIDStr)
+func (h SetlistHandler) DeleteItem(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
+
+	itemID, err := GetIntParam(r, "itemId")
+	if err != nil {
+		return apierror.InvalidRequest("Identifiant d'élément invalide.")
+	}
 
 	if err := h.SetlistService.DeleteItem(r.Context(), itemID, bandID); err != nil {
-		writeAppError(w, apierror.InternalError("suppression d'élément"))
-		return
+		return apierror.InternalError("suppression d'élément")
 	}
-	w.WriteHeader(http.StatusNoContent)
+
+	RespondNoContent(w)
+	return nil
 }
 
-func (h SetlistHandler) DuplicateSetlist(w http.ResponseWriter, r *http.Request) {
-	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
-	if !ok {
-		writeAppError(w, apierror.NewServerError(apierror.ErrInternal, "Impossible d'identifier le groupe depuis le token."))
-		return
-	}
-
-	idStr := r.PathValue("id")
-	originalSetlistID, err := strconv.Atoi(idStr)
+func (h SetlistHandler) DuplicateSetlist(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
 	if err != nil {
-		writeAppError(w, apierror.InvalidRequest("Identifiant de setlist invalide."))
-		return
+		return err
 	}
 
-	var payload service.DuplicateSetlistPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		writeAppError(w, apierror.InvalidRequest("Corps de la requête invalide."))
-		return
+	originalSetlistID, err := GetIntParam(r, "id")
+	if err != nil {
+		return apierror.InvalidRequest("Identifiant de setlist invalide.")
+	}
+
+	payload, err := DecodeJSON[service.DuplicateSetlistPayload](r)
+	if err != nil {
+		return err
 	}
 
 	newSetlist, err := h.SetlistService.Duplicate(r.Context(), originalSetlistID, bandID, payload.Name, payload.Color)
 	if err != nil {
-		writeAppError(w, apierror.InternalError("duplication de setlist"))
-		return
+		return apierror.InternalError("duplication de setlist")
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newSetlist)
+	RespondCreated(w, newSetlist)
+	return nil
 }
