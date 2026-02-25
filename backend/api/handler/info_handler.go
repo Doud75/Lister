@@ -35,7 +35,7 @@ func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	cacheKey := cache.ProfileKey(userID)
+	cacheKey := cache.ProfileKey(userID, bandID)
 	if data, ok := cache.Get(r.Context(), h.Cache, cacheKey); ok {
 		var info userInfoResponse
 		if err := json.Unmarshal([]byte(data), &info); err == nil {

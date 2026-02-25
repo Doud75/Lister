@@ -39,8 +39,8 @@ func SongKey(bandID int) string {
 	return fmt.Sprintf("band:%d:songs", bandID)
 }
 
-func ProfileKey(userID int) string {
-	return fmt.Sprintf("user:%d:profile", userID)
+func ProfileKey(userID int, bandID int) string {
+	return fmt.Sprintf("user:%d:band:%d:profile", userID, bandID)
 }
 
 func SetlistKey(bandID int) string {
