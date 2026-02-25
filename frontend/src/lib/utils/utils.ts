@@ -18,7 +18,7 @@ export function formatItemDuration(seconds: number | null | undefined): string {
 
 export function calculateTotalDuration(items: SetlistItem[]): number {
     if (!items) return 0;
-    return items.reduce((total, item) => total + (item.duration_seconds?.Int32 ?? 0), 0);
+    return items.reduce((total, item) => total + (item.duration_seconds ?? 0), 0);
 }
 
 export function getSongNumber(currentItem: SetlistItem, allItems: SetlistItem[]): number | null {

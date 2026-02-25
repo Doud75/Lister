@@ -81,7 +81,7 @@
                                             {getSongNumber(item, items)}.
                                         </span>
                                         <span class="font-medium text-slate-800 dark:text-slate-100">
-                                            {item.title.String}
+                                        {item.title ?? ''}
                                         </span>
                                     </div>
                                 {:else}
@@ -100,7 +100,7 @@
                                         /></svg
                                         >
                                         <span class="font-medium italic text-teal-800 dark:text-teal-200"
-                                        >{item.title.String}</span
+                                        >{item.title ?? ''}</span
                                         >
                                     </div>
                                 {/if}

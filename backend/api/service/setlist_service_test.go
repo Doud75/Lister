@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"setlist/api/model"
@@ -108,7 +107,8 @@ func TestSetlistService_Duplicate(t *testing.T) {
 	mockRepo.EXPECT().GetSetlistByID(ctx, originalID, bandID).Return(model.Setlist{ID: originalID, BandID: bandID}, nil)
 
 	// Expect Get items
-	items := []model.SetlistItem{{ID: 1, SongID: sql.NullInt32{Int32: 5, Valid: true}}}
+	songID := int32(5)
+	items := []model.SetlistItem{{ID: 1, SongID: &songID}}
 	mockRepo.EXPECT().GetSetlistItemsBySetlistID(ctx, originalID).Return(items, nil)
 
 	// Expect Create new setlist within TX

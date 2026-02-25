@@ -1,47 +1,45 @@
-export type NullableString = { String: string; Valid: boolean };
-export type NullableInt = { Int32: number; Valid: boolean };
-
 export type Song = {
     id: number;
     title: string;
-    album_name: NullableString;
-    song_key: NullableString;
-    duration_seconds: NullableInt;
-    tempo: NullableInt;
-    lyrics: NullableString;
-    links: NullableString;
+    album_name: string | null;
+    song_key: string | null;
+    duration_seconds: number | null;
+    tempo: number | null;
+    lyrics: string | null;
+    links: string | null;
 };
 
 export type Interlude = {
     id: number;
     title: string;
-    speaker: NullableString;
-    script: NullableString;
-    duration_seconds: NullableInt;
+    speaker: string | null;
+    script: string | null;
+    duration_seconds: number | null;
 };
 
 
 type SetlistItemBase = {
     id: number;
     position: number;
-    title: NullableString;
-    duration_seconds: NullableInt;
-    notes: NullableString;
+    title: string | null;
+    duration_seconds: number | null;
+    notes: string | null;
+    transition_duration_seconds: number;
 };
 
 export type SetlistSongItem = SetlistItemBase & {
     item_type: 'song';
-    song_id: NullableInt;
-    tempo: NullableInt;
-    song_key: NullableString;
-    links: NullableString;
+    song_id: number | null;
+    tempo: number | null;
+    song_key: string | null;
+    links: string | null;
 };
 
 export type SetlistInterludeItem = SetlistItemBase & {
     item_type: 'interlude';
-    interlude_id: NullableInt;
-    speaker: NullableString;
-    script: NullableString;
+    interlude_id: number | null;
+    speaker: string | null;
+    script: string | null;
 };
 
 export type SetlistItem = SetlistSongItem | SetlistInterludeItem;

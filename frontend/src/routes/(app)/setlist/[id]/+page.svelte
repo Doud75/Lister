@@ -46,12 +46,12 @@
         }
         if (form?.updatedInterlude) {
             const index = items.findIndex(
-                (item) => item.item_type === 'interlude' && item.interlude_id?.Int32 === form.interlude.id
+                (item) => item.item_type === 'interlude' && item.interlude_id === form.interlude.id
             );
             if (index !== -1) {
                 const updatedItem = items[index] as SetlistItemType;
                 if (updatedItem.item_type === 'interlude') {
-                    updatedItem.title.String = form.interlude.title;
+                    updatedItem.title = form.interlude.title;
                     updatedItem.speaker = form.interlude.speaker;
                     updatedItem.duration_seconds = form.interlude.duration_seconds;
                     items[index] = updatedItem;

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"setlist/api/model"
 	"setlist/api/repository"
@@ -32,18 +31,11 @@ func (s InterludeService) Create(ctx context.Context, payload CreateInterludePay
 	}
 
 	interlude := model.Interlude{
-		BandID: bandID,
-		Title:  payload.Title,
-	}
-
-	if payload.Speaker != nil {
-		interlude.Speaker = sql.NullString{String: *payload.Speaker, Valid: true}
-	}
-	if payload.Script != nil {
-		interlude.Script = sql.NullString{String: *payload.Script, Valid: true}
-	}
-	if payload.DurationSeconds != nil {
-		interlude.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}
+		BandID:          bandID,
+		Title:           payload.Title,
+		Speaker:         payload.Speaker,
+		Script:          payload.Script,
+		DurationSeconds: ptrInt32(payload.DurationSeconds),
 	}
 
 	return s.InterludeRepo.CreateInterlude(ctx, interlude)
@@ -66,10 +58,10 @@ func (s InterludeService) Update(ctx context.Context, id int, bandID int, payloa
 	}
 
 	if payload.Speaker != nil {
-		interlude.Speaker = sql.NullString{String: *payload.Speaker, Valid: true}
+		interlude.Speaker = payload.Speaker
 	}
 	if payload.DurationSeconds != nil {
-		interlude.DurationSeconds = sql.NullInt32{Int32: int32(*payload.DurationSeconds), Valid: true}
+		interlude.DurationSeconds = ptrInt32(payload.DurationSeconds)
 	}
 
 	return s.InterludeRepo.UpdateInterlude(ctx, interlude)

@@ -115,32 +115,32 @@
                 {#if songNumber}
                     <span class="text-lg font-bold text-slate-400 dark:text-slate-500">{songNumber}.</span>
                 {/if}
-                <a
-                    href="/song/{item.song_id?.Int32}?from={$page.url.pathname}"
-                    class="truncate font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
-                >
-                    {item.title.String}
-                </a>
+                    <a
+                        href="/song/{item.song_id}?from={$page.url.pathname}"
+                        class="truncate font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                    >
+                        {item.title ?? ''}
+                    </a>
             </div>
             <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-slate-500 dark:text-slate-400">
-                {#if item.duration_seconds?.Valid}
-                    <span>Durée: {formatItemDuration(item.duration_seconds.Int32)}</span>
+                {#if item.duration_seconds !== null}
+                    <span>Durée: {formatItemDuration(item.duration_seconds)}</span>
                 {/if}
-                {#if item.tempo?.Valid}
+                {#if item.tempo !== null}
                     <span class="hidden sm:inline">&bull;</span>
-                    <span>Tempo: {item.tempo.Int32} BPM</span>
+                    <span>Tempo: {item.tempo} BPM</span>
                 {/if}
-                {#if item.song_key?.Valid}
+                {#if item.song_key !== null}
                     <span class="hidden sm:inline">&bull;</span>
-                    <span>Tonalité: {item.song_key.String}</span>
+                    <span>Tonalité: {item.song_key}</span>
                 {/if}
-                {#if item.links?.Valid}
+                {#if item.links !== null}
                     <span class="hidden sm:inline">&bull;</span>
-                    <a href={item.links.String} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
+                    <a href={item.links} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
                 {/if}
             </div>
-            {#if item.notes?.Valid && item.notes.String}
-                {@render notesSnippet(item.notes.String, 'text-slate-500 dark:text-slate-400')}
+            {#if item.notes}
+                {@render notesSnippet(item.notes, 'text-slate-500 dark:text-slate-400')}
             {/if}
 
         {:else if item.item_type === 'interlude'}
@@ -157,18 +157,18 @@
                             clip-rule="evenodd"
                     /></svg>
                     <p class="truncate font-semibold text-teal-900 dark:text-teal-200">
-                        {item.title.String}
+                        {item.title ?? ''}
                     </p>
                 </div>
                 <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 pl-8 text-xs text-teal-700 dark:text-teal-300">
-                    {#if item.speaker?.Valid && item.speaker.String}
-                        <span>Intervenant : <span class="font-medium">{item.speaker.String}</span></span>
+                    {#if item.speaker}
+                        <span>Intervenant : <span class="font-medium">{item.speaker}</span></span>
                         <span class="hidden sm:inline">&bull;</span>
                     {/if}
-                    <span>Durée : {formatItemDuration(item.duration_seconds.Int32)}</span>
+                    <span>Durée : {formatItemDuration(item.duration_seconds)}</span>
                 </div>
-                {#if item.notes?.Valid && item.notes.String}
-                    {@render notesSnippet(item.notes.String, 'text-teal-800 dark:text-teal-200')}
+                {#if item.notes}
+                    {@render notesSnippet(item.notes, 'text-teal-800 dark:text-teal-200')}
                 {/if}
             </div>
         {/if}

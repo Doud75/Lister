@@ -11,7 +11,7 @@
     const songsByAlbum = $derived.by(() => {
         const grouped: Record<string, Song[]> = {};
         for (const song of songs) {
-            const album = song.album_name?.Valid ? song.album_name.String : 'Sans Album';
+        const album = song.album_name ?? 'Sans Album';
             if (!grouped[album]) {
                 grouped[album] = [];
             }
@@ -65,20 +65,20 @@
                                         <a href="/song/{song.id}" class="truncate font-semibold text-indigo-600 hover:underline dark:text-indigo-400">{song.title}</a>
                                     </div>
                                     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                                        {#if song.duration_seconds.Valid}
-                                            <span>Durée: {formatDuration(song.duration_seconds.Int32)}</span>
+                                        {#if song.duration_seconds !== null}
+                                            <span>Durée: {formatDuration(song.duration_seconds)}</span>
                                         {/if}
-                                        {#if song.tempo.Valid}
+                                        {#if song.tempo !== null}
                                             <span class="hidden sm:inline">&bull;</span>
-                                            <span>Tempo: {song.tempo.Int32} BPM</span>
+                                            <span>Tempo: {song.tempo} BPM</span>
                                         {/if}
-                                        {#if song.song_key.Valid}
+                                        {#if song.song_key !== null}
                                             <span class="hidden sm:inline">&bull;</span>
-                                            <span>Tonalité: {song.song_key.String}</span>
+                                            <span>Tonalité: {song.song_key}</span>
                                         {/if}
-                                        {#if song.links.Valid}
+                                        {#if song.links !== null}
                                             <span class="hidden sm:inline">&bull;</span>
-                                            <a href={song.links.String} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
+                                            <a href={song.links} target="_blank" rel="noopener noreferrer" class="hover:underline">Lien</a>
                                         {/if}
                                     </div>
                                 </div>

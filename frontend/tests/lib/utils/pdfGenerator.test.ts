@@ -36,26 +36,46 @@ describe('PDF Generation', () => {
         id: 1,
         name: 'My Awesome Setlist!',
         color: '#ff0000',
+        is_archived: false,
         created_at: '2024-01-01T12:00:00Z',
         items: [
             {
                 id: 10,
                 item_type: 'song',
-                title: { String: 'First Song', Valid: true },
-                notes: { String: 'A little note', Valid: true }
+                position: 0,
+                title: 'First Song',
+                notes: 'A little note',
+                duration_seconds: null,
+                tempo: null,
+                song_key: null,
+                links: null,
+                song_id: null,
+                transition_duration_seconds: 0,
             },
             {
                 id: 11,
                 item_type: 'interlude',
-                title: { String: 'A quick talk', Valid: true },
-                speaker: { String: 'Lead', Valid: true },
-                notes: { String: 'Hello PDF world', Valid: true }
+                position: 1,
+                title: 'A quick talk',
+                speaker: 'Lead',
+                notes: 'Hello PDF world',
+                duration_seconds: null,
+                script: null,
+                interlude_id: null,
+                transition_duration_seconds: 0,
             },
             {
                 id: 12,
                 item_type: 'song',
-                title: { String: 'Second Song', Valid: true },
-                notes: { String: '', Valid: false }
+                position: 2,
+                title: 'Second Song',
+                notes: null,
+                duration_seconds: null,
+                tempo: null,
+                song_key: null,
+                links: null,
+                song_id: null,
+                transition_duration_seconds: 0,
             }
         ]
     } as SetlistDetails;
