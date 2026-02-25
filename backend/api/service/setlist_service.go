@@ -2,17 +2,25 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
 	"setlist/api/middleware"
 	"setlist/api/model"
 	"setlist/api/repository"
+	"setlist/cache"
+	"time"
+
+	"github.com/redis/go-redis/v9"
 )
+
+const setlistCacheTTL = 30 * time.Minute
 
 type SetlistService struct {
 	SetlistRepo   repository.SetlistRepository
 	InterludeRepo repository.InterludeRepository
+	Cache         *redis.Client
 }
 
 type CreateSetlistPayload struct {
@@ -60,7 +68,13 @@ func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload
 		return model.Setlist{}, fmt.Errorf("invalid color format: %s", payload.Color)
 	}
 
-	return s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.GetDB(), payload.Name, payload.Color, bandID)
+	created, err := s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.GetDB(), payload.Name, payload.Color, bandID)
+	if err != nil {
+		return model.Setlist{}, err
+	}
+
+	cache.Delete(ctx, s.Cache, cache.SetlistKey(bandID))
+	return created, nil
 }
 
 func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) (model.Setlist, error) {
@@ -85,7 +99,13 @@ func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload 
 		setlist.IsArchived = *payload.IsArchived
 	}
 
-	return s.SetlistRepo.UpdateSetlist(ctx, setlist)
+	updated, err := s.SetlistRepo.UpdateSetlist(ctx, setlist)
+	if err != nil {
+		return model.Setlist{}, err
+	}
+
+	cache.Delete(ctx, s.Cache, cache.SetlistKey(bandID))
+	return updated, nil
 }
 
 func (s SetlistService) Delete(ctx context.Context, setlistID int, bandID int) error {
@@ -93,11 +113,34 @@ func (s SetlistService) Delete(ctx context.Context, setlistID int, bandID int) e
 	if err != nil {
 		return errors.New("setlist not found or does not belong to the user's band")
 	}
-	return s.SetlistRepo.DeleteSetlist(ctx, setlistID, bandID)
+	if err := s.SetlistRepo.DeleteSetlist(ctx, setlistID, bandID); err != nil {
+		return err
+	}
+
+	cache.Delete(ctx, s.Cache, cache.SetlistKey(bandID))
+	return nil
 }
 
 func (s SetlistService) GetAllForBand(ctx context.Context, bandID int) ([]model.Setlist, error) {
-	return s.SetlistRepo.GetSetlistsByBandID(ctx, bandID)
+	key := cache.SetlistKey(bandID)
+
+	if data, ok := cache.Get(ctx, s.Cache, key); ok {
+		var setlists []model.Setlist
+		if err := json.Unmarshal([]byte(data), &setlists); err == nil {
+			return setlists, nil
+		}
+	}
+
+	setlists, err := s.SetlistRepo.GetSetlistsByBandID(ctx, bandID)
+	if err != nil {
+		return nil, err
+	}
+
+	if data, err := json.Marshal(setlists); err == nil {
+		cache.Set(ctx, s.Cache, key, string(data), setlistCacheTTL)
+	}
+
+	return setlists, nil
 }
 
 func (s SetlistService) GetDetails(ctx context.Context, id int, bandID int) (SetlistDetails, error) {
@@ -189,5 +232,10 @@ func (s SetlistService) Duplicate(ctx context.Context, originalSetlistID int, ba
 		return model.Setlist{}, err
 	}
 
-	return newSetlist, tx.Commit(ctx)
+	if err := tx.Commit(ctx); err != nil {
+		return model.Setlist{}, err
+	}
+
+	cache.Delete(ctx, s.Cache, cache.SetlistKey(bandID))
+	return newSetlist, nil
 }

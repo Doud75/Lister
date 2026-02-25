@@ -43,6 +43,10 @@ func ProfileKey(userID int) string {
 	return fmt.Sprintf("user:%d:profile", userID)
 }
 
+func SetlistKey(bandID int) string {
+	return fmt.Sprintf("band:%d:setlists", bandID)
+}
+
 func Get(ctx context.Context, client *redis.Client, key string) (string, bool) {
 	if client == nil {
 		return "", false

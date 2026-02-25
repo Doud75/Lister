@@ -44,7 +44,7 @@ func main() {
 	infoHandler := handler.InfoHandler{InfoRepo: infoRepo, UserRepo: userRepo, Cache: redisClient}
 
 	setlistRepo := &repository.PgSetlistRepository{DB: dbPool}
-	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo}
+	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo, Cache: redisClient}
 	setlistHandler := handler.SetlistHandler{SetlistService: setlistService}
 
 	songRepo := &repository.PgSongRepository{DB: dbPool}
