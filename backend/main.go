@@ -8,6 +8,7 @@ import (
 	"setlist/api/middleware"
 	"setlist/api/repository"
 	"setlist/api/service"
+	"setlist/cache"
 	"setlist/config"
 	"setlist/db"
 )
@@ -16,6 +17,8 @@ func main() {
 	cfg := config.Load()
 	dbPool := db.NewConnection(cfg.DatabaseURL)
 	defer dbPool.Close()
+
+	redisClient := cache.NewClient(cfg.RedisURL)
 
 	userRepo := &repository.PgUserRepository{DB: dbPool}
 	refreshTokenRepo := &repository.PgRefreshTokenRepository{DB: dbPool}
@@ -38,14 +41,14 @@ func main() {
 	interludeHandler := handler.InterludeHandler{InterludeService: interludeService}
 
 	infoRepo := &repository.PgInfoRepository{DB: dbPool}
-	infoHandler := handler.InfoHandler{InfoRepo: infoRepo, UserRepo: userRepo}
+	infoHandler := handler.InfoHandler{InfoRepo: infoRepo, UserRepo: userRepo, Cache: redisClient}
 
 	setlistRepo := &repository.PgSetlistRepository{DB: dbPool}
-	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo}
+	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo, Cache: redisClient}
 	setlistHandler := handler.SetlistHandler{SetlistService: setlistService}
 
 	songRepo := &repository.PgSongRepository{DB: dbPool}
-	songService := service.SongService{SongRepo: songRepo}
+	songService := service.SongService{SongRepo: songRepo, Cache: redisClient}
 	songHandler := handler.SongHandler{SongService: songService}
 
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)

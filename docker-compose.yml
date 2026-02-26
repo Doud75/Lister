@@ -1,6 +1,4 @@
-version: '3.8'
-
-services:  
+services:
   backend:
     build:
       context: ./backend
@@ -13,6 +11,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
   frontend:
     build:
@@ -39,6 +39,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
     networks:
       - app-network
 

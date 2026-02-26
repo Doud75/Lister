@@ -32,4 +32,10 @@ docker-clean-project: down
 	@docker images -a --filter "label=com.docker.compose.project=setlist-pwa" -q | xargs -r docker rmi
 	docker builder prune
 
-.PHONY: up down logs shell-front shell-back shell-db docker-clean docker-clean-all docker-clean-cache docker-clean-project
+redis-cli:
+	docker compose exec redis redis-cli
+
+redis-flush:
+	docker compose exec redis redis-cli FLUSHALL
+
+.PHONY: up down logs shell-front shell-back shell-db docker-clean docker-clean-all docker-clean-cache docker-clean-project redis-cli redis-flush
