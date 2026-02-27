@@ -64,11 +64,14 @@ test.describe('Dashboard', () => {
 
         // Go to dashboard and switch back to band1
         await page.goto('/dashboard');
-        await expect(page.getByText(band1)).toBeVisible();
-        await expect(page.getByText(band2)).toBeVisible();
+
+        // Scope to main to avoid matching the navbar <select> options
+        const main = page.locator('main');
+        await expect(main.getByRole('button', { name: band1 })).toBeVisible();
+        await expect(main.getByRole('button', { name: band2 })).toBeVisible();
 
         // Click card for band1
-        await page.getByText(band1).click();
+        await main.getByRole('button', { name: band1 }).click();
         await page.waitForURL('/');
         await expect(page.getByRole('heading', { name: band1 })).toBeVisible();
     });
