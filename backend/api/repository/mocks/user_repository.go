@@ -71,36 +71,6 @@ func (mr *MockUserRepositoryMockRecorder) CreateBandAndUser(ctx, bandName, usern
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBandAndUser", reflect.TypeOf((*MockUserRepository)(nil).CreateBandAndUser), ctx, bandName, username, passwordHash)
 }
 
-// CreateBand mocks base method.
-func (m *MockUserRepository) CreateBand(ctx context.Context, name string, ownerUserID int) (model.Band, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateBand", ctx, name, ownerUserID)
-	ret0, _ := ret[0].(model.Band)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateBand indicates an expected call of CreateBand.
-func (mr *MockUserRepositoryMockRecorder) CreateBand(ctx, name, ownerUserID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBand", reflect.TypeOf((*MockUserRepository)(nil).CreateBand), ctx, name, ownerUserID)
-}
-
-// FindBandsWithRoleByUserID mocks base method.
-func (m *MockUserRepository) FindBandsWithRoleByUserID(ctx context.Context, userID int) ([]model.BandWithRole, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindBandsWithRoleByUserID", ctx, userID)
-	ret0, _ := ret[0].([]model.BandWithRole)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindBandsWithRoleByUserID indicates an expected call of FindBandsWithRoleByUserID.
-func (mr *MockUserRepositoryMockRecorder) FindBandsWithRoleByUserID(ctx, userID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindBandsWithRoleByUserID", reflect.TypeOf((*MockUserRepository)(nil).FindBandsWithRoleByUserID), ctx, userID)
-}
-
 // CreateUserAndAddToBand mocks base method.
 func (m *MockUserRepository) CreateUserAndAddToBand(ctx context.Context, bandID int, username, passwordHash, role string) (model.User, error) {
 	m.ctrl.T.Helper()

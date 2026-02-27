@@ -91,16 +91,15 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
 
-    if (decoded && decoded.exp * 1000 > Date.now()) {
+    if (decoded && decoded.exp * 1000 > Date.now() && activeBandId) {
         try {
             const userInfoUrl = `${BACKEND_URL}/user/info`;
-            const headers: Record<string, string> = {
-                'Authorization': `Bearer ${event.locals.token || token}`
-            };
-            if (activeBandId) {
-                headers['X-Band-ID'] = activeBandId;
-            }
-            const userInfoRes = await fetch(userInfoUrl, { headers });
+            const userInfoRes = await fetch(userInfoUrl, {
+                headers: {
+                    'Authorization': `Bearer ${event.locals.token || token}`,
+                    'X-Band-ID': activeBandId
+                }
+            });
 
             if (userInfoRes.ok) {
                 const userInfo = await userInfoRes.json();
