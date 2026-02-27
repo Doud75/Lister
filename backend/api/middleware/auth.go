@@ -64,6 +64,15 @@ func JWTAuthUserOnly(jwtSecret string) func(http.Handler) http.Handler {
 			}
 
 			ctx := context.WithValue(r.Context(), UserIDKey, claimsVal.UserID)
+
+			// Optionally inject BandID if the header is present, without checking membership.
+			// Band-scoped routes that require membership verification use JWTAuth instead.
+			if bandIDStr := r.Header.Get("X-Band-ID"); bandIDStr != "" {
+				if bandID, err := strconv.Atoi(bandIDStr); err == nil {
+					ctx = context.WithValue(ctx, BandIDKey, bandID)
+				}
+			}
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

@@ -65,6 +65,21 @@ export const handle: Handle = async ({ event, resolve }) => {
                     ...cookieOptions,
                     maxAge: 60 * 60 * 24 * 30
                 });
+
+                if (refreshData.bands && refreshData.bands.length > 0) {
+                    event.cookies.set('user_bands', JSON.stringify(refreshData.bands), {
+                        ...cookieOptions,
+                        maxAge: 60 * 60 * 24 * 30
+                    });
+                    const currentBandId = activeBandId ? parseInt(activeBandId) : null;
+                    const stillValid = currentBandId && refreshData.bands.some((b: { id: number }) => b.id === currentBandId);
+                    if (!stillValid) {
+                        event.cookies.set('active_band_id', refreshData.bands[0].id.toString(), {
+                            ...cookieOptions,
+                            maxAge: 60 * 60 * 24 * 30
+                        });
+                    }
+                }
                 
                 event.locals.token = refreshData.token;
                 decoded = jwtDecode<UserPayload>(refreshData.token);
