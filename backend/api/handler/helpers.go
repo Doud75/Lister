@@ -38,6 +38,11 @@ func GetBandID(r *http.Request) (int, error) {
 	return bandID, nil
 }
 
+func GetOptionalBandID(r *http.Request) (int, bool) {
+	bandID, ok := r.Context().Value(middleware.BandIDKey).(int)
+	return bandID, ok
+}
+
 func GetUserID(r *http.Request) (int, error) {
 	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
 	if !ok {

@@ -30,9 +30,21 @@ func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		return err
 	}
-	bandID, err := GetBandID(r)
+
+	bandID, hasBand := GetOptionalBandID(r)
+
+	user, err := h.InfoRepo.GetUserByID(r.Context(), userID)
 	if err != nil {
-		return err
+		return apierror.NotFound("Utilisateur")
+	}
+
+	if !hasBand {
+		RespondOK(w, userInfoResponse{
+			Username: user.Username,
+			BandName: "",
+			Role:     "",
+		})
+		return nil
 	}
 
 	cacheKey := cache.ProfileKey(userID, bandID)
@@ -42,11 +54,6 @@ func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) 
 			RespondOK(w, info)
 			return nil
 		}
-	}
-
-	user, err := h.InfoRepo.GetUserByID(r.Context(), userID)
-	if err != nil {
-		return apierror.NotFound("Utilisateur")
 	}
 
 	band, err := h.InfoRepo.GetBandByID(r.Context(), bandID)

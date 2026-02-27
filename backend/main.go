@@ -52,6 +52,7 @@ func main() {
 	songHandler := handler.SongHandler{SongService: songService}
 
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)
+	authMiddlewareUserOnly := middleware.JWTAuthUserOnly(cfg.JWTSecret)
 	adminMiddleware := middleware.AdminOnly(userRepo)
 	rateLimiter := middleware.NewRateLimiter(cfg.RateLimitEnabled)
 
@@ -61,9 +62,9 @@ func main() {
 	mux.Handle("/api/auth/signup", rateLimiter.LimitMiddleware(handler.Wrap(userHandler.Signup)))
 	mux.Handle("/api/auth/refresh", handler.Wrap(authHandler.RefreshToken))
 	mux.Handle("/api/auth/logout", handler.Wrap(authHandler.Logout))
-	mux.Handle("PUT /api/user/password", authMiddleware(handler.Wrap(userHandler.UpdatePassword)))
-	mux.Handle("GET /api/user/info", authMiddleware(handler.Wrap(infoHandler.GetCurrentUserInfo)))
-	mux.Handle("GET /api/user/search", authMiddleware(handler.Wrap(userHandler.SearchUsers)))
+	mux.Handle("PUT /api/user/password", authMiddlewareUserOnly(handler.Wrap(userHandler.UpdatePassword)))
+	mux.Handle("GET /api/user/info", authMiddlewareUserOnly(handler.Wrap(infoHandler.GetCurrentUserInfo)))
+	mux.Handle("GET /api/user/search", authMiddlewareUserOnly(handler.Wrap(userHandler.SearchUsers)))
 
 	mux.Handle("GET /api/bands/{bandId}/members", authMiddleware(handler.Wrap(bandHandler.GetMembers)))
 	mux.Handle("POST /api/bands/{bandId}/members", authMiddleware(adminMiddleware(handler.Wrap(bandHandler.InviteMember))))

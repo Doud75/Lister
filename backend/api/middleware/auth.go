@@ -21,25 +21,8 @@ const (
 func JWTAuth(jwtSecret string, userRepo repository.UserRepository) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				http.Error(w, "Missing authorization header", http.StatusUnauthorized)
-				return
-			}
-
-			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-			if tokenString == authHeader {
-				http.Error(w, "Invalid token format", http.StatusUnauthorized)
-				return
-			}
-
-			claims := &auth.JWTClaims{}
-			token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-				return []byte(jwtSecret), nil
-			})
-
-			if err != nil || !token.Valid {
-				http.Error(w, "Invalid token", http.StatusUnauthorized)
+			claimsVal, ok := validateJWT(w, r, jwtSecret)
+			if !ok {
 				return
 			}
 
@@ -54,7 +37,7 @@ func JWTAuth(jwtSecret string, userRepo repository.UserRepository) func(http.Han
 				return
 			}
 
-			isMember, err := userRepo.IsUserInBand(r.Context(), claims.UserID, bandID)
+			isMember, err := userRepo.IsUserInBand(r.Context(), claimsVal.UserID, bandID)
 			if err != nil {
 				http.Error(w, "Error verifying band membership", http.StatusInternalServerError)
 				return
@@ -64,10 +47,49 @@ func JWTAuth(jwtSecret string, userRepo repository.UserRepository) func(http.Han
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
+			ctx := context.WithValue(r.Context(), UserIDKey, claimsVal.UserID)
 			ctx = context.WithValue(ctx, BandIDKey, bandID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func JWTAuthUserOnly(jwtSecret string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			claimsVal, ok := validateJWT(w, r, jwtSecret)
+			if !ok {
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserIDKey, claimsVal.UserID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func validateJWT(w http.ResponseWriter, r *http.Request, jwtSecret string) (*auth.JWTClaims, bool) {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		http.Error(w, "Missing authorization header", http.StatusUnauthorized)
+		return nil, false
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == authHeader {
+		http.Error(w, "Invalid token format", http.StatusUnauthorized)
+		return nil, false
+	}
+
+	claims := &auth.JWTClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+	if err != nil || !token.Valid {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return nil, false
+	}
+
+	return claims, true
 }
