@@ -57,6 +57,12 @@
                         role="menuitem"
                         onclick={close}>Mon compte</a
                 >
+                <a
+                        href="/dashboard"
+                        class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                        role="menuitem"
+                        onclick={close}>Mes Groupes</a
+                >
             </div>
             <div class="border-t border-slate-200 py-1 dark:border-slate-700">
                 <form action="/logout" method="POST" use:enhance>
