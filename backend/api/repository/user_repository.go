@@ -11,7 +11,6 @@ import (
 )
 
 var (
-	ErrDuplicateBand     = errors.New("band with this name already exists")
 	ErrDuplicateUsername = errors.New("username already exists")
 )
 
@@ -45,10 +44,6 @@ func (r *PgUserRepository) CreateBandAndUser(ctx context.Context, bandName, user
 	bandQuery := `INSERT INTO bands (name) VALUES ($1) RETURNING id, name`
 	err = tx.QueryRow(ctx, bandQuery, bandName).Scan(&band.ID, &band.Name)
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return model.User{}, model.Band{}, ErrDuplicateBand
-		}
 		return model.User{}, model.Band{}, err
 	}
 
