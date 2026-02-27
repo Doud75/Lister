@@ -24,9 +24,6 @@ func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		if errors.Is(err, repository.ErrDuplicateUsername) {
 			return apierror.UsernameTaken()
 		}
-		if errors.Is(err, repository.ErrDuplicateBand) {
-			return apierror.BandNameTaken()
-		}
 		if appErr := asAppError(err); appErr != nil {
 			return appErr
 		}
