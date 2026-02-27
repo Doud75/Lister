@@ -222,3 +222,14 @@ func (s UserService) SearchUsers(ctx context.Context, query string) ([]model.Use
 	}
 	return s.UserRepo.SearchUsersByUsername(ctx, query)
 }
+
+func (s UserService) CreateBand(ctx context.Context, name string, ownerUserID int) (model.Band, error) {
+	if name == "" {
+		return model.Band{}, errors.New("band name cannot be empty")
+	}
+	return s.UserRepo.CreateBand(ctx, name, ownerUserID)
+}
+
+func (s UserService) GetUserBands(ctx context.Context, userID int) ([]model.BandWithRole, error) {
+	return s.UserRepo.FindBandsWithRoleByUserID(ctx, userID)
+}

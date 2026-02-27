@@ -65,7 +65,9 @@ func main() {
 	mux.Handle("PUT /api/user/password", authMiddlewareUserOnly(handler.Wrap(userHandler.UpdatePassword)))
 	mux.Handle("GET /api/user/info", authMiddlewareUserOnly(handler.Wrap(infoHandler.GetCurrentUserInfo)))
 	mux.Handle("GET /api/user/search", authMiddlewareUserOnly(handler.Wrap(userHandler.SearchUsers)))
+	mux.Handle("GET /api/user/bands", authMiddlewareUserOnly(handler.Wrap(bandHandler.GetUserBands)))
 
+	mux.Handle("POST /api/bands", authMiddlewareUserOnly(handler.Wrap(bandHandler.CreateBand)))
 	mux.Handle("GET /api/bands/{bandId}/members", authMiddleware(handler.Wrap(bandHandler.GetMembers)))
 	mux.Handle("POST /api/bands/{bandId}/members", authMiddleware(adminMiddleware(handler.Wrap(bandHandler.InviteMember))))
 	mux.Handle("DELETE /api/bands/{bandId}/members/{userId}", authMiddleware(adminMiddleware(handler.Wrap(bandHandler.RemoveMember))))
