@@ -9,14 +9,6 @@ async function signup(page: Page, bandName: string, username: string) {
     await page.waitForURL('/');
 }
 
-async function login(page: Page, username: string) {
-    await page.goto('/login');
-    await page.getByLabel("Nom d'utilisateur").fill(username);
-    await page.locator('#password').fill('StrongPass1!');
-    await page.getByRole('button', { name: 'Se connecter' }).click();
-    await page.waitForURL('/');
-}
-
 test.describe('Dashboard', () => {
     test('should display user groups on the dashboard page', async ({ page }) => {
         const ts = Date.now();
@@ -45,7 +37,7 @@ test.describe('Dashboard', () => {
         await expect(page.locator('#band-name')).toBeVisible();
 
         await page.locator('#band-name').fill(newBandName);
-        await page.getByRole('button', { name: 'Créer' }).click();
+        await page.getByRole('button', { name: 'Créer le groupe', exact: true }).click();
 
         // Should redirect to home with new band active
         await page.waitForURL('/');
@@ -66,7 +58,7 @@ test.describe('Dashboard', () => {
         await page.goto('/dashboard');
         await page.getByRole('button', { name: 'Créer un groupe' }).click();
         await page.locator('#band-name').fill(band2);
-        await page.getByRole('button', { name: 'Créer' }).click();
+        await page.getByRole('button', { name: 'Créer le groupe', exact: true }).click();
         await page.waitForURL('/');
         // band2 is now active
 
