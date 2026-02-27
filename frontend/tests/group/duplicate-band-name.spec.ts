@@ -1,4 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function logout(page: Page) {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Ouvrir le menu du profil' }).click();
+    await page.getByRole('menuitem', { name: 'Déconnexion' }).click();
+    await page.waitForURL('/login');
+}
 
 test.describe('Duplicate Band Name', () => {
     test('should allow creating two bands with the same name', async ({ page }) => {
@@ -14,8 +21,8 @@ test.describe('Duplicate Band Name', () => {
         await page.waitForURL('/');
         await expect(page.getByRole('heading', { name: bandName })).toBeVisible();
 
-        // --- Se déconnecter ---
-        await page.goto('/logout');
+        // --- Se déconnecter via le menu profil ---
+        await logout(page);
 
         // --- Deuxième compte + groupe avec le MÊME nom de groupe ---
         await page.goto('/signup');
