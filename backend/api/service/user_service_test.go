@@ -7,6 +7,7 @@ import (
 
 	"setlist/api/model"
 	"setlist/api/repository/mocks"
+	"setlist/auth"
 
 	"go.uber.org/mock/gomock"
 )
@@ -36,14 +37,9 @@ func TestUserService_Signup(t *testing.T) {
 		expectedUser := model.User{ID: 1, Username: "testuser"}
 		expectedBand := model.Band{ID: 1, Name: "Test Band"}
 
-		// Expect CreateBandAndUser
-		// Password argument is hashed inside the service, so we use gomock.Any() to match the hashed password string
 		mockUserRepo.EXPECT().
 			CreateBandAndUser(ctx, payload.BandName, payload.Username, gomock.Any()).
 			Return(expectedUser, expectedBand, nil)
-
-		// Expect ReplaceUserRefreshToken
-		// Token hash and expiry are generated inside service, so allow Any()
 		mockRefreshTokenRepo.EXPECT().
 			ReplaceUserRefreshToken(ctx, expectedUser.ID, gomock.Any(), gomock.Any()).
 			Return(nil)
@@ -89,4 +85,99 @@ func TestUserService_Signup(t *testing.T) {
 			t.Errorf("expected error %v, got %v", repoErr, err)
 		}
 	})
+}
+
+func TestUserService_Login(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
+	mockRefreshTokenRepo := mocks.NewMockRefreshTokenRepository(ctrl)
+
+	svc := UserService{
+		UserRepo:         mockUserRepo,
+		RefreshTokenRepo: mockRefreshTokenRepo,
+		JWTSecret:        "testsecret",
+	}
+
+	ctx := context.Background()
+	payload := LoginPayload{Username: "testuser", Password: "Password123!"}
+
+	t.Run("LoginWithBands", func(t *testing.T) {
+		hashedPw, _ := hashPasswordForTest("Password123!")
+		expectedUser := model.User{ID: 1, Username: "testuser", PasswordHash: hashedPw}
+		expectedBands := []model.Band{{ID: 1, Name: "Test Band"}}
+
+		mockUserRepo.EXPECT().
+			FindUserByUsername(ctx, payload.Username).
+			Return(expectedUser, nil)
+		mockUserRepo.EXPECT().
+			FindBandsByUserID(ctx, expectedUser.ID).
+			Return(expectedBands, nil)
+		mockRefreshTokenRepo.EXPECT().
+			ReplaceUserRefreshToken(ctx, expectedUser.ID, gomock.Any(), gomock.Any()).
+			Return(nil)
+
+		resp, err := svc.Login(ctx, payload)
+
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if resp.Token == "" {
+			t.Error("token should not be empty")
+		}
+		if len(resp.Bands) != 1 {
+			t.Errorf("expected 1 band, got %d", len(resp.Bands))
+		}
+	})
+
+	t.Run("LoginWithNoBands_OrphanUser", func(t *testing.T) {
+		hashedPw, _ := hashPasswordForTest("Password123!")
+		expectedUser := model.User{ID: 2, Username: "testuser", PasswordHash: hashedPw}
+
+		mockUserRepo.EXPECT().
+			FindUserByUsername(ctx, payload.Username).
+			Return(expectedUser, nil)
+		mockUserRepo.EXPECT().
+			FindBandsByUserID(ctx, expectedUser.ID).
+			Return([]model.Band{}, nil)
+
+		mockRefreshTokenRepo.EXPECT().
+			ReplaceUserRefreshToken(ctx, expectedUser.ID, gomock.Any(), gomock.Any()).
+			Return(nil)
+
+		resp, err := svc.Login(ctx, payload)
+
+		if err != nil {
+			t.Fatalf("orphan user login should succeed, got error: %v", err)
+		}
+		if resp.Token == "" {
+			t.Error("token should not be empty")
+		}
+		if len(resp.Bands) != 0 {
+			t.Errorf("expected 0 bands for orphan user, got %d", len(resp.Bands))
+		}
+	})
+
+	t.Run("InvalidPassword", func(t *testing.T) {
+		hashedPw, _ := hashPasswordForTest("Password123!")
+		expectedUser := model.User{ID: 3, Username: "testuser", PasswordHash: hashedPw}
+
+		mockUserRepo.EXPECT().
+			FindUserByUsername(ctx, payload.Username).
+			Return(expectedUser, nil)
+
+		resp, err := svc.Login(ctx, LoginPayload{Username: "testuser", Password: "wrongpassword"})
+
+		if err == nil {
+			t.Fatal("expected error for invalid password, got nil")
+		}
+		if resp != nil {
+			t.Fatal("response should be nil on error")
+		}
+	})
+}
+
+func hashPasswordForTest(password string) (string, error) {
+	return auth.HashPassword(password)
 }

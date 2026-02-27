@@ -107,9 +107,6 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 	if err != nil {
 		return nil, err
 	}
-	if len(bands) == 0 {
-		return nil, errors.New("user is not part of any band")
-	}
 
 	token, err := auth.GenerateJWT(s.JWTSecret, user.ID)
 	if err != nil {
