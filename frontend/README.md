@@ -86,3 +86,5 @@ Les commandes suivantes sont à lancer depuis le dossier `frontend/`.
     - `components/ui/`: Composants d'interface génériques (Button, Input...).
     - `stores/`: Stores Svelte pour la gestion d'état global (ex: `auth.ts`).
 - `static/`: Fichiers publics (icônes, `robots.txt`...).
+
+##
