@@ -11,3 +11,11 @@ type Invitation struct {
 	CreatedAt time.Time `json:"created_at"`
 	MaxUses   *int      `json:"max_uses"`
 }
+
+type InvitationDetail struct {
+	Token     string    `json:"token"`
+	BandID    int       `json:"-"`
+	BandName  string    `json:"band_name"`
+	Role      string    `json:"role"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
