@@ -51,6 +51,10 @@ func main() {
 	songService := service.SongService{SongRepo: songRepo, Cache: redisClient}
 	songHandler := handler.SongHandler{SongService: songService}
 
+	invitationRepo := &repository.PgInvitationRepository{DB: dbPool}
+	invitationService := service.InvitationService{InvitationRepo: invitationRepo, UserRepo: userRepo}
+	invitationHandler := handler.InvitationHandler{InvitationService: invitationService}
+
 	authMiddleware := middleware.JWTAuth(cfg.JWTSecret, userRepo)
 	authMiddlewareUserOnly := middleware.JWTAuthUserOnly(cfg.JWTSecret)
 	adminMiddleware := middleware.AdminOnly(userRepo)
@@ -71,6 +75,10 @@ func main() {
 	mux.Handle("GET /api/bands/{bandId}/members", authMiddleware(handler.Wrap(bandHandler.GetMembers)))
 	mux.Handle("POST /api/bands/{bandId}/members", authMiddleware(adminMiddleware(handler.Wrap(bandHandler.InviteMember))))
 	mux.Handle("DELETE /api/bands/{bandId}/members/{userId}", authMiddleware(adminMiddleware(handler.Wrap(bandHandler.RemoveMember))))
+
+	mux.Handle("POST /api/bands/{bandId}/invitations", authMiddleware(adminMiddleware(handler.Wrap(invitationHandler.CreateInvitation))))
+	mux.Handle("GET /api/invitations/{token}", handler.Wrap(invitationHandler.GetInvitation))
+	mux.Handle("POST /api/invitations/{token}/accept", authMiddlewareUserOnly(handler.Wrap(invitationHandler.AcceptInvitation)))
 
 	mux.Handle("POST /api/setlist", authMiddleware(handler.Wrap(setlistHandler.CreateSetlist)))
 	mux.Handle("GET /api/setlist", authMiddleware(handler.Wrap(setlistHandler.GetSetlists)))
