@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 
 const BACKEND_URL = env.BACKEND_INTERNAL_URL || 'http://backend:8089/api';
 
-const handleProxy: RequestHandler = async ({ request, params, fetch, locals }) => {
+const handleProxy: RequestHandler = async ({ request, params, locals, getClientAddress }) => {
 	const url = new URL(request.url);
 	const proxyUrl = `${BACKEND_URL}/${params.slug}${url.search}`;
 
@@ -19,7 +19,13 @@ const handleProxy: RequestHandler = async ({ request, params, fetch, locals }) =
 	}
 
 	try {
-        return await fetch(proxyUrl, {
+		headers.set('X-Forwarded-For', getClientAddress());
+	} catch (e) {
+		// Ignore if getClientAddress is not available (e.g. during prerendering)
+	}
+
+	try {
+        return await globalThis.fetch(proxyUrl, {
 			method: request.method,
 			headers: headers,
 			body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : null,

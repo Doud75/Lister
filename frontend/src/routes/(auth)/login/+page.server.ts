@@ -3,6 +3,11 @@ import type { Actions } from './$types';
 
 export const actions: Actions = {
     default: async ({ request, cookies, fetch }) => {
+        const contentType = request.headers.get('content-type') || '';
+        if (!contentType.includes('application/x-www-form-urlencoded') && !contentType.includes('multipart/form-data')) {
+            return fail(415, { error: 'Format de requête invalide (attendu: form-data ou urlencoded)' });
+        }
+
         const data = await request.formData();
         const username = data.get('username');
         const password = data.get('password');

@@ -35,14 +35,21 @@ export const handle: Handle = async ({ event, resolve }) => {
             needsRefresh = true;
         }
     } else {
-        console.log('[AUTH] No JWT token found');
+        const path = event.url.pathname;
+        if (path.startsWith('/api') || path.startsWith('/dashboard') || path.startsWith('/setlist') || path.startsWith('/song') || path.startsWith('/interlude') || path.startsWith('/settings')) {
+            console.log(`[${new Date().toISOString()}] [AUTH] No JWT token found for protected route: ${path}`);
+        }
     }
 
     if ((!token || needsRefresh) && refreshToken) {
         try {
+            const clientIp = event.getClientAddress();
             const refreshResponse = await fetch(`${BACKEND_URL}/auth/refresh`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Forwarded-For': clientIp
+                },
                 body: JSON.stringify({ refresh_token: refreshToken })
             });
 
@@ -97,6 +104,11 @@ export const handle: Handle = async ({ event, resolve }) => {
             const headers: Record<string, string> = {
                 'Authorization': `Bearer ${event.locals.token || token}`
             };
+            
+            try {
+                headers['X-Forwarded-For'] = event.getClientAddress();
+            } catch (e) { /* ignore */ }
+            
             if (activeBandId) {
                 headers['X-Band-ID'] = activeBandId;
             }
