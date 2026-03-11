@@ -5,13 +5,14 @@ export const load: LayoutLoad = ({ data, url }) => {
     const { user } = data;
     const { pathname } = url;
 
-    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/join');
+    const isLoginOrSignup = pathname.startsWith('/login') || pathname.startsWith('/signup');
+    const isPublicRoute = isLoginOrSignup || pathname.startsWith('/join');
 
-    if (!user && !isAuthRoute) {
+    if (!user && !isPublicRoute) {
         throw redirect(307, '/login');
     }
 
-    if (user && isAuthRoute) {
+    if (user && isLoginOrSignup) {
         throw redirect(307, '/');
     }
 

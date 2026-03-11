@@ -9,7 +9,7 @@
         code?: string;
     } | null;
 
-    let { form }: { form: ActionData } = $props();
+    let { form, data }: { form: ActionData; data: { redirectTo?: string } } = $props();
 
     const errorMessages: Record<string, string> = {
         INVALID_CREDENTIALS: 'Identifiant ou mot de passe incorrect.',
@@ -32,6 +32,9 @@
     </div>
 
     <form method="POST" use:enhance class="space-y-6">
+        {#if data.redirectTo}
+            <input type="hidden" name="redirectTo" value={data.redirectTo} />
+        {/if}
         <Input label="Nom d'utilisateur" id="username" name="username" required />
         <Input label="Mot de passe" id="password" name="password" type="password" required togglePasswordVisibility={true}/>
 
