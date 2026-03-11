@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
-    default: async ({ request, cookies, fetch }) => {
+    default: async ({ request, cookies, fetch, url }) => {
         const contentType = request.headers.get('content-type') || '';
         if (!contentType.includes('application/x-www-form-urlencoded') && !contentType.includes('multipart/form-data')) {
             return fail(415, { error: 'Format de requête invalide (attendu: form-data ou urlencoded)' });
@@ -50,6 +50,8 @@ export const actions: Actions = {
             cookies.set('active_band_id', result.bands[0].id.toString(), cookieOptions);
         }
 
-        throw redirect(303, '/');
+        const rawRedirectTo = url.searchParams.get('redirectTo');
+        const redirectTo = rawRedirectTo?.startsWith('/') ? rawRedirectTo : '/';
+        throw redirect(303, redirectTo);
     }
 };

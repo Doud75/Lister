@@ -13,7 +13,7 @@
         };
     } | null;
 
-    let { form }: { form: ActionData } = $props();
+    let { form, data }: { form: ActionData; data: { redirectTo?: string } } = $props();
 
     let bandName = $state('');
     let username = $state('');
@@ -46,6 +46,9 @@
     </div>
 
     <form method="POST" use:enhance class="space-y-6">
+        {#if data.redirectTo}
+            <input type="hidden" name="redirectTo" value={data.redirectTo} />
+        {/if}
         <Input
                 label="Nom du groupe"
                 id="bandName"

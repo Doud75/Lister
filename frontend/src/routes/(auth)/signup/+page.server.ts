@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
-    default: async ({ request, cookies, fetch }) => {
+    default: async ({ request, cookies, fetch, url }) => {
         const data = await request.formData();
         const bandName = data.get('bandName')?.toString() || '';
         const username = data.get('username')?.toString() || '';
@@ -75,6 +75,8 @@ export const actions: Actions = {
             cookies.set('active_band_id', result.bands[0].id.toString(), cookieOptions);
         }
 
-        throw redirect(303, '/');
+        const rawRedirectTo = url.searchParams.get('redirectTo');
+        const redirectTo = rawRedirectTo?.startsWith('/') ? rawRedirectTo : '/';
+        throw redirect(303, redirectTo);
     }
 };
