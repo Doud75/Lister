@@ -1,10 +1,6 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
-    import { invalidateAll } from '$app/navigation';
     import type { ActionData, PageData } from './$types';
-    import Input from '$lib/components/ui/Input.svelte';
-    import Button from '$lib/components/ui/Button.svelte';
-    import { onMount } from 'svelte';
 
     let inviteLink = $state('');
     let inviteExpiry = $state('');
@@ -49,10 +45,6 @@
         window.setTimeout(() => { copied = false; }, 2000);
     }
 
-    type UserSearchResult = {
-        id: number;
-        username: string;
-    };
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
 
