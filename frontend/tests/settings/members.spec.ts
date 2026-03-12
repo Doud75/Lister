@@ -41,24 +41,8 @@ test.describe.serial('Settings - Members Page (Admin)', () => {
         await expect(page.locator('li', { hasText: 'testuser' })).toBeVisible();
     });
 
-    test('should invite an existing user not in the band', async ({ page }) => {
-        await page.getByLabel("Nom d'utilisateur").fill('multiGroupUser');
-        await page.getByRole('button', { name: 'Ajouter / Inviter' }).click();
-
-        await expect(page.locator('li', { hasText: 'multiGroupUser' })).toBeVisible();
-    });
-
-    test('should create and invite a new user', async ({ page }) => {
-        const newUser = `newUser_${Date.now()}`;
-
-        await page.getByLabel("Nom d'utilisateur").fill(newUser);
-        await page.getByRole('button', { name: 'Ajouter / Inviter' }).click();
-
-        await expect(page.getByText('Utilisateur non trouvé. Veuillez définir un mot de passe pour créer son compte.')).toBeVisible();
-
-        await page.getByLabel('Mot de passe temporaire').fill('StrongPass1!');
-        await page.getByRole('button', { name: 'Créer et Inviter' }).click();
-
-        await expect(page.locator('li', { hasText: newUser })).toBeVisible();
+    test('should display the invitation link section', async ({ page }) => {
+        await expect(page.getByRole('heading', { name: 'Inviter par lien' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Générer un lien' })).toBeVisible();
     });
 });

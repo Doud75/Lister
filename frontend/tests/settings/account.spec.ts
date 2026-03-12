@@ -67,28 +67,20 @@ test.describe.serial('Settings - Account Page', () => {
 });
 
 test.describe('Settings - Account Page (Orphan User)', () => {
-    test('should allow an orphan user to access settings and change password', async ({ page, context }) => {
+    test('should allow an orphan user to access settings and change password', async ({ page }) => {
         const ts = Date.now();
         const username = `orphan_account_${ts}`;
         const password = 'StrongPass1!';
         const newPassword = 'NewOrphanPass1!';
 
-        // Signup creates a user with a band
+        // Signup without a band — lands directly on /dashboard (orphan state)
         await page.goto('/signup');
-        await page.getByLabel('Nom du groupe').fill(`Orphan Band ${ts}`);
-        await page.getByLabel("Votre nom d'utilisateur").fill(username);
+        await page.getByLabel("Nom d'utilisateur").fill(username);
         await page.getByLabel('Mot de passe', { exact: true }).fill(password);
-        await page.getByRole('button', { name: 'Créer le groupe et le compte' }).click();
-        await page.waitForURL('/');
-
-        // Remove active_band_id to simulate orphan state
-        await context.clearCookies({ name: 'active_band_id' });
-
-        // / should redirect to /dashboard (no band)
-        await page.goto('/');
+        await page.getByRole('button', { name: 'Créer mon compte' }).click();
         await page.waitForURL('/dashboard');
 
-        // Settings account should still be accessible without a band
+        // Settings account should be accessible without a band
         await page.goto('/settings/account');
         await expect(page.getByRole('heading', { name: 'Mon Compte' })).toBeVisible();
 
@@ -98,8 +90,7 @@ test.describe('Settings - Account Page (Orphan User)', () => {
         await page.getByLabel('Confirmer le nouveau mot de passe').fill(newPassword);
         await page.getByRole('button', { name: 'Sauvegarder' }).click();
 
-        // After password change, the account page server redirects to '/'
-        // Since no active band, we should end up at /dashboard
+        // After password change, no active band → should end up at /dashboard
         await page.waitForURL('/dashboard');
     });
 });

@@ -1,11 +1,18 @@
 import { test, expect, type Page } from '@playwright/test';
 
-async function signup(page: Page, bandName: string, username: string) {
+async function signup(page: Page, username: string) {
     await page.goto('/signup');
-    await page.getByLabel('Nom du groupe').fill(bandName);
-    await page.getByLabel("Votre nom d'utilisateur").fill(username);
+    await page.getByLabel("Nom d'utilisateur").fill(username);
     await page.getByLabel('Mot de passe', { exact: true }).fill('StrongPass1!');
-    await page.getByRole('button', { name: 'Créer le groupe et le compte' }).click();
+    await page.getByRole('button', { name: 'Créer mon compte' }).click();
+    await page.waitForURL('/dashboard');
+}
+
+async function signupAndCreateBand(page: Page, username: string, bandName: string) {
+    await signup(page, username);
+    await page.getByRole('button', { name: 'Créer un groupe' }).click();
+    await page.locator('#band-name').fill(bandName);
+    await page.getByRole('button', { name: 'Créer le groupe', exact: true }).click();
     await page.waitForURL('/');
 }
 
@@ -15,7 +22,7 @@ test.describe('Dashboard', () => {
         const username = `dash_user_${ts}`;
         const bandName = `Dash Band ${ts}`;
 
-        await signup(page, bandName, username);
+        await signupAndCreateBand(page, username, bandName);
         await page.goto('/dashboard');
 
         await expect(page.getByRole('heading', { name: 'Mes Groupes' })).toBeVisible();
@@ -29,7 +36,7 @@ test.describe('Dashboard', () => {
         const username = `dash_create_${ts}`;
         const newBandName = `New Band ${ts}`;
 
-        await signup(page, `Initial Band ${ts}`, username);
+        await signupAndCreateBand(page, username, `Initial Band ${ts}`);
         await page.goto('/dashboard');
 
         // Open create form
@@ -53,7 +60,7 @@ test.describe('Dashboard', () => {
         const band1 = `Switch Band A ${ts}`;
         const band2 = `Switch Band B ${ts}`;
 
-        await signup(page, band1, username);
+        await signupAndCreateBand(page, username, band1);
         // Create a second band from the dashboard
         await page.goto('/dashboard');
         await page.getByRole('button', { name: 'Créer un groupe' }).click();
@@ -80,7 +87,7 @@ test.describe('Dashboard', () => {
         const ts = Date.now();
         const username = `orphan_redirect_${ts}`;
 
-        await signup(page, `Orphan Band ${ts}`, username);
+        await signup(page, username);
         // Remove the active band cookie to simulate orphan state
         await context.clearCookies({ name: 'active_band_id' });
 

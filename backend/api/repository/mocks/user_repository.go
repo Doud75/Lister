@@ -71,6 +71,21 @@ func (mr *MockUserRepositoryMockRecorder) CreateBandAndUser(ctx, bandName, usern
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBandAndUser", reflect.TypeOf((*MockUserRepository)(nil).CreateBandAndUser), ctx, bandName, username, passwordHash)
 }
 
+// CreateUser mocks base method.
+func (m *MockUserRepository) CreateUser(ctx context.Context, username, passwordHash string) (model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser", ctx, username, passwordHash)
+	ret0, _ := ret[0].(model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockUserRepositoryMockRecorder) CreateUser(ctx, username, passwordHash any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockUserRepository)(nil).CreateUser), ctx, username, passwordHash)
+}
+
 // CreateBand mocks base method.
 func (m *MockUserRepository) CreateBand(ctx context.Context, name string, ownerUserID int) (model.Band, error) {
 	m.ctrl.T.Helper()

@@ -28,18 +28,16 @@ func TestUserService_Signup(t *testing.T) {
 
 	ctx := context.Background()
 	payload := AuthPayload{
-		BandName: "Test Band",
 		Username: "testuser",
 		Password: "Password123!",
 	}
 
 	t.Run("Success", func(t *testing.T) {
 		expectedUser := model.User{ID: 1, Username: "testuser"}
-		expectedBand := model.Band{ID: 1, Name: "Test Band"}
 
 		mockUserRepo.EXPECT().
-			CreateBandAndUser(ctx, payload.BandName, payload.Username, gomock.Any()).
-			Return(expectedUser, expectedBand, nil)
+			CreateUser(ctx, payload.Username, gomock.Any()).
+			Return(expectedUser, nil)
 		mockRefreshTokenRepo.EXPECT().
 			ReplaceUserRefreshToken(ctx, expectedUser.ID, gomock.Any(), gomock.Any()).
 			Return(nil)
@@ -58,11 +56,8 @@ func TestUserService_Signup(t *testing.T) {
 		if resp.RefreshToken == "" {
 			t.Error("refresh token should not be empty")
 		}
-		if len(resp.Bands) != 1 {
-			t.Errorf("expected 1 band, got %d", len(resp.Bands))
-		}
-		if resp.Bands[0].Name != expectedBand.Name {
-			t.Errorf("expected band name %s, got %s", expectedBand.Name, resp.Bands[0].Name)
+		if len(resp.Bands) != 0 {
+			t.Errorf("expected 0 bands, got %d", len(resp.Bands))
 		}
 	})
 
@@ -70,8 +65,8 @@ func TestUserService_Signup(t *testing.T) {
 		repoErr := errors.New("database error")
 
 		mockUserRepo.EXPECT().
-			CreateBandAndUser(ctx, payload.BandName, payload.Username, gomock.Any()).
-			Return(model.User{}, model.Band{}, repoErr)
+			CreateUser(ctx, payload.Username, gomock.Any()).
+			Return(model.User{}, repoErr)
 
 		resp, err := svc.Signup(ctx, payload)
 

@@ -16,6 +16,7 @@ var (
 
 type UserRepository interface {
 	CreateBandAndUser(ctx context.Context, bandName, username, passwordHash string) (model.User, model.Band, error)
+	CreateUser(ctx context.Context, username, passwordHash string) (model.User, error)
 	CreateUserAndAddToBand(ctx context.Context, bandID int, username, passwordHash, role string) (model.User, error)
 	CreateBand(ctx context.Context, name string, ownerUserID int) (model.Band, error)
 	GetMembersByBandID(ctx context.Context, bandID int) ([]model.BandMember, error)
@@ -67,6 +68,20 @@ func (r *PgUserRepository) CreateBandAndUser(ctx context.Context, bandName, user
 	}
 
 	return user, band, tx.Commit(ctx)
+}
+
+func (r *PgUserRepository) CreateUser(ctx context.Context, username, passwordHash string) (model.User, error) {
+	var user model.User
+	query := `INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username, created_at`
+	err := r.DB.QueryRow(ctx, query, username, passwordHash).Scan(&user.ID, &user.Username, &user.CreatedAt)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return model.User{}, ErrDuplicateUsername
+		}
+		return model.User{}, err
+	}
+	return user, nil
 }
 
 func (r *PgUserRepository) CreateUserAndAddToBand(ctx context.Context, bandID int, username, passwordHash, role string) (model.User, error) {
