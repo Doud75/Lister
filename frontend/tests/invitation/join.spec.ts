@@ -106,7 +106,7 @@ test.describe('Invitation System', () => {
         // Login link contains redirectTo pointing to /join/
         const loginHref = await guestPage.getByRole('link', { name: 'Se connecter' }).getAttribute('href');
         expect(loginHref).toContain('redirectTo');
-        expect(loginHref).toContain('/join/');
+        expect(loginHref).toContain('%2Fjoin%2F');
 
         // Log in via the link → should land back on the join page
         await guestPage.getByRole('link', { name: 'Se connecter' }).click();
