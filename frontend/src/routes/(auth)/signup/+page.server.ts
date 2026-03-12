@@ -4,13 +4,12 @@ import type { Actions } from './$types';
 export const actions: Actions = {
     default: async ({ request, cookies, fetch, url }) => {
         const data = await request.formData();
-        const bandName = data.get('bandName')?.toString() || '';
         const username = data.get('username')?.toString() || '';
         const password = data.get('password')?.toString() || '';
 
         const errors: Record<string, string> = {};
 
-        const { validateUsername, validatePassword, sanitizeText } = await import('$lib/validation');
+        const { validateUsername, validatePassword } = await import('$lib/validation');
 
         const usernameValidation = validateUsername(username);
         if (!usernameValidation.success) {
@@ -24,33 +23,23 @@ export const actions: Actions = {
 
         if (Object.keys(errors).length > 0) {
             return fail(400, {
-                data: { bandName, username },
+                data: { username },
                 errors
             });
         }
 
-        const sanitizedUsername = sanitizeText(username);
-        const sanitizedBandName = sanitizeText(bandName);
-
         const response = await fetch('/api/auth/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                band_name: sanitizedBandName,
-                username: sanitizedUsername,
-                password
-            })
+            body: JSON.stringify({ username, password })
         });
 
         const result = await response.json();
         if (!response.ok) {
             if (result.code === 'USERNAME_TAKEN') {
-                return fail(409, { data: { bandName, username }, errors: { username: result.error } });
+                return fail(409, { data: { username }, errors: { username: result.error } });
             }
-            if (result.code === 'BAND_NAME_TAKEN') {
-                return fail(409, { data: { bandName, username }, errors: { bandName: result.error } });
-            }
-            return fail(response.status, { data: { bandName, username }, error: result.error });
+            return fail(response.status, { data: { username }, error: result.error });
         }
 
         const cookieOptions = {
@@ -76,7 +65,7 @@ export const actions: Actions = {
         }
 
         const rawRedirectTo = url.searchParams.get('redirectTo');
-        const redirectTo = rawRedirectTo?.startsWith('/') ? rawRedirectTo : '/';
+        const redirectTo = rawRedirectTo?.startsWith('/') ? rawRedirectTo : '/dashboard';
         throw redirect(303, redirectTo);
     }
 };

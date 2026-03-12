@@ -18,7 +18,6 @@ type UserService struct {
 }
 
 type AuthPayload struct {
-	BandName string `json:"band_name"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -53,14 +52,13 @@ func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResp
 	}
 
 	payload.Username = SanitizeString(payload.Username)
-	payload.BandName = SanitizeString(payload.BandName)
 
 	hashedPassword, err := auth.HashPassword(payload.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	user, band, err := s.UserRepo.CreateBandAndUser(ctx, payload.BandName, payload.Username, hashedPassword)
+	user, err := s.UserRepo.CreateUser(ctx, payload.Username, hashedPassword)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +87,7 @@ func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResp
 	return &AuthResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
-		Bands:        []model.Band{band},
+		Bands:        []model.Band{},
 	}, nil
 }
 
