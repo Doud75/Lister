@@ -17,14 +17,6 @@ async function signupAndCreateBand(page: Page, username: string, bandName: strin
     await page.waitForURL('/');
 }
 
-async function login(page: Page, username: string, password = 'StrongPass1!'): Promise<void> {
-    await page.goto('/login');
-    await page.getByLabel("Nom d'utilisateur").fill(username);
-    await page.locator('#password').fill(password);
-    await page.getByRole('button', { name: 'Se connecter' }).click();
-    await page.waitForURL('/');
-}
-
 /** Admin clicks "Générer un lien" and returns the generated join URL. */
 async function generateInviteLink(page: Page): Promise<string> {
     await page.goto('/settings/members');
