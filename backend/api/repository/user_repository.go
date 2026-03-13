@@ -28,6 +28,7 @@ type UserRepository interface {
 	FindBandsByUserID(ctx context.Context, userID int) ([]model.Band, error)
 	FindBandsWithRoleByUserID(ctx context.Context, userID int) ([]model.BandWithRole, error)
 	IsUserInBand(ctx context.Context, userID int, bandID int) (bool, error)
+	GetAdminCountInBand(ctx context.Context, bandID int) (int, error)
 	AddUserToBand(ctx context.Context, userID, bandID int, role string) error
 	SearchUsersByUsername(ctx context.Context, usernameQuery string) ([]model.User, error)
 }
@@ -314,4 +315,11 @@ func (r *PgUserRepository) FindBandsWithRoleByUserID(ctx context.Context, userID
 		bands = append(bands, b)
 	}
 	return bands, rows.Err()
+}
+
+func (r *PgUserRepository) GetAdminCountInBand(ctx context.Context, bandID int) (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM band_users WHERE band_id = $1 AND role = 'admin'`
+	err := r.DB.QueryRow(ctx, query, bandID).Scan(&count)
+	return count, err
 }

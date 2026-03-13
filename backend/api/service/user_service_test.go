@@ -223,3 +223,55 @@ func TestUserService_CreateBand(t *testing.T) {
 		}
 	})
 }
+
+func TestUserService_LeaveBand(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
+	svc := UserService{UserRepo: mockUserRepo, JWTSecret: "testsecret"}
+	ctx := context.Background()
+
+	const userID, bandID = 10, 5
+
+	t.Run("MemberLeaves_Success", func(t *testing.T) {
+		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("member", nil)
+		mockUserRepo.EXPECT().RemoveUserFromBand(ctx, bandID, userID).Return(nil)
+
+		if err := svc.LeaveBand(ctx, userID, bandID); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("LastAdmin_Blocked", func(t *testing.T) {
+		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("admin", nil)
+		mockUserRepo.EXPECT().GetAdminCountInBand(ctx, bandID).Return(1, nil)
+
+		err := svc.LeaveBand(ctx, userID, bandID)
+		if err == nil {
+			t.Fatal("expected error for last admin, got nil")
+		}
+		if err.Error() != "last_admin" {
+			t.Errorf("expected 'last_admin' error, got: %v", err)
+		}
+	})
+
+	t.Run("AdminWithCoAdmin_Success", func(t *testing.T) {
+		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("admin", nil)
+		mockUserRepo.EXPECT().GetAdminCountInBand(ctx, bandID).Return(2, nil)
+		mockUserRepo.EXPECT().RemoveUserFromBand(ctx, bandID, userID).Return(nil)
+
+		if err := svc.LeaveBand(ctx, userID, bandID); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("NotMember_Error", func(t *testing.T) {
+		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("", errors.New("not found"))
+
+		err := svc.LeaveBand(ctx, userID, bandID)
+		if err == nil {
+			t.Fatal("expected error for non-member, got nil")
+		}
+	})
+}

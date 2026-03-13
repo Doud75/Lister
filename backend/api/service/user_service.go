@@ -214,6 +214,25 @@ func (s UserService) RemoveMember(ctx context.Context, bandID int, userID int) e
 	return s.UserRepo.RemoveUserFromBand(ctx, bandID, userID)
 }
 
+func (s UserService) LeaveBand(ctx context.Context, userID int, bandID int) error {
+	role, err := s.UserRepo.GetUserRoleInBand(ctx, userID, bandID)
+	if err != nil {
+		return errors.New("you are not a member of this band")
+	}
+
+	if role == "admin" {
+		count, err := s.UserRepo.GetAdminCountInBand(ctx, bandID)
+		if err != nil {
+			return err
+		}
+		if count <= 1 {
+			return errors.New("last_admin")
+		}
+	}
+
+	return s.UserRepo.RemoveUserFromBand(ctx, bandID, userID)
+}
+
 func (s UserService) SearchUsers(ctx context.Context, query string) ([]model.User, error) {
 	if len(query) < 3 {
 		return []model.User{}, nil

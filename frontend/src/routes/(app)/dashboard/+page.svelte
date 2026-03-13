@@ -1,5 +1,6 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
+    import { page } from '$app/stores';
     import Modal from '$lib/components/ui/Modal.svelte';
     import type { ActionData, PageData } from './$types';
 
@@ -9,10 +10,25 @@
     let bandName = $state('');
     let isCreating = $state(false);
 
+    let isLeaveModalOpen = $state(false);
+    let leaveBandId = $state('');
+    let leaveBandName = $state('');
+    let isLeaving = $state(false);
+
     function openModal() {
         bandName = '';
         isModalOpen = true;
     }
+
+    function openLeaveModal(id: number, name: string, e: MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        leaveBandId = id.toString();
+        leaveBandName = name;
+        isLeaveModalOpen = true;
+    }
+
+    const leftGroupName = $derived($page.url.searchParams.get('left'));
 </script>
 
 <svelte:head>
@@ -40,6 +56,18 @@
         </button>
     </div>
 
+    {#if leftGroupName}
+        <div class="mb-6 rounded-lg bg-teal-50 px-4 py-3 text-sm text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
+            Vous avez quitté le groupe <strong>{leftGroupName}</strong>.
+        </div>
+    {/if}
+
+    {#if form?.leaveError}
+        <div class="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+            {form.leaveError}
+        </div>
+    {/if}
+
     {#if data.bands.length === 0}
         <div class="rounded-xl border-2 border-dashed border-slate-300 p-16 text-center dark:border-slate-700">
             <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,35 +81,50 @@
     {:else}
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {#each data.bands as band (band.id)}
-                <form method="POST" action="?/switchBand" use:enhance>
-                    <input type="hidden" name="bandId" value={band.id} />
+                <div class="group relative rounded-xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:bg-slate-800
+                    {data.activeBandId === band.id.toString()
+                        ? 'border-indigo-400 ring-2 ring-indigo-400 dark:border-indigo-500 dark:ring-indigo-500'
+                        : 'border-slate-200 dark:border-slate-700 dark:hover:border-slate-600'}">
+
                     <button
-                        type="submit"
-                        class="group w-full rounded-xl border bg-white p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:bg-slate-800
-                            {data.activeBandId === band.id.toString()
-                                ? 'border-indigo-400 ring-2 ring-indigo-400 dark:border-indigo-500 dark:ring-indigo-500'
-                                : 'border-slate-200 dark:border-slate-700 dark:hover:border-slate-600'}"
+                        type="button"
+                        onclick={(e) => openLeaveModal(band.id, band.name, e)}
+                        title="Quitter ce groupe"
+                        class="absolute right-2 top-2 rounded-md p-1 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                        aria-label="Quitter {band.name}"
                     >
-                        <div class="flex items-start justify-between">
-                            <div class="min-w-0 flex-1">
-                                <h2 class="truncate text-base font-semibold text-slate-900 dark:text-white">{band.name}</h2>
-                                <span class="mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                    {band.role === 'admin'
-                                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                                        : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}">
-                                    {band.role === 'admin' ? 'Admin' : 'Membre'}
-                                </span>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                class="h-5 w-5 flex-shrink-0 text-slate-400 transition-transform group-hover:translate-x-1">
-                                <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        {#if data.activeBandId === band.id.toString()}
-                            <p class="mt-3 text-xs text-indigo-600 dark:text-indigo-400">✓ Groupe actif</p>
-                        {/if}
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
+                            <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 3.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd"/>
+                        </svg>
                     </button>
-                </form>
+
+                    <form method="POST" action="?/switchBand" use:enhance>
+                        <input type="hidden" name="bandId" value={band.id} />
+                        <button
+                            type="submit"
+                            class="w-full p-5 text-left"
+                        >
+                            <div class="flex items-start justify-between pr-4">
+                                <div class="min-w-0 flex-1">
+                                    <h2 class="truncate text-base font-semibold text-slate-900 dark:text-white">{band.name}</h2>
+                                    <span class="mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                                        {band.role === 'admin'
+                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                                            : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}">
+                                        {band.role === 'admin' ? 'Admin' : 'Membre'}
+                                    </span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                    class="h-5 w-5 flex-shrink-0 text-slate-400 transition-transform group-hover:translate-x-1">
+                                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            {#if data.activeBandId === band.id.toString()}
+                                <p class="mt-3 text-xs text-indigo-600 dark:text-indigo-400">✓ Groupe actif</p>
+                            {/if}
+                        </button>
+                    </form>
+                </div>
             {/each}
         </div>
     {/if}
@@ -146,3 +189,52 @@
     </div>
 </Modal>
 
+<Modal isOpen={isLeaveModalOpen} onClose={() => (isLeaveModalOpen = false)}>
+    <div class="space-y-4">
+        <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5 text-red-600 dark:text-red-400">
+                    <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Quitter le groupe</h2>
+        </div>
+
+        <p class="text-sm text-slate-600 dark:text-slate-400">
+            Êtes-vous sûr de vouloir quitter <strong>{leaveBandName}</strong> ?
+            Vous n'aurez plus accès à ce groupe ni à ses données.
+        </p>
+
+        <form
+            method="POST"
+            action="?/leaveBand"
+            use:enhance={() => {
+                isLeaving = true;
+                return async ({ update }) => {
+                    isLeaving = false;
+                    isLeaveModalOpen = false;
+                    await update();
+                };
+            }}
+        >
+            <input type="hidden" name="bandId" value={leaveBandId} />
+            <input type="hidden" name="bandName" value={leaveBandName} />
+            <div class="flex justify-end gap-3 pt-2">
+                <button
+                    type="button"
+                    onclick={() => (isLeaveModalOpen = false)}
+                    class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="submit"
+                    disabled={isLeaving}
+                    class="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-500 disabled:opacity-50"
+                >
+                    {isLeaving ? 'Départ...' : 'Quitter le groupe'}
+                </button>
+            </div>
+        </form>
+    </div>
+</Modal>

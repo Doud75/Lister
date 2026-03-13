@@ -112,3 +112,29 @@ func (h BandHandler) CreateBand(w http.ResponseWriter, r *http.Request) error {
 	RespondCreated(w, band)
 	return nil
 }
+
+func (h BandHandler) LeaveBand(w http.ResponseWriter, r *http.Request) error {
+	userID, err := GetUserID(r)
+	if err != nil {
+		return err
+	}
+
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
+
+	if err := h.UserService.LeaveBand(r.Context(), userID, bandID); err != nil {
+		if err.Error() == "last_admin" {
+			return apierror.NewUserError(
+				apierror.ErrInvalidRequest,
+				"Impossible de quitter : vous êtes le dernier administrateur. Supprimez le groupe ou promouvez un autre membre.",
+				http.StatusConflict,
+			)
+		}
+		return apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest)
+	}
+
+	RespondNoContent(w)
+	return nil
+}
