@@ -1,28 +1,27 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
-
-async function signup(page: any, username: string, password: string) {
-    await page.goto('/signup');
-    await page.getByLabel("Votre nom d'utilisateur").fill(username);
-    await page.getByLabel('Mot de passe', { exact: true }).fill(password);
-    await page.getByRole('button', { name: 'Créer le compte' }).click();
-    await page.waitForURL('/dashboard');
+async function signup(page: Page, username: string, password: string) {
+	await page.goto('/signup');
+	await page.getByLabel("Nom d'utilisateur").fill(username);
+	await page.getByLabel('Mot de passe', { exact: true }).fill(password);
+	await page.getByRole('button', { name: 'Créer mon compte' }).click();
+	await page.waitForURL('/dashboard');
 }
 
-async function createBand(page: any, bandName: string) {
+async function createBand(page: Page, bandName: string) {
     await page.goto('/dashboard');
     await page.getByRole('button', { name: 'Créer un groupe' }).click();
-    await page.getByLabel('Nom du groupe').fill(bandName);
-    await page.getByRole('button', { name: 'Créer' }).click();
-    await page.waitForURL('/dashboard');
+    await page.locator('#band-name').fill(bandName);
+    await page.getByRole('button', { name: 'Créer le groupe', exact: true }).click();
+    await page.waitForURL('/');
+    await page.goto('/dashboard');
 }
 
-async function logout(page: any) {
+async function logout(page: Page) {
     await page.goto('/logout');
 }
 
-async function login(page: any, username: string, password: string) {
+async function login(page: Page, username: string, password: string) {
     await page.goto('/login');
     await page.getByLabel("Nom d'utilisateur").fill(username);
     await page.getByLabel('Mot de passe').fill(password);
@@ -39,7 +38,6 @@ test.describe('Default Band', () => {
         const bandB = `Star Band B ${timestamp}`;
 
         await signup(page, username, 'StrongPass1!');
-        // bandA est auto-créé comme défaut via CreateBand
         await createBand(page, bandA);
         await createBand(page, bandB);
 
@@ -99,7 +97,6 @@ test.describe('Default Band', () => {
 
         // S'assurer que bandA est le défaut
         await page.goto('/dashboard');
-        // bandA devrait être le premier (is_default=true)
         // Définir bandA explicitement comme défaut
         await page.getByRole('button', { name: `Définir ${bandA} comme groupe par défaut` }).first().click().catch(() => {
             // Si déjà défaut, on ignore l'erreur
