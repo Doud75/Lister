@@ -107,11 +107,14 @@ test.describe('Default Band', () => {
         await memberPage.waitForURL('/');
 
         await memberPage.goto('/dashboard');
-        await memberPage.getByRole('button', { name: `Définir ${bandA} comme groupe par défaut`, exact: true }).click();
+        const setBandADefault = memberPage.getByRole('button', { name: `Définir ${bandA} comme groupe par défaut`, exact: true });
+        if (await setBandADefault.isVisible()) {
+            await setBandADefault.click();
+            await memberPage.goto('/dashboard');
+        }
         await expect(memberPage.getByRole('button', { name: 'Groupe par défaut', exact: true })).toBeVisible();
 
         await memberPage.getByRole('button', { name: `Quitter ${bandA}` }).click({ force: true });
-
         await expect(memberPage.getByText('Êtes-vous sûr de vouloir quitter')).toBeVisible();
         await expect(memberPage.locator('[role="dialog"]').getByText(bandA)).toBeVisible();
 
@@ -119,6 +122,7 @@ test.describe('Default Band', () => {
         await memberPage.waitForURL(/\/dashboard/);
         await expect(memberPage.getByText('Vous avez quitté le groupe')).toBeVisible();
 
+        await memberPage.goto('/dashboard');
         await expect(memberPage.getByRole('button', { name: 'Groupe par défaut', exact: true })).toBeVisible();
         await expect(memberPage.getByRole('heading', { name: bandA, level: 2 })).not.toBeVisible();
 

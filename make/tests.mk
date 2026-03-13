@@ -50,6 +50,15 @@ test-auth: test-up run-playwright-auth test-down
 test-auth-login: test-up run-playwright-auth-login test-down
 	@echo "✅ Auth login test finished."
 
+test-auth-signup: test-up run-playwright-auth-signup test-down
+	@echo "✅ Auth signup test finished."
+
+test-invitation: test-up run-playwright-invitation test-down
+	@echo "✅ All Invitation tests finished."
+
+test-invitation-join: test-up run-playwright-invitation-join test-down
+	@echo "✅ Invitation join test finished."
+
 test-settings: test-up run-playwright-settings test-down
 	@echo "✅ All Settings tests finished."
 
@@ -64,6 +73,12 @@ test-duplicate-band: test-up run-playwright-duplicate-band test-down
 
 test-dashboard: test-up run-playwright-dashboard test-down
 	@echo "✅ Dashboard E2E test finished."
+
+test-leave-band: test-up run-playwright-leave-band test-down
+	@echo "✅ Leave band E2E test finished."
+
+test-default-band: test-up run-playwright-default-band test-down
+	@echo "✅ Default band E2E test finished."
 
 # --- Cibles de test par fichier spécifique (granulaire) ---
 
@@ -189,6 +204,18 @@ run-playwright-song-detail:
 	@echo "--- Running SONG DETAIL Playwright tests ---"
 	@cd frontend && npx playwright test tests/song/detail.spec.ts
 
+run-playwright-auth-signup:
+	@echo "--- Running AUTH SIGNUP Playwright test ---"
+	@cd frontend && npx playwright test tests/auth/signup.spec.ts
+
+run-playwright-invitation:
+	@echo "--- Running INVITATION Playwright tests (directory) ---"
+	@cd frontend && npx playwright test tests/invitation/
+
+run-playwright-invitation-join:
+	@echo "--- Running INVITATION JOIN Playwright test ---"
+	@cd frontend && npx playwright test tests/invitation/join.spec.ts
+
 run-playwright-multi-group:
 	@echo "--- Running MULTI-GROUP Playwright test ---"
 	@cd frontend && npx playwright test tests/group/multi-group.spec.ts
@@ -200,6 +227,14 @@ run-playwright-duplicate-band:
 run-playwright-dashboard:
 	@echo "--- Running DASHBOARD Playwright test ---"
 	@cd frontend && npx playwright test tests/group/dashboard.spec.ts
+
+run-playwright-leave-band:
+	@echo "--- Running LEAVE BAND Playwright test ---"
+	@cd frontend && npx playwright test tests/group/leave-band.spec.ts
+
+run-playwright-default-band:
+	@echo "--- Running DEFAULT BAND Playwright test ---"
+	@cd frontend && npx playwright test tests/group/default-band.spec.ts
 
 run-playwright-settings:
 	@echo "--- Running SETTINGS Playwright tests (directory) ---"
@@ -226,7 +261,11 @@ run-playwright-interlude-behavior:
 	@cd frontend && npx playwright test tests/interlude/behavior.spec.ts
 
 # --- Déclaration .PHONY pour toutes les cibles ---
-.PHONY: test-all test-unit test-unit-watch test test-setlist test-song test-settings test-interlude test-multi-group test-duplicate-band test-dashboard test-auth test-auth-login \
+.PHONY: test-all test-unit test-unit-watch test-backend test-backend-cover \
+		test test-setlist test-song test-settings test-interlude \
+		test-multi-group test-duplicate-band test-dashboard test-leave-band test-default-band \
+		test-auth test-auth-login test-auth-signup \
+		test-invitation test-invitation-join \
 		test-setlist-actions test-setlist-detail test-setlist-add test-setlist-new test-setlist-duplicate \
 		test-song-list test-song-new test-song-edit test-song-detail \
 		test-settings-account test-settings-members \
@@ -235,7 +274,8 @@ run-playwright-interlude-behavior:
 		run-playwright run-playwright-setlist-actions run-playwright-setlist run-playwright-setlist-detail \
 		run-playwright-setlist-add run-playwright-setlist-new run-playwright-setlist-duplicate \
 		run-playwright-song run-playwright-song-list run-playwright-song-new run-playwright-song-edit run-playwright-song-detail \
-		run-playwright-multi-group run-playwright-duplicate-band run-playwright-dashboard \
+		run-playwright-multi-group run-playwright-duplicate-band run-playwright-dashboard run-playwright-leave-band run-playwright-default-band \
 		run-playwright-settings run-playwright-settings-account run-playwright-settings-members \
 		run-playwright-interlude run-playwright-interlude-new run-playwright-interlude-behavior \
-		run-playwright-auth run-playwright-auth-login
+		run-playwright-auth run-playwright-auth-login run-playwright-auth-signup \
+		run-playwright-invitation run-playwright-invitation-join
