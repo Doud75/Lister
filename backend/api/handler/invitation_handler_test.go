@@ -167,6 +167,13 @@ func TestInvitationHandler_AcceptInvitation(t *testing.T) {
 			AddUserToBand(gomock.Any(), 42, 10, "member").
 			Return(nil)
 
+		mockUserRepo.EXPECT().
+			FindBandsWithRoleByUserID(gomock.Any(), 42).
+			Return([]model.BandWithRole{{ID: 10, Name: "Test Band", IsDefault: false}}, nil)
+		mockUserRepo.EXPECT().
+			SetDefaultBand(gomock.Any(), 42, 10).
+			Return(nil)
+
 		w := httptest.NewRecorder()
 		err := h.AcceptInvitation(w, req)
 

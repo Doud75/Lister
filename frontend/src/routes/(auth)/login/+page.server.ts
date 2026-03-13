@@ -47,7 +47,8 @@ export const actions: Actions = {
 
         if (result.bands && result.bands.length > 0) {
             cookies.set('user_bands', JSON.stringify(result.bands), cookieOptions);
-            cookies.set('active_band_id', result.bands[0].id.toString(), cookieOptions);
+            const activeBandId = result.default_band_id ?? result.bands[0].id;
+            cookies.set('active_band_id', activeBandId.toString(), cookieOptions);
         }
 
         const rawRedirectTo = url.searchParams.get('redirectTo');

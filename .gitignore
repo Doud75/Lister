@@ -63,3 +63,5 @@ repomix-output.xml
 frontend/playwright-report
 frontend/test-results
 test-results
+
+CLAUDE.md

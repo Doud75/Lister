@@ -12,5 +12,6 @@ type BandWithRole struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Role      string    `json:"role"`
+	IsDefault bool      `json:"is_default"`
 	CreatedAt time.Time `json:"created_at"`
 }

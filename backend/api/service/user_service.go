@@ -38,9 +38,10 @@ type InviteMemberPayload struct {
 }
 
 type AuthResponse struct {
-	Token        string       `json:"token"`
-	RefreshToken string       `json:"refresh_token"`
-	Bands        []model.Band `json:"bands"`
+	Token         string              `json:"token"`
+	RefreshToken  string              `json:"refresh_token"`
+	Bands         []model.BandWithRole `json:"bands"`
+	DefaultBandID *int                `json:"default_band_id"`
 }
 
 func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResponse, error) {
@@ -87,7 +88,7 @@ func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResp
 	return &AuthResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
-		Bands:        []model.Band{},
+		Bands:        []model.BandWithRole{},
 	}, nil
 }
 
@@ -101,9 +102,18 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 		return nil, errors.New("invalid credentials")
 	}
 
-	bands, err := s.UserRepo.FindBandsByUserID(ctx, user.ID)
+	bands, err := s.UserRepo.FindBandsWithRoleByUserID(ctx, user.ID)
 	if err != nil {
 		return nil, err
+	}
+
+	var defaultBandID *int
+	for _, b := range bands {
+		if b.IsDefault {
+			id := b.ID
+			defaultBandID = &id
+			break
+		}
 	}
 
 	token, err := auth.GenerateJWT(s.JWTSecret, user.ID)
@@ -128,9 +138,10 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 	}
 
 	return &AuthResponse{
-		Token:        token,
-		RefreshToken: refreshToken,
-		Bands:        bands,
+		Token:         token,
+		RefreshToken:  refreshToken,
+		Bands:         bands,
+		DefaultBandID: defaultBandID,
 	}, nil
 }
 
@@ -230,7 +241,32 @@ func (s UserService) LeaveBand(ctx context.Context, userID int, bandID int) erro
 		}
 	}
 
-	return s.UserRepo.RemoveUserFromBand(ctx, bandID, userID)
+	allBands, err := s.UserRepo.FindBandsWithRoleByUserID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	var wasDefault bool
+	for _, b := range allBands {
+		if b.ID == bandID && b.IsDefault {
+			wasDefault = true
+			break
+		}
+	}
+
+	if err := s.UserRepo.RemoveUserFromBand(ctx, bandID, userID); err != nil {
+		return err
+	}
+
+	if wasDefault {
+		for _, b := range allBands {
+			if b.ID != bandID {
+				_ = s.UserRepo.SetDefaultBand(ctx, userID, b.ID)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s UserService) SearchUsers(ctx context.Context, query string) ([]model.User, error) {
@@ -244,9 +280,27 @@ func (s UserService) CreateBand(ctx context.Context, name string, ownerUserID in
 	if name == "" {
 		return model.Band{}, errors.New("band name cannot be empty")
 	}
-	return s.UserRepo.CreateBand(ctx, name, ownerUserID)
+	band, err := s.UserRepo.CreateBand(ctx, name, ownerUserID)
+	if err != nil {
+		return model.Band{}, err
+	}
+
+	bands, err := s.UserRepo.FindBandsWithRoleByUserID(ctx, ownerUserID)
+	if err == nil && len(bands) == 1 {
+		_ = s.UserRepo.SetDefaultBand(ctx, ownerUserID, band.ID)
+	}
+
+	return band, nil
 }
 
 func (s UserService) GetUserBands(ctx context.Context, userID int) ([]model.BandWithRole, error) {
 	return s.UserRepo.FindBandsWithRoleByUserID(ctx, userID)
+}
+
+func (s UserService) SetDefaultBand(ctx context.Context, userID int, bandID int) error {
+	isMember, err := s.UserRepo.IsUserInBand(ctx, userID, bandID)
+	if err != nil || !isMember {
+		return errors.New("band not found or you are not a member")
+	}
+	return s.UserRepo.SetDefaultBand(ctx, userID, bandID)
 }

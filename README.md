@@ -1,6 +1,6 @@
 # Setlist PWA 🎸
 
-Bienvenue sur le projet **Setlist PWA** ! Cette application est une *Progressive Web App* conçue pour aider les groupes de musique à créer, gérer et partager leurs setlists.
+Bienvenue sur le projet **Lister** ! Cette application est une *Progressive Web App* conçue pour aider les groupes de musique à créer, gérer et partager leurs setlists.
 
 ## ✨ Fonctionnalités
 

@@ -138,3 +138,26 @@ func (h BandHandler) LeaveBand(w http.ResponseWriter, r *http.Request) error {
 	RespondNoContent(w)
 	return nil
 }
+
+type SetDefaultBandPayload struct {
+	BandID int `json:"band_id"`
+}
+
+func (h BandHandler) SetDefaultBand(w http.ResponseWriter, r *http.Request) error {
+	userID, err := GetUserID(r)
+	if err != nil {
+		return err
+	}
+
+	payload, err := DecodeJSON[SetDefaultBandPayload](r)
+	if err != nil {
+		return err
+	}
+
+	if err := h.UserService.SetDefaultBand(r.Context(), userID, payload.BandID); err != nil {
+		return apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest)
+	}
+
+	RespondNoContent(w)
+	return nil
+}
