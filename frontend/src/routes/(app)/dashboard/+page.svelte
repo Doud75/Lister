@@ -6,6 +6,8 @@
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
 
+    let localBands = $state(data.bands.map((b: typeof data.bands[0]) => ({ ...b })));
+
     let isModalOpen = $state(false);
     let bandName = $state('');
     let isCreating = $state(false);
@@ -14,6 +16,20 @@
     let leaveBandId = $state('');
     let leaveBandName = $state('');
     let isLeaving = $state(false);
+
+    let setDefaultToast = $state(false);
+    let setDefaultTimer: ReturnType<typeof setTimeout>;
+
+    function showDefaultToast() {
+        setDefaultToast = true;
+        clearTimeout(setDefaultTimer);
+        setDefaultTimer = setTimeout(() => (setDefaultToast = false), 2500);
+    }
+
+    function optimisticSetDefault(bandId: number) {
+        localBands = localBands.map((b: typeof localBands[0]) => ({ ...b, is_default: b.id === bandId }));
+        showDefaultToast();
+    }
 
     function openModal() {
         bandName = '';
@@ -68,6 +84,12 @@
         </div>
     {/if}
 
+    {#if setDefaultToast}
+        <div class="mb-6 rounded-lg bg-teal-50 px-4 py-3 text-sm text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
+            Groupe par défaut mis à jour — il sera activé à la prochaine connexion.
+        </div>
+    {/if}
+
     {#if data.bands.length === 0}
         <div class="rounded-xl border-2 border-dashed border-slate-300 p-16 text-center dark:border-slate-700">
             <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -80,7 +102,7 @@
         </div>
     {:else}
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {#each data.bands as band (band.id)}
+            {#each localBands as band (band.id)}
                 <div class="group relative rounded-xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:bg-slate-800
                     {data.activeBandId === band.id.toString()
                         ? 'border-indigo-400 ring-2 ring-indigo-400 dark:border-indigo-500 dark:ring-indigo-500'
@@ -113,7 +135,40 @@
                             </button>
                         </form>
 
-                        <div class="flex-shrink-0 flex items-center pr-3">
+                        <div class="flex-shrink-0 flex items-center gap-1 pr-3">
+                            <form method="POST" action="?/setDefault" use:enhance={(e) => {
+                                const bandId = parseInt((e.formData.get('bandId') as string) ?? '0');
+                                return async ({ result, update }) => {
+                                    if (result.type === 'success') {
+                                        optimisticSetDefault(bandId);
+                                    } else {
+                                        await update({ reset: false });
+                                    }
+                                };
+                            }}>
+                                <input type="hidden" name="bandId" value={band.id} />
+                                <button
+                                    type="submit"
+                                    disabled={band.is_default}
+                                    title={band.is_default ? 'Groupe par défaut' : 'Définir comme groupe par défaut'}
+                                    aria-label={band.is_default ? 'Groupe par défaut' : `Définir ${band.name} comme groupe par défaut`}
+                                    class="rounded-md p-2 transition-colors
+                                        {band.is_default
+                                            ? 'text-amber-400 cursor-default'
+                                            : 'text-slate-300 hover:text-amber-400 dark:text-slate-600 dark:hover:text-amber-400'}"
+                                >
+                                    {#if band.is_default}
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                            <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+                                        </svg>
+                                    {:else}
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                        </svg>
+                                    {/if}
+                                </button>
+                            </form>
+
                             <button
                                 type="button"
                                 onclick={(e) => openLeaveModal(band.id, band.name, e)}

@@ -30,6 +30,7 @@ type UserRepository interface {
 	IsUserInBand(ctx context.Context, userID int, bandID int) (bool, error)
 	GetAdminCountInBand(ctx context.Context, bandID int) (int, error)
 	AddUserToBand(ctx context.Context, userID, bandID int, role string) error
+	SetDefaultBand(ctx context.Context, userID, bandID int) error
 	SearchUsersByUsername(ctx context.Context, usernameQuery string) ([]model.User, error)
 }
 
@@ -295,11 +296,11 @@ func (r *PgUserRepository) CreateBand(ctx context.Context, name string, ownerUse
 func (r *PgUserRepository) FindBandsWithRoleByUserID(ctx context.Context, userID int) ([]model.BandWithRole, error) {
 	bands := make([]model.BandWithRole, 0)
 	query := `
-		SELECT b.id, b.name, bu.role, b.created_at
+		SELECT b.id, b.name, bu.role, bu.is_default, b.created_at
 		FROM bands b
 		JOIN band_users bu ON bu.band_id = b.id
 		WHERE bu.user_id = $1
-		ORDER BY b.name`
+		ORDER BY bu.is_default DESC, b.name`
 
 	rows, err := r.DB.Query(ctx, query, userID)
 	if err != nil {
@@ -309,7 +310,7 @@ func (r *PgUserRepository) FindBandsWithRoleByUserID(ctx context.Context, userID
 
 	for rows.Next() {
 		var b model.BandWithRole
-		if err := rows.Scan(&b.ID, &b.Name, &b.Role, &b.CreatedAt); err != nil {
+		if err := rows.Scan(&b.ID, &b.Name, &b.Role, &b.IsDefault, &b.CreatedAt); err != nil {
 			return nil, err
 		}
 		bands = append(bands, b)
@@ -322,4 +323,27 @@ func (r *PgUserRepository) GetAdminCountInBand(ctx context.Context, bandID int) 
 	query := `SELECT COUNT(*) FROM band_users WHERE band_id = $1 AND role = 'admin'`
 	err := r.DB.QueryRow(ctx, query, bandID).Scan(&count)
 	return count, err
+}
+
+func (r *PgUserRepository) SetDefaultBand(ctx context.Context, userID, bandID int) error {
+	tx, err := r.DB.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, `UPDATE band_users SET is_default = FALSE WHERE user_id = $1`, userID)
+	if err != nil {
+		return err
+	}
+
+	tag, err := tx.Exec(ctx, `UPDATE band_users SET is_default = TRUE WHERE user_id = $1 AND band_id = $2`, userID, bandID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return errors.New("band not found or user is not a member")
+	}
+
+	return tx.Commit(ctx)
 }

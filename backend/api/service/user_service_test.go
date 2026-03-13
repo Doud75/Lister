@@ -101,13 +101,13 @@ func TestUserService_Login(t *testing.T) {
 	t.Run("LoginWithBands", func(t *testing.T) {
 		hashedPw, _ := hashPasswordForTest("Password123!")
 		expectedUser := model.User{ID: 1, Username: "testuser", PasswordHash: hashedPw}
-		expectedBands := []model.Band{{ID: 1, Name: "Test Band"}}
+		expectedBands := []model.BandWithRole{{ID: 1, Name: "Test Band", Role: "admin", IsDefault: true}}
 
 		mockUserRepo.EXPECT().
 			FindUserByUsername(ctx, payload.Username).
 			Return(expectedUser, nil)
 		mockUserRepo.EXPECT().
-			FindBandsByUserID(ctx, expectedUser.ID).
+			FindBandsWithRoleByUserID(ctx, expectedUser.ID).
 			Return(expectedBands, nil)
 		mockRefreshTokenRepo.EXPECT().
 			ReplaceUserRefreshToken(ctx, expectedUser.ID, gomock.Any(), gomock.Any()).
@@ -124,6 +124,9 @@ func TestUserService_Login(t *testing.T) {
 		if len(resp.Bands) != 1 {
 			t.Errorf("expected 1 band, got %d", len(resp.Bands))
 		}
+		if resp.DefaultBandID == nil || *resp.DefaultBandID != 1 {
+			t.Errorf("expected DefaultBandID=1, got %v", resp.DefaultBandID)
+		}
 	})
 
 	t.Run("LoginWithNoBands_OrphanUser", func(t *testing.T) {
@@ -134,8 +137,8 @@ func TestUserService_Login(t *testing.T) {
 			FindUserByUsername(ctx, payload.Username).
 			Return(expectedUser, nil)
 		mockUserRepo.EXPECT().
-			FindBandsByUserID(ctx, expectedUser.ID).
-			Return([]model.Band{}, nil)
+			FindBandsWithRoleByUserID(ctx, expectedUser.ID).
+			Return([]model.BandWithRole{}, nil)
 
 		mockRefreshTokenRepo.EXPECT().
 			ReplaceUserRefreshToken(ctx, expectedUser.ID, gomock.Any(), gomock.Any()).
@@ -198,6 +201,12 @@ func TestUserService_CreateBand(t *testing.T) {
 		mockUserRepo.EXPECT().
 			CreateBand(ctx, "New Band", 1).
 			Return(expectedBand, nil)
+		mockUserRepo.EXPECT().
+			FindBandsWithRoleByUserID(ctx, 1).
+			Return([]model.BandWithRole{{ID: 10, Name: "New Band", IsDefault: false}}, nil)
+		mockUserRepo.EXPECT().
+			SetDefaultBand(ctx, 1, 10).
+			Return(nil)
 
 		band, err := svc.CreateBand(ctx, "New Band", 1)
 
@@ -236,6 +245,9 @@ func TestUserService_LeaveBand(t *testing.T) {
 
 	t.Run("MemberLeaves_Success", func(t *testing.T) {
 		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("member", nil)
+		mockUserRepo.EXPECT().FindBandsWithRoleByUserID(ctx, userID).Return([]model.BandWithRole{
+			{ID: bandID, Name: "Band", IsDefault: false},
+		}, nil)
 		mockUserRepo.EXPECT().RemoveUserFromBand(ctx, bandID, userID).Return(nil)
 
 		if err := svc.LeaveBand(ctx, userID, bandID); err != nil {
@@ -259,6 +271,9 @@ func TestUserService_LeaveBand(t *testing.T) {
 	t.Run("AdminWithCoAdmin_Success", func(t *testing.T) {
 		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("admin", nil)
 		mockUserRepo.EXPECT().GetAdminCountInBand(ctx, bandID).Return(2, nil)
+		mockUserRepo.EXPECT().FindBandsWithRoleByUserID(ctx, userID).Return([]model.BandWithRole{
+			{ID: bandID, Name: "Band", IsDefault: false},
+		}, nil)
 		mockUserRepo.EXPECT().RemoveUserFromBand(ctx, bandID, userID).Return(nil)
 
 		if err := svc.LeaveBand(ctx, userID, bandID); err != nil {

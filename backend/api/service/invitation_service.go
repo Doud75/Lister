@@ -86,5 +86,10 @@ func (s InvitationService) AcceptInvitation(ctx context.Context, token string, u
 		return nil, err
 	}
 
+	bands, err := s.UserRepo.FindBandsWithRoleByUserID(ctx, userID)
+	if err == nil && len(bands) == 1 {
+		_ = s.UserRepo.SetDefaultBand(ctx, userID, invitation.BandID)
+	}
+
 	return invitation, nil
 }

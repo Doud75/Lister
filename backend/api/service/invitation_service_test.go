@@ -134,6 +134,13 @@ func TestInvitationService_AcceptInvitation(t *testing.T) {
 			AddUserToBand(ctx, 42, 10, "member").
 			Return(nil)
 
+		mockUserRepo.EXPECT().
+			FindBandsWithRoleByUserID(ctx, 42).
+			Return([]model.BandWithRole{{ID: 10, Name: "The Beatles", IsDefault: false}}, nil)
+		mockUserRepo.EXPECT().
+			SetDefaultBand(ctx, 42, 10).
+			Return(nil)
+
 		res, err := svc.AcceptInvitation(ctx, "testtoken", 42)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)

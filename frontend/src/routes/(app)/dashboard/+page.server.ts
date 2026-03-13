@@ -73,6 +73,26 @@ export const actions: Actions = {
         throw redirect(303, '/');
     },
 
+    setDefault: async ({ request, fetch }) => {
+        const formData = await request.formData();
+        const bandId = formData.get('bandId')?.toString();
+
+        if (!bandId) return fail(400, { defaultError: 'Identifiant manquant.' });
+
+        const res = await fetch('/api/user/default-band', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ band_id: parseInt(bandId) })
+        });
+
+        if (!res.ok) {
+            const result = await res.json().catch(() => ({}));
+            return fail(res.status, { defaultError: result.error ?? 'Erreur.' });
+        }
+
+        return { setDefaultSuccess: true, bandId: parseInt(bandId) };
+    },
+
     leaveBand: async ({ request, fetch, cookies }) => {
         const formData = await request.formData();
         const bandId = formData.get('bandId')?.toString();
