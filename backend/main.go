@@ -75,6 +75,7 @@ func main() {
 	mux.Handle("GET /api/bands/{bandId}/members", authMiddleware(handler.Wrap(bandHandler.GetMembers)))
 	mux.Handle("POST /api/bands/{bandId}/members", authMiddleware(adminMiddleware(handler.Wrap(bandHandler.InviteMember))))
 	mux.Handle("DELETE /api/bands/{bandId}/members/{userId}", authMiddleware(adminMiddleware(handler.Wrap(bandHandler.RemoveMember))))
+	mux.Handle("DELETE /api/bands/{bandId}/members/me", authMiddlewareUserOnly(handler.Wrap(bandHandler.LeaveBand)))
 
 	mux.Handle("POST /api/bands/{bandId}/invitations", authMiddleware(adminMiddleware(handler.Wrap(invitationHandler.CreateInvitation))))
 	mux.Handle("GET /api/invitations/{token}", handler.Wrap(invitationHandler.GetInvitation))

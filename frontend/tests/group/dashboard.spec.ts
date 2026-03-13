@@ -74,11 +74,11 @@ test.describe('Dashboard', () => {
 
         // Scope to main to avoid matching the navbar <select> options
         const main = page.locator('main');
-        await expect(main.getByRole('button', { name: band1 })).toBeVisible();
-        await expect(main.getByRole('button', { name: band2 })).toBeVisible();
+        await expect(main.getByRole('heading', { name: band1, level: 2 })).toBeVisible();
+        await expect(main.getByRole('heading', { name: band2, level: 2 })).toBeVisible();
 
-        // Click card for band1
-        await main.getByRole('button', { name: band1 }).click();
+        // Click the switch-band form button for band1
+        await main.locator('form[action="?/switchBand"]').filter({ hasText: band1 }).getByRole('button').click();
         await page.waitForURL('/');
         await expect(page.getByRole('heading', { name: band1 })).toBeVisible();
     });
