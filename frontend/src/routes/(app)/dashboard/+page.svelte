@@ -85,45 +85,48 @@
                     {data.activeBandId === band.id.toString()
                         ? 'border-indigo-400 ring-2 ring-indigo-400 dark:border-indigo-500 dark:ring-indigo-500'
                         : 'border-slate-200 dark:border-slate-700 dark:hover:border-slate-600'}">
-
-                    <button
-                        type="button"
-                        onclick={(e) => openLeaveModal(band.id, band.name, e)}
-                        title="Quitter ce groupe"
-                        class="absolute right-2 top-2 rounded-md p-1 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-slate-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                        aria-label="Quitter {band.name}"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
-                            <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 3.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
-
-                    <form method="POST" action="?/switchBand" use:enhance>
-                        <input type="hidden" name="bandId" value={band.id} />
-                        <button
-                            type="submit"
-                            class="w-full p-5 text-left"
-                        >
-                            <div class="flex items-start justify-between pr-4">
-                                <div class="min-w-0 flex-1">
-                                    <h2 class="truncate text-base font-semibold text-slate-900 dark:text-white">{band.name}</h2>
-                                    <span class="mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                        {band.role === 'admin'
-                                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                                            : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}">
-                                        {band.role === 'admin' ? 'Admin' : 'Membre'}
-                                    </span>
+                    <div class="flex items-center">
+                        <form method="POST" action="?/switchBand" use:enhance class="flex-1 min-w-0">
+                            <input type="hidden" name="bandId" value={band.id} />
+                            <button
+                                type="submit"
+                                class="w-full p-5 text-left"
+                            >
+                                <div class="flex items-start justify-between pr-2">
+                                    <div class="min-w-0 flex-1">
+                                        <h2 class="truncate text-base font-semibold text-slate-900 dark:text-white">{band.name}</h2>
+                                        <span class="mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                                            {band.role === 'admin'
+                                                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                                                : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}">
+                                            {band.role === 'admin' ? 'Admin' : 'Membre'}
+                                        </span>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="h-5 w-5 flex-shrink-0 text-slate-400 transition-transform group-hover:translate-x-1">
+                                        <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                    </svg>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                    class="h-5 w-5 flex-shrink-0 text-slate-400 transition-transform group-hover:translate-x-1">
-                                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                {#if data.activeBandId === band.id.toString()}
+                                    <p class="mt-3 text-xs text-indigo-600 dark:text-indigo-400">✓ Groupe actif</p>
+                                {/if}
+                            </button>
+                        </form>
+
+                        <div class="flex-shrink-0 flex items-center pr-3">
+                            <button
+                                type="button"
+                                onclick={(e) => openLeaveModal(band.id, band.name, e)}
+                                class="rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                                aria-label="Quitter {band.name}"
+                                title="Quitter ce groupe"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
                                 </svg>
-                            </div>
-                            {#if data.activeBandId === band.id.toString()}
-                                <p class="mt-3 text-xs text-indigo-600 dark:text-indigo-400">✓ Groupe actif</p>
-                            {/if}
-                        </button>
-                    </form>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             {/each}
         </div>
