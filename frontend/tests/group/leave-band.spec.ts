@@ -59,7 +59,7 @@ test.describe('Leave Band', () => {
 
         // Modale de confirmation
         await expect(memberPage.getByText('Êtes-vous sûr de vouloir quitter')).toBeVisible();
-        await expect(memberPage.getByRole('strong', { name: bandName })).toBeVisible();
+        await expect(memberPage.getByText(bandName, { exact: true })).toBeVisible();
 
         // Confirmation
         await memberPage.getByRole('button', { name: 'Quitter le groupe' }).click();
