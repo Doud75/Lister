@@ -5,6 +5,7 @@
     import type { PageData } from './$types';
     import type {Snippet} from "svelte";
     import ProfileDropdown from "$lib/components/ui/ProfileDropdown.svelte";
+    import Toast from '$lib/components/ui/Toast.svelte';
 
     let { children, data }: { children: Snippet; data: PageData } = $props();
 
@@ -65,6 +66,7 @@
     });
 </script>
 
+<Toast />
 <div class="min-h-screen bg-slate-100 dark:bg-slate-900">
     <header class="bg-white shadow-sm dark:bg-slate-800">
         <nav class="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
