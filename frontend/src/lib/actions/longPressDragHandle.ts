@@ -26,7 +26,7 @@ export function longPressDragHandle(node: HTMLElement) {
 		node.style.opacity = '1';
 	}
 
-	function blockNativeTouchEvents(e: any) {
+	function blockNativePointerDown(e: PointerEvent) {
 		if (e.pointerType === 'mouse') return;
 		if (!isDispatching) {
 			e.stopImmediatePropagation();
@@ -44,6 +44,7 @@ export function longPressDragHandle(node: HTMLElement) {
 
 	function onTouchStart(e: TouchEvent) {
 		if (e.touches.length > 1) return;
+		e.stopImmediatePropagation();
 		const touch = e.touches[0];
 		startX = touch.clientX;
 		startY = touch.clientY;
@@ -88,8 +89,7 @@ export function longPressDragHandle(node: HTMLElement) {
 	node.addEventListener('touchend', cancel, { capture: true, passive: true });
 	node.addEventListener('touchcancel', cancel, { capture: true, passive: true });
 
-	node.addEventListener('mousedown', blockNativeTouchEvents, { capture: true });
-	node.addEventListener('pointerdown', blockNativeTouchEvents, { capture: true });
+	node.addEventListener('pointerdown', blockNativePointerDown, { capture: true });
 
 	return {
 		destroy() {
@@ -97,8 +97,7 @@ export function longPressDragHandle(node: HTMLElement) {
 			node.removeEventListener('touchmove', onTouchMove, { capture: true });
 			node.removeEventListener('touchend', cancel, { capture: true });
 			node.removeEventListener('touchcancel', cancel, { capture: true });
-			node.removeEventListener('mousedown', blockNativeTouchEvents, { capture: true });
-			node.removeEventListener('pointerdown', blockNativeTouchEvents, { capture: true });
+			node.removeEventListener('pointerdown', blockNativePointerDown, { capture: true });
 			cancel();
 		}
 	};
