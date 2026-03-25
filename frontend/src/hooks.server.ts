@@ -9,8 +9,14 @@ type UserPayload = {
 
 const BACKEND_URL = env.BACKEND_INTERNAL_URL || 'http://backend:8089/api';
 
+const AUTH_ROUTES = ['/login', '/signup'];
+
 export const handle: Handle = async ({ event, resolve }) => {
     if (event.url.pathname === '/logout') {
+        return resolve(event);
+    }
+
+    if (AUTH_ROUTES.some((r) => event.url.pathname.startsWith(r))) {
         return resolve(event);
     }
 
@@ -107,7 +113,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             
             try {
                 headers['X-Forwarded-For'] = event.getClientAddress();
-            } catch (e) { /* ignore */ }
+            } catch { /* ignore */ }
             
             if (activeBandId) {
                 headers['X-Band-ID'] = activeBandId;
