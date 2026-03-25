@@ -2,6 +2,7 @@
     import type { SetlistItem } from '$lib/types';
     import { enhance } from '$app/forms';
     import { dragHandle } from 'svelte-dnd-action';
+    import { longPressDragHandle } from '$lib/actions/longPressDragHandle';
     import { formatItemDuration } from '$lib/utils/utils';
     import { page } from '$app/stores';
 
@@ -16,6 +17,7 @@
 
 {#snippet dragHandleSnippet()}
     <div
+            use:longPressDragHandle
             use:dragHandle
             class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
             aria-label="Drag to reorder"

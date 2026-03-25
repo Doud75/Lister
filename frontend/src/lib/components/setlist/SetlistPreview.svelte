@@ -1,6 +1,7 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
     import { dragHandle, dragHandleZone } from 'svelte-dnd-action';
+    import { longPressDragHandle } from '$lib/actions/longPressDragHandle';
     import { formatDuration, getSongNumber } from '$lib/utils/utils';
     import type { SetlistItem } from '$lib/types';
 
@@ -56,6 +57,7 @@
                     {#each items as item (item.id)}
                         <li class="flex items-center gap-2">
                             <div
+                                    use:longPressDragHandle
                                     use:dragHandle
                                     class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
                                     aria-label="Drag to reorder"

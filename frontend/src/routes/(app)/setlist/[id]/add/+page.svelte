@@ -33,9 +33,9 @@
             const optimisticItem: Partial<SetlistItem> = {
                 id: Date.now(),
                 item_type: itemType,
-                title: { String: title, Valid: true },
+                title: title,
                 position: items.length,
-                duration_seconds: { Int32: duration, Valid: true }
+                duration_seconds: duration
             };
 
             items.push(optimisticItem as SetlistItem);
