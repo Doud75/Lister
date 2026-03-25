@@ -10,28 +10,18 @@ export function longPressDragHandle(node: HTMLElement) {
 	let activeTouchId: number | null = null;
 	let isFiring = false;
 
-	function getListItem(): HTMLElement | null {
-		return node.closest('li') as HTMLElement | null;
-	}
-
 	function applyFeedback() {
-		const item = getListItem() ?? node;
-		item.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
-		item.style.transform = 'scale(1.02)';
-		item.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
-		item.style.zIndex = '1';
-		item.style.position = 'relative';
-		item.style.borderRadius = '8px';
+		node.style.transition = 'box-shadow 0.3s ease, background-color 0.3s ease';
+		node.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.4)';
+		node.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+		node.style.borderRadius = '6px';
 	}
 
 	function removeFeedback() {
-		const item = getListItem() ?? node;
-		item.style.transition = 'transform 0.2s ease, box-shadow 0.2s ease';
-		item.style.transform = '';
-		item.style.boxShadow = '';
-		item.style.zIndex = '';
-		item.style.position = '';
-		item.style.borderRadius = '';
+		node.style.transition = '';
+		node.style.boxShadow = '';
+		node.style.backgroundColor = '';
+		node.style.borderRadius = '';
 	}
 
 	function cancel() {
@@ -59,9 +49,9 @@ export function longPressDragHandle(node: HTMLElement) {
 
 		timer = setTimeout(() => {
 			timer = null;
-			removeFeedback();
-
 			if (activeTouchId === null) return;
+
+			removeFeedback();
 
 			isFiring = true;
 			node.dispatchEvent(
