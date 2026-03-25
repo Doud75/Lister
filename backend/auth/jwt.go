@@ -2,11 +2,12 @@ package auth
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -41,11 +42,14 @@ func GenerateRefreshToken() (string, error) {
 }
 
 func HashRefreshToken(token string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(token), 12)
-	return string(bytes), err
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:]), nil
 }
 
 func VerifyRefreshToken(token, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(token))
-	return err == nil
+	h, err := HashRefreshToken(token)
+	if err != nil {
+		return false
+	}
+	return h == hash
 }

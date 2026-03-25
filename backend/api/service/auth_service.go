@@ -22,32 +22,18 @@ type RefreshTokenResponse struct {
 }
 
 func (s AuthService) RefreshAccessToken(ctx context.Context, refreshToken string) (*RefreshTokenResponse, error) {
-	var userID int
-	var expiresAt time.Time
-	var matchedHash string
-
-	tokens, err := s.RefreshTokenRepo.GetAllValidTokens(ctx)
+	tokenHash, err := auth.HashRefreshToken(refreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	found := false
-	for _, token := range tokens {
-		if auth.VerifyRefreshToken(refreshToken, token.TokenHash) {
-			userID = token.UserID
-			expiresAt = token.ExpiresAt
-			matchedHash = token.TokenHash
-			found = true
-			break
-		}
-	}
-
-	if !found {
+	userID, expiresAt, err := s.RefreshTokenRepo.FindRefreshToken(ctx, tokenHash)
+	if err != nil {
 		return nil, errors.New("refresh token not found")
 	}
 
 	if time.Now().After(expiresAt) {
-		s.RefreshTokenRepo.DeleteRefreshToken(ctx, matchedHash)
+		s.RefreshTokenRepo.DeleteRefreshToken(ctx, tokenHash)
 		return nil, errors.New("refresh token expired")
 	}
 
@@ -85,18 +71,11 @@ func (s AuthService) RefreshAccessToken(ctx context.Context, refreshToken string
 }
 
 func (s AuthService) RevokeRefreshToken(ctx context.Context, refreshToken string, userID int) error {
-	hashes, err := s.RefreshTokenRepo.GetUserTokenHashes(ctx, userID)
+	hash, err := auth.HashRefreshToken(refreshToken)
 	if err != nil {
 		return err
 	}
-
-	for _, hash := range hashes {
-		if auth.VerifyRefreshToken(refreshToken, hash) {
-			return s.RefreshTokenRepo.DeleteRefreshToken(ctx, hash)
-		}
-	}
-
-	return nil
+	return s.RefreshTokenRepo.DeleteRefreshToken(ctx, hash)
 }
 
 func (s AuthService) RevokeAllUserTokens(ctx context.Context, userID int) error {

@@ -57,7 +57,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                     'X-Forwarded-For': clientIp
                 },
                 body: JSON.stringify({ refresh_token: refreshToken }),
-                signal: AbortSignal.timeout(1500)
+                signal: AbortSignal.timeout(3000)
             });
 
             if (refreshResponse.ok) {
