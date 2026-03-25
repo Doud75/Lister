@@ -46,11 +46,12 @@ export const handle: Handle = async ({ event, resolve }) => {
             const clientIp = event.getClientAddress();
             const refreshResponse = await fetch(`${BACKEND_URL}/auth/refresh`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'X-Forwarded-For': clientIp
                 },
-                body: JSON.stringify({ refresh_token: refreshToken })
+                body: JSON.stringify({ refresh_token: refreshToken }),
+                signal: AbortSignal.timeout(3000)
             });
 
             if (refreshResponse.ok) {
@@ -80,12 +81,11 @@ export const handle: Handle = async ({ event, resolve }) => {
                     });
                     const currentBandId = activeBandId ? parseInt(activeBandId) : null;
                     const stillValid = currentBandId && refreshData.bands.some((b: { id: number }) => b.id === currentBandId);
-                    if (!stillValid) {
-                        event.cookies.set('active_band_id', refreshData.bands[0].id.toString(), {
-                            ...cookieOptions,
-                            maxAge: 60 * 60 * 24 * 30
-                        });
-                    }
+                    const newActiveBandId = stillValid ? currentBandId!.toString() : refreshData.bands[0].id.toString();
+                    event.cookies.set('active_band_id', newActiveBandId, {
+                        ...cookieOptions,
+                        maxAge: 60 * 60 * 24 * 30
+                    });
                 }
                 
                 event.locals.token = refreshData.token;
@@ -112,7 +112,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             if (activeBandId) {
                 headers['X-Band-ID'] = activeBandId;
             }
-            const userInfoRes = await fetch(userInfoUrl, { headers });
+            const userInfoRes = await fetch(userInfoUrl, { headers, signal: AbortSignal.timeout(3000) });
 
             if (userInfoRes.ok) {
                 const userInfo = await userInfoRes.json();
