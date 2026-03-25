@@ -5,23 +5,19 @@ export function longPressDragHandle(node: HTMLElement) {
 	let timer: ReturnType<typeof setTimeout> | null = null;
 	let startX = 0;
 	let startY = 0;
-	let startScreenX = 0;
-	let startScreenY = 0;
-	let activeTouchId: number | null = null;
-	let dragTouchId: number | null = null;
-	let isFiring = false;
+	let isLongPressActive = false;
+	let isDispatching = false;
 
 	function applyFeedback() {
-		node.style.transition = 'transform 0.1s ease-out, box-shadow 0.1s ease-out';
-		node.style.transform = 'scale(1.1)';
-		node.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.5)';
-		node.style.backgroundColor = 'rgba(99, 102, 241, 0.2)';
-		node.style.borderRadius = '6px';
+		node.style.transition = 'transform 0.1s ease-out';
+		node.style.transform = 'scale(1.2)';
+		node.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.4)';
+		node.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
 		node.style.zIndex = '50';
 	}
 
 	function removeFeedback() {
-		node.style.transition = 'transform 0.2s ease-in, box-shadow 0.2s ease-in';
+		node.style.transition = 'transform 0.1s ease-in';
 		node.style.transform = '';
 		node.style.boxShadow = '';
 		node.style.backgroundColor = '';
@@ -30,103 +26,79 @@ export function longPressDragHandle(node: HTMLElement) {
 		node.style.opacity = '1';
 	}
 
+	function blockNativeTouchEvents(e: any) {
+		if (e.pointerType === 'mouse') return;
+		if (!isDispatching) {
+			e.stopImmediatePropagation();
+		}
+	}
+
 	function cancel() {
-		if (timer !== null) {
+		if (timer) {
 			clearTimeout(timer);
 			timer = null;
 		}
+		isLongPressActive = false;
 		removeFeedback();
-		activeTouchId = null;
 	}
 
 	function onTouchStart(e: TouchEvent) {
-		if (isFiring) return;
-
-		const touch = e.changedTouches[0];
-		activeTouchId = touch.identifier;
+		if (e.touches.length > 1) return;
+		const touch = e.touches[0];
 		startX = touch.clientX;
 		startY = touch.clientY;
-		startScreenX = touch.screenX;
-		startScreenY = touch.screenY;
-
-		node.style.opacity = '0.7';
+		isLongPressActive = true;
+		node.style.opacity = '0.6';
 
 		timer = setTimeout(() => {
-			timer = null;
-			if (activeTouchId === null) return;
-
-			dragTouchId = activeTouchId;
-			activeTouchId = null;
+			if (!isLongPressActive) return;
 
 			if (window.navigator && window.navigator.vibrate) {
-				window.navigator.vibrate(30);
+				window.navigator.vibrate(40);
 			}
-
 			applyFeedback();
 
-			isFiring = true;
-			node.dispatchEvent(
-				new MouseEvent('mousedown', {
-					bubbles: true,
-					cancelable: true,
-					clientX: startX,
-					clientY: startY,
-					screenX: startScreenX,
-					screenY: startScreenY,
-					button: 0,
-					buttons: 1
-				})
-			);
-			isFiring = false;
+			isDispatching = true;
+			const opts = {
+				bubbles: true,
+				cancelable: true,
+				clientX: startX,
+				clientY: startY,
+				view: window,
+				button: 0,
+				buttons: 1
+			};
+			node.dispatchEvent(new MouseEvent('mousedown', opts));
+			isDispatching = false;
 		}, LONG_PRESS_DELAY_MS);
 	}
 
 	function onTouchMove(e: TouchEvent) {
-		if (activeTouchId !== null) {
-			const touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
-			if (!touch) return;
-			const dx = Math.abs(touch.clientX - startX);
-			const dy = Math.abs(touch.clientY - startY);
-			if (dx > MOVEMENT_CANCEL_THRESHOLD_PX || dy > MOVEMENT_CANCEL_THRESHOLD_PX) {
-				cancel();
-			}
-		} else if (dragTouchId !== null) {
-			const touch = Array.from(e.changedTouches).find((t) => t.identifier === dragTouchId);
-			if (touch) e.preventDefault();
+		if (!isLongPressActive) return;
+		const touch = e.touches[0];
+		const dx = Math.abs(touch.clientX - startX);
+		const dy = Math.abs(touch.clientY - startY);
+		if (dx > MOVEMENT_CANCEL_THRESHOLD_PX || dy > MOVEMENT_CANCEL_THRESHOLD_PX) {
+			cancel();
 		}
 	}
 
-	function onTouchEnd(e: TouchEvent) {
-		if (activeTouchId !== null) {
-			const touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
-			if (touch) cancel();
-		} else if (dragTouchId !== null) {
-			const touch = Array.from(e.changedTouches).find((t) => t.identifier === dragTouchId);
-			if (touch) {
-				dragTouchId = null;
-				removeFeedback();
-			}
-		}
-	}
+	node.addEventListener('touchstart', onTouchStart, { capture: true, passive: true });
+	node.addEventListener('touchmove', onTouchMove, { capture: true, passive: true });
+	node.addEventListener('touchend', cancel, { capture: true, passive: true });
+	node.addEventListener('touchcancel', cancel, { capture: true, passive: true });
 
-	node.addEventListener('touchstart', onTouchStart as EventListener, {
-		capture: true,
-		passive: false
-	});
-	window.addEventListener('touchmove', onTouchMove as EventListener, {
-		capture: true,
-		passive: false
-	});
-	window.addEventListener('touchend', onTouchEnd as EventListener, {
-		capture: true,
-		passive: false
-	});
+	node.addEventListener('mousedown', blockNativeTouchEvents, { capture: true });
+	node.addEventListener('pointerdown', blockNativeTouchEvents, { capture: true });
 
 	return {
 		destroy() {
-			node.removeEventListener('touchstart', onTouchStart as EventListener, { capture: true });
-			window.removeEventListener('touchmove', onTouchMove as EventListener, { capture: true });
-			window.removeEventListener('touchend', onTouchEnd as EventListener, { capture: true });
+			node.removeEventListener('touchstart', onTouchStart, { capture: true });
+			node.removeEventListener('touchmove', onTouchMove, { capture: true });
+			node.removeEventListener('touchend', cancel, { capture: true });
+			node.removeEventListener('touchcancel', cancel, { capture: true });
+			node.removeEventListener('mousedown', blockNativeTouchEvents, { capture: true });
+			node.removeEventListener('pointerdown', blockNativeTouchEvents, { capture: true });
 			cancel();
 		}
 	};
