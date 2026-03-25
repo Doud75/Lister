@@ -1,4 +1,4 @@
-const LONG_PRESS_DELAY_MS = 1000;
+const LONG_PRESS_DELAY_MS = 500;
 const MOVEMENT_CANCEL_THRESHOLD_PX = 10;
 
 export function longPressDragHandle(node: HTMLElement) {
@@ -12,17 +12,22 @@ export function longPressDragHandle(node: HTMLElement) {
 	let isFiring = false;
 
 	function applyFeedback() {
-		node.style.transition = 'box-shadow 0.3s ease, background-color 0.3s ease';
-		node.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.4)';
-		node.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+		node.style.transition = 'transform 0.1s ease-out, box-shadow 0.1s ease-out';
+		node.style.transform = 'scale(1.1)';
+		node.style.boxShadow = '0 0 0 4px rgba(99, 102, 241, 0.5)';
+		node.style.backgroundColor = 'rgba(99, 102, 241, 0.2)';
 		node.style.borderRadius = '6px';
+		node.style.zIndex = '50';
 	}
 
 	function removeFeedback() {
-		node.style.transition = '';
+		node.style.transition = 'transform 0.2s ease-in, box-shadow 0.2s ease-in';
+		node.style.transform = '';
 		node.style.boxShadow = '';
 		node.style.backgroundColor = '';
 		node.style.borderRadius = '';
+		node.style.zIndex = '';
+		node.style.opacity = '1';
 	}
 
 	function cancel() {
@@ -37,8 +42,6 @@ export function longPressDragHandle(node: HTMLElement) {
 	function onTouchStart(e: TouchEvent) {
 		if (isFiring) return;
 
-		e.stopImmediatePropagation();
-
 		const touch = e.changedTouches[0];
 		activeTouchId = touch.identifier;
 		startX = touch.clientX;
@@ -46,7 +49,7 @@ export function longPressDragHandle(node: HTMLElement) {
 		startScreenX = touch.screenX;
 		startScreenY = touch.screenY;
 
-		applyFeedback();
+		node.style.opacity = '0.7';
 
 		timer = setTimeout(() => {
 			timer = null;
@@ -55,7 +58,11 @@ export function longPressDragHandle(node: HTMLElement) {
 			dragTouchId = activeTouchId;
 			activeTouchId = null;
 
-			removeFeedback();
+			if (window.navigator && window.navigator.vibrate) {
+				window.navigator.vibrate(30);
+			}
+
+			applyFeedback();
 
 			isFiring = true;
 			node.dispatchEvent(
@@ -95,7 +102,10 @@ export function longPressDragHandle(node: HTMLElement) {
 			if (touch) cancel();
 		} else if (dragTouchId !== null) {
 			const touch = Array.from(e.changedTouches).find((t) => t.identifier === dragTouchId);
-			if (touch) dragTouchId = null;
+			if (touch) {
+				dragTouchId = null;
+				removeFeedback();
+			}
 		}
 	}
 
