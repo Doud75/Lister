@@ -57,7 +57,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                     'X-Forwarded-For': clientIp
                 },
                 body: JSON.stringify({ refresh_token: refreshToken }),
-                signal: AbortSignal.timeout(3000)
+                signal: AbortSignal.timeout(1500)
             });
 
             if (refreshResponse.ok) {
@@ -118,7 +118,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             if (activeBandId) {
                 headers['X-Band-ID'] = activeBandId;
             }
-            const userInfoRes = await fetch(userInfoUrl, { headers, signal: AbortSignal.timeout(3000) });
+            const userInfoRes = await fetch(userInfoUrl, { headers, signal: AbortSignal.timeout(1500) });
 
             if (userInfoRes.ok) {
                 const userInfo = await userInfoRes.json();

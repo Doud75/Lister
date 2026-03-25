@@ -8,6 +8,7 @@ export function longPressDragHandle(node: HTMLElement) {
 	let startScreenX = 0;
 	let startScreenY = 0;
 	let activeTouchId: number | null = null;
+	let dragTouchId: number | null = null;
 	let isFiring = false;
 
 	function applyFeedback() {
@@ -51,6 +52,9 @@ export function longPressDragHandle(node: HTMLElement) {
 			timer = null;
 			if (activeTouchId === null) return;
 
+			dragTouchId = activeTouchId;
+			activeTouchId = null;
+
 			removeFeedback();
 
 			isFiring = true;
@@ -67,40 +71,52 @@ export function longPressDragHandle(node: HTMLElement) {
 				})
 			);
 			isFiring = false;
-			activeTouchId = null;
 		}, LONG_PRESS_DELAY_MS);
 	}
 
 	function onTouchMove(e: TouchEvent) {
-		if (activeTouchId === null) return;
-		const touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
-		if (!touch) return;
-
-		const dx = Math.abs(touch.clientX - startX);
-		const dy = Math.abs(touch.clientY - startY);
-		if (dx > MOVEMENT_CANCEL_THRESHOLD_PX || dy > MOVEMENT_CANCEL_THRESHOLD_PX) {
-			cancel();
+		if (activeTouchId !== null) {
+			const touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
+			if (!touch) return;
+			const dx = Math.abs(touch.clientX - startX);
+			const dy = Math.abs(touch.clientY - startY);
+			if (dx > MOVEMENT_CANCEL_THRESHOLD_PX || dy > MOVEMENT_CANCEL_THRESHOLD_PX) {
+				cancel();
+			}
+		} else if (dragTouchId !== null) {
+			const touch = Array.from(e.changedTouches).find((t) => t.identifier === dragTouchId);
+			if (touch) e.preventDefault();
 		}
 	}
 
 	function onTouchEnd(e: TouchEvent) {
-		if (activeTouchId === null) return;
-		const touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
-		if (touch) cancel();
+		if (activeTouchId !== null) {
+			const touch = Array.from(e.changedTouches).find((t) => t.identifier === activeTouchId);
+			if (touch) cancel();
+		} else if (dragTouchId !== null) {
+			const touch = Array.from(e.changedTouches).find((t) => t.identifier === dragTouchId);
+			if (touch) dragTouchId = null;
+		}
 	}
 
 	node.addEventListener('touchstart', onTouchStart as EventListener, {
 		capture: true,
 		passive: false
 	});
-	window.addEventListener('touchmove', onTouchMove as EventListener, { passive: true });
-	window.addEventListener('touchend', onTouchEnd as EventListener, { passive: true });
+	window.addEventListener('touchmove', onTouchMove as EventListener, {
+		capture: true,
+		passive: false
+	});
+	window.addEventListener('touchend', onTouchEnd as EventListener, {
+		capture: true,
+		passive: false
+	});
 
 	return {
 		destroy() {
 			node.removeEventListener('touchstart', onTouchStart as EventListener, { capture: true });
-			window.removeEventListener('touchmove', onTouchMove as EventListener);
-			window.removeEventListener('touchend', onTouchEnd as EventListener);
+			window.removeEventListener('touchmove', onTouchMove as EventListener, { capture: true });
+			window.removeEventListener('touchend', onTouchEnd as EventListener, { capture: true });
 			cancel();
 		}
 	};
