@@ -16,6 +16,8 @@ export default defineConfig({
 				name: 'lister',
 				short_name: 'Lister',
 				description: 'Une application pour gérer les setlists de votre groupe',
+				start_url: '/',
+				scope: '/',
 				theme_color: '#333333',
 				background_color: '#ffffff',
 				display: 'standalone',
@@ -23,18 +25,26 @@ export default defineConfig({
 					{
 						src: 'web-app-manifest-192x192.png',
 						sizes: '192x192',
-						type: 'image/png'
+						type: 'image/png',
+						purpose: 'any'
+					},
+					{
+						src: 'web-app-manifest-192x192.png',
+						sizes: '192x192',
+						type: 'image/png',
+						purpose: 'maskable'
 					},
 					{
 						src: 'web-app-manifest-512x512.png',
 						sizes: '512x512',
 						type: 'image/png',
+						purpose: 'any'
 					},
 					{
 						src: 'web-app-manifest-512x512.png',
 						sizes: '512x512',
 						type: 'image/png',
-						purpose: 'any maskable'
+						purpose: 'maskable'
 					}
 				]
 			},
