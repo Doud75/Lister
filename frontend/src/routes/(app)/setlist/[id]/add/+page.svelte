@@ -7,17 +7,12 @@
     import type { SubmitFunction } from '@sveltejs/kit';
     import {calculateTotalDuration} from "$lib/utils/utils";
 
-    import { untrack } from 'svelte';
-
     let { data } = $props<{ data: PageData }>();
     let setlist = $derived(data.setlist);
     let songs = $derived(data.songs);
     let interludes = $derived(data.interludes);
 
-    let items = $state(untrack(() => data.setlist.items));
-    $effect(() => {
-        items = data.setlist.items;
-    });
+    let items = $derived(data.setlist.items);
     let addingItemId = $state<number | null>(null);
 
     const totalDurationSeconds = $derived(calculateTotalDuration(items));

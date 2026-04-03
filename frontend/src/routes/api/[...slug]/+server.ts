@@ -20,7 +20,7 @@ const handleProxy: RequestHandler = async ({ request, params, locals, getClientA
 
 	try {
 		headers.set('X-Forwarded-For', getClientAddress());
-	} catch (e) {
+	} catch {
 		// Ignore if getClientAddress is not available (e.g. during prerendering)
 	}
 
