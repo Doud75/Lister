@@ -34,12 +34,12 @@ test.describe('Setlist Add Item Page', () => {
         setlistId = await createEmptySetlist(page);
         addUrl = `/setlist/${setlistId}/add`;
         await page.goto(addUrl);
-        await expect(page.getByRole('heading', { name: /Build Setlist:/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Construire la setlist :/ })).toBeVisible();
     });
 
     test('should display an empty setlist and the song library', async ({ page }) => {
-        await expect(getSetlistContainer(page).getByText('Add items from your library to get started.')).toBeVisible();
-        await expect(getLibraryContainer(page).getByRole('button', { name: /Songs \(\d+\)/ })).toBeVisible();
+        await expect(getSetlistContainer(page).getByText('Ajoutez des éléments depuis votre bibliothèque pour commencer.')).toBeVisible();
+        await expect(getLibraryContainer(page).getByRole('button', { name: /Chansons \(\d+\)/ })).toBeVisible();
         await expect(getLibraryContainer(page).getByText('Song Title 1')).toBeVisible();
     });
 
@@ -55,7 +55,7 @@ test.describe('Setlist Add Item Page', () => {
         await expect(setlistItems).toHaveCount(2);
         await expect(setlistItems.nth(1)).toContainText('Another Song To Add');
 
-        await library.getByRole('button', { name: /Interludes/ }).click();
+        await library.getByRole('button', { name: /Interludes \(\d+\)/ }).click();
         await library.locator('li').filter({ hasText: 'Interlude To Add' }).getByRole('button').click();
 
         await expect(setlistItems).toHaveCount(3);
@@ -70,12 +70,12 @@ test.describe('Setlist Add Item Page', () => {
 
         await library.locator('li').filter({ hasText: 'Song Title 1' }).getByRole('button').click();
         await library.locator('li').filter({ hasText: 'Another Song To Add' }).getByRole('button').click();
-        await library.getByRole('button', { name: /Interludes/ }).click();
+        await library.getByRole('button', { name: /Interludes \(\d+\)/ }).click();
         await library.locator('li').filter({ hasText: 'Interlude To Add' }).getByRole('button').click();
         await expect(setlistItems).toHaveCount(3);
 
-        const handle = setlistItems.filter({ hasText: 'Song Title 1' }).locator('[aria-label="Drag to reorder"]');
-        const dropTarget = setlistItems.filter({ hasText: 'Interlude To Add' }).locator('[aria-label="Drag to reorder"]');;
+        const handle = setlistItems.filter({ hasText: 'Song Title 1' }).locator('[aria-label="Glisser pour réorganiser"]');
+        const dropTarget = setlistItems.filter({ hasText: 'Interlude To Add' }).locator('[aria-label="Glisser pour réorganiser"]');
 
         await handle.hover();
         await page.mouse.down();
@@ -90,29 +90,29 @@ test.describe('Setlist Add Item Page', () => {
     });
 
     test('should navigate to new song page and back via cancel', async ({ page }) => {
-        await getLibraryContainer(page).getByRole('link', { name: '+ Create New Song' }).click();
+        await getLibraryContainer(page).getByRole('link', { name: '+ Créer une chanson' }).click();
 
         await page.waitForURL(`/song/new?redirectTo=${addUrl}`);
-        await expect(page.getByRole('heading', { name: 'Add a New Song to Your Library' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Ajouter une chanson à votre bibliothèque' })).toBeVisible();
 
-        await page.getByRole('link', { name: 'Cancel' }).click();
+        await page.getByRole('link', { name: 'Annuler' }).click();
 
         await page.waitForURL(addUrl);
-        await expect(page.getByRole('heading', { name: /Build Setlist:/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Construire la setlist :/ })).toBeVisible();
     });
 
     test('should navigate to new interlude page and back via cancel', async ({ page }) => {
         const library = getLibraryContainer(page);
 
-        await library.getByRole('button', { name: /Interludes/ }).click();
-        await library.getByRole('link', { name: '+ Create New Interlude' }).click();
+        await library.getByRole('button', { name: /Interludes \(\d+\)/ }).click();
+        await library.getByRole('link', { name: '+ Créer un interlude' }).click();
 
         await page.waitForURL(`/interlude/new?redirectTo=${addUrl}`);
-        await expect(page.getByRole('heading', { name: 'Add a New Interlude' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Ajouter un nouvel interlude' })).toBeVisible();
 
-        await page.getByRole('link', { name: 'Cancel' }).click();
+        await page.getByRole('link', { name: 'Annuler' }).click();
 
         await page.waitForURL(addUrl);
-        await expect(page.getByRole('heading', { name: /Build Setlist:/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Construire la setlist :/ })).toBeVisible();
     });
 });

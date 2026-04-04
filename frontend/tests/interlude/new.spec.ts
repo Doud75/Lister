@@ -32,11 +32,11 @@ test.describe('Create New Interlude Page', () => {
         await page.goto(`/interlude/new?redirectTo=${addUrl}`);
 
         const newInterludeTitle = `My New Test Interlude ${Date.now()}`;
-        await page.getByLabel('Interlude Title').fill(newInterludeTitle);
-        await page.getByLabel('Speaker (optional)').fill('Test Speaker');
+        await page.getByLabel("Titre de l'interlude").fill(newInterludeTitle);
+        await page.getByLabel('Intervenant (optionnel)').fill('Test Speaker');
         await page.locator('#dur_sec').fill('45');
-        await page.getByLabel('Script / Notes (optional)').fill('This is the default script.');
-        await page.getByRole('button', { name: 'Create Interlude' }).click();
+        await page.getByLabel('Script / Notes (optionnel)').fill('This is the default script.');
+        await page.getByRole('button', { name: "Créer l'interlude" }).click();
 
         await page.waitForURL(addUrl);
 
@@ -46,12 +46,12 @@ test.describe('Create New Interlude Page', () => {
 
     test('should show validation error if title is empty', async ({ page }) => {
         await page.goto('/interlude/new');
-        await page.getByRole('button', { name: 'Create Interlude' }).click();
+        await page.getByRole('button', { name: "Créer l'interlude" }).click();
 
         await page.waitForTimeout(500);
         await expect(page).toHaveURL('/interlude/new');
 
-        const titleInput = page.getByLabel('Interlude Title');
+        const titleInput = page.getByLabel("Titre de l'interlude");
         const isInvalid = await titleInput.evaluate(
             (element) => !(element as HTMLInputElement).checkValidity()
         );
@@ -60,9 +60,9 @@ test.describe('Create New Interlude Page', () => {
 
     test('should navigate back when cancel is clicked', async ({ page }) => {
         await page.goto(`/interlude/new?redirectTo=${addUrl}`);
-        await page.getByRole('link', { name: 'Cancel' }).click();
+        await page.getByRole('link', { name: 'Annuler' }).click();
 
         await page.waitForURL(addUrl);
-        await expect(page.getByRole('heading', { name: /Build Setlist:/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Construire la setlist :/ })).toBeVisible();
     });
 });
