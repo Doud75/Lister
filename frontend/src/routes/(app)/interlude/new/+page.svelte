@@ -39,12 +39,32 @@
         <Input label="Interlude Title" id="title" name="title" required />
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <Input label="Speaker (optional)" id="speaker" name="speaker" placeholder="e.g., Lead Singer" />
-            <Input
-                    label="Duration (seconds)"
-                    id="duration_seconds"
-                    name="duration_seconds"
-                    type="number"
-            />
+            <div>
+                <label class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
+                    Duration (optional)
+                </label>
+                <div class="mt-2 flex items-center gap-2">
+                    <input
+                            type="number"
+                            id="dur_min"
+                            name="dur_min"
+                            min="0"
+                            placeholder="0"
+                            class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500"
+                    />
+                    <span class="text-slate-500 dark:text-slate-400 shrink-0">min</span>
+                    <input
+                            type="number"
+                            id="dur_sec"
+                            name="dur_sec"
+                            min="0"
+                            max="59"
+                            placeholder="00"
+                            class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500"
+                    />
+                    <span class="text-slate-500 dark:text-slate-400 shrink-0">sec</span>
+                </div>
+            </div>
         </div>
 
         <div>

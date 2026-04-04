@@ -21,6 +21,7 @@ export function calculateTotalDuration(items: SetlistItem[]): number {
     return items.reduce((total, item) => total + (item.duration_seconds ?? 0), 0);
 }
 
+
 export function getSongNumber(currentItem: SetlistItem, allItems: SetlistItem[]): number | null {
     if (currentItem.item_type !== 'song') return null;
     const songsOnly = allItems.filter(i => i.item_type === 'song');
