@@ -34,7 +34,7 @@ test.describe('Create New Interlude Page', () => {
         const newInterludeTitle = `My New Test Interlude ${Date.now()}`;
         await page.getByLabel('Interlude Title').fill(newInterludeTitle);
         await page.getByLabel('Speaker (optional)').fill('Test Speaker');
-        await page.getByLabel('Duration (seconds)').fill('45');
+        await page.locator('#dur_sec').fill('45');
         await page.getByLabel('Script / Notes (optional)').fill('This is the default script.');
         await page.getByRole('button', { name: 'Create Interlude' }).click();
 
