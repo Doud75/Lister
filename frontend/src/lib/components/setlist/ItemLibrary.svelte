@@ -31,7 +31,7 @@
                     class:!text-indigo-600={activeTab === 'songs'}
                     class:dark:!text-indigo-400={activeTab === 'songs'}
             >
-                Songs ({songs.length})
+                Chansons ({songs.length})
             </button>
             <button
                     onclick={() => (activeTab = 'interludes')}
@@ -50,14 +50,14 @@
                     href="/song/new?redirectTo=/setlist/{setlistId}/add"
                     class="block w-full rounded-md bg-indigo-50 py-2.5 text-center text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
             >
-                + Create New Song
+                + Créer une chanson
             </a>
         {:else}
             <a
                     href="/interlude/new?redirectTo=/setlist/{setlistId}/add"
                     class="block w-full rounded-md bg-indigo-50 py-2.5 text-center text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
             >
-                + Create New Interlude
+                + Créer un interlude
             </a>
         {/if}
     </div>
@@ -102,7 +102,7 @@
                 </ul>
             {:else}
                 <p class="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
-                    Your song library is empty.
+                    Votre bibliothèque de chansons est vide.
                 </p>
             {/if}
         {/if}
@@ -146,7 +146,7 @@
                 </ul>
             {:else}
                 <p class="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
-                    You have no saved interludes.
+                    Aucun interlude enregistré.
                 </p>
             {/if}
         {/if}

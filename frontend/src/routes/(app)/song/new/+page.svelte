@@ -17,10 +17,10 @@
 
 <div class="container mx-auto max-w-2xl px-4 sm:px-6">
     <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-        Add a New Song to Your Library
+        Ajouter une chanson à votre bibliothèque
     </h1>
     <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
-        This will add the song to your global library.
+        Cela ajoutera la chanson à votre bibliothèque.
     </p>
 
     <SongForm {form} {cancelHref} />

@@ -28,7 +28,7 @@
 
 {#if item.item_type === 'song'}
     <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-        Edit Note for {item.title ?? ''}
+        Modifier la note de {item.title ?? ''}
     </h3>
     <form method="POST" action="?/updateSongNotes" use:enhance={commonEnhance} class="mt-4 space-y-4">
         <input type="hidden" name="itemId" value={item.id} />
@@ -37,17 +37,17 @@
                 id="notes"
                 name="notes"
                 bind:value={modalNotes}
-                placeholder="Add a comment..."
+                placeholder="Ajouter un commentaire..."
         />
         <div class="flex justify-end gap-3">
-            <Button type="button" variant="secondary" onclick={close} autoWidth>Cancel</Button>
-            <Button type="submit" autoWidth>Save Note</Button>
+            <Button type="button" variant="secondary" onclick={close} autoWidth>Annuler</Button>
+            <Button type="submit" autoWidth>Enregistrer la note</Button>
         </div>
     </form>
 {/if}
 
 {#if item.item_type === 'interlude'}
-    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Edit Interlude</h3>
+    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Modifier l'interlude</h3>
     <form
             method="POST"
             action="?/updateInterlude"
@@ -56,12 +56,12 @@
     >
         <input type="hidden" name="interludeId" value={item.interlude_id} />
         <input type="hidden" name="itemId" value={item.id} />
-        <Input label="Title" id="title" name="title" bind:value={modalTitle} required />
+        <Input label="Titre" id="title" name="title" bind:value={modalTitle} required />
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input label="Speaker" id="speaker" name="speaker" bind:value={modalSpeaker} />
+            <Input label="Intervenant" id="speaker" name="speaker" bind:value={modalSpeaker} />
             <div>
                 <label class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
-                    Duration
+                    Durée
                 </label>
                 <div class="mt-2 flex items-center gap-2">
                     <input
@@ -90,8 +90,8 @@
         </div>
         <Textarea label="Script" id="script" name="script" bind:value={modalNotes} />
         <div class="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="secondary" onclick={close} autoWidth>Cancel</Button>
-            <Button type="submit" autoWidth>Save Interlude</Button>
+            <Button type="button" variant="secondary" onclick={close} autoWidth>Annuler</Button>
+            <Button type="submit" autoWidth>Enregistrer l'interlude</Button>
         </div>
     </form>
 {/if}

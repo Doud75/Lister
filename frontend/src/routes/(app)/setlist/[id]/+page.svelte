@@ -223,7 +223,7 @@
                 <a href="/" class="hover:underline">&larr; Retour</a>
                 <span>&bull;</span>
                 <span
-                >Total Duration: <span class="font-semibold"
+                >Durée totale : <span class="font-semibold"
                 >{formatDuration(totalDurationSeconds)}</span
                 ></span
                 >
@@ -268,10 +268,10 @@
                     />
                 </svg>
                 <h3 class="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
-                    This setlist is empty
+                    Cette setlist est vide
                 </h3>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Get started by adding your first item.
+                    Commencez par ajouter votre premier élément.
                 </p>
             </div>
         {/if}

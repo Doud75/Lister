@@ -49,13 +49,13 @@
 <div class="container mx-auto px-4 sm:px-6">
     <header class="mb-8">
         <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Build Setlist: <span class="text-indigo-500">{setlist.name}</span>
+            Construire la setlist : <span class="text-indigo-500">{setlist.name}</span>
         </h1>
         <a
                 href="/setlist/{setlist.id}"
                 class="mt-2 inline-block text-sm text-indigo-500 hover:underline dark:text-indigo-400"
         >
-            &larr; Done Editing
+            &larr; Terminer l'édition
         </a>
     </header>
 

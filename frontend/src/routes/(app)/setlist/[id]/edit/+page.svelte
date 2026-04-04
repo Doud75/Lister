@@ -11,20 +11,20 @@
 <div class="container mx-auto max-w-2xl px-4 sm:px-6">
     <header class="mb-8">
         <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Edit Setlist
+            Modifier la setlist
         </h1>
         <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
-            Update the details for "<span class="font-semibold text-indigo-500">{data.setlist.name}</span>".
+            Modifiez les détails de "<span class="font-semibold text-indigo-500">{data.setlist.name}</span>".
         </p>
     </header>
 
     <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
         <form class="space-y-6" method="POST" use:enhance>
-            <Input label="Setlist Name" id="name" name="name" bind:value={data.setlist.name} required />
+            <Input label="Nom de la setlist" id="name" name="name" bind:value={data.setlist.name} required />
 
             <div>
                 <label for="color" class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
-                    Label Color
+                    Couleur
                 </label>
                 <div class="mt-2 flex items-center gap-4">
                     <input
@@ -43,10 +43,10 @@
 
             <div class="flex items-center justify-between gap-4 pt-4">
                 <a href="/setlist/{data.setlist.id}" class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">
-                    Cancel
+                    Annuler
                 </a>
                 <Button isLoading={$navigating?.type === 'form'} autoWidth>
-                    Save Changes
+                    Enregistrer
                 </Button>
             </div>
         </form>

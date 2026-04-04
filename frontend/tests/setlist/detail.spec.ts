@@ -31,7 +31,7 @@ test.describe('Setlist Detail Page', () => {
     });
 
     test('should reorder items using drag and drop', async ({ page }) => {
-        const handle = page.locator('li').filter({ hasText: 'Song Title 1' }).locator('[aria-label="Drag to reorder"]');
+        const handle = page.locator('li').filter({ hasText: 'Song Title 1' }).locator('[aria-label="Glisser pour réorganiser"]');
         const dropTarget = page.locator('li').filter({ hasText: 'Song Title 2' });
 
         await handle.hover();
@@ -55,7 +55,7 @@ test.describe('Setlist Detail Page', () => {
         const interludeItem = page.locator('li').filter({ hasText: 'Test Interlude' });
 
         await expect(interludeItem).toBeVisible();
-        await interludeItem.getByRole('button', { name: 'Remove item' }).click({ force: true });
+        await interludeItem.getByRole('button', { name: "Supprimer l'élément" }).click({ force: true });
 
         await expect(interludeItem).toBeHidden();
         await expect(page.locator('ul[data-testid="setlist-items"] > li')).toHaveCount(2);
@@ -65,12 +65,12 @@ test.describe('Setlist Detail Page', () => {
         const songItem = page.locator('li').filter({ hasText: 'Song Title 1' });
         const newNote = 'Start with the guitar riff.';
 
-        await songItem.getByRole('button', { name: 'Edit item' }).click({ force: true });
+        await songItem.getByRole('button', { name: "Modifier l'élément" }).click({ force: true });
         await expect(page.getByRole('dialog')).toBeVisible();
 
-        const noteTextarea = page.getByRole('dialog').getByPlaceholder('Add a comment...');
+        const noteTextarea = page.getByRole('dialog').getByPlaceholder('Ajouter un commentaire...');
         await noteTextarea.fill(newNote);
-        await page.getByRole('button', { name: 'Save Note' }).click();
+        await page.getByRole('button', { name: 'Enregistrer la note' }).click();
 
         await expect(page.getByRole('dialog')).toBeHidden();
         await expect(page.getByText(newNote)).toBeVisible();

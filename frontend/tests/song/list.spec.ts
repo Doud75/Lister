@@ -61,6 +61,6 @@ test.describe('Song Library Page', () => {
         await page.getByRole('link', { name: '+ Ajouter une chanson' }).click();
 
         await page.waitForURL('/song/new');
-        await expect(page.getByRole('heading', { name: 'Add a New Song to Your Library' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Ajouter une chanson à votre bibliothèque' })).toBeVisible();
     });
 });
