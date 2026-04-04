@@ -55,13 +55,13 @@ test.describe('Interlude Behavior in Setlists', () => {
         await expect(interludeItemA).toBeVisible();
         await expect(interludeItemA).toContainText(originalScript);
 
-        await interludeItemA.getByRole('button', { name: 'Edit item' }).click({ force: true});
+        await interludeItemA.getByRole('button', { name: "Modifier l'élément" }).click({ force: true});
 
         const modal = page.getByRole('dialog');
         await expect(modal).toBeVisible();
         const scriptForSetlistA = 'This is the script ONLY for Setlist A.';
         await modal.getByLabel('Script').fill(scriptForSetlistA);
-        await modal.getByRole('button', { name: 'Save Interlude' }).click();
+        await modal.getByRole('button', { name: "Enregistrer l'interlude" }).click();
         await expect(modal).toBeHidden();
 
         await expect(interludeItemA).toContainText(scriptForSetlistA);
@@ -87,13 +87,13 @@ test.describe('Interlude Behavior in Setlists', () => {
         const interludeItemA = page.locator('li').filter({ hasText: interludeTitle });
         await expect(interludeItemA).toBeVisible();
 
-        await interludeItemA.getByRole('button', { name: 'Edit item' }).click({ force: true});
+        await interludeItemA.getByRole('button', { name: "Modifier l'élément" }).click({ force: true});
 
         const modal = page.getByRole('dialog');
         await expect(modal).toBeVisible();
         const newSpeaker = 'Global New Speaker';
-        await modal.getByLabel('Speaker').fill(newSpeaker);
-        await modal.getByRole('button', { name: 'Save Interlude' }).click();
+        await modal.getByLabel('Intervenant').fill(newSpeaker);
+        await modal.getByRole('button', { name: "Enregistrer l'interlude" }).click();
         await expect(modal).toBeHidden();
 
         await expect(interludeItemA).toContainText(`Intervenant : ${newSpeaker}`);
@@ -113,10 +113,10 @@ test.describe('Interlude Behavior in Setlists', () => {
         const interludeItemA = page.locator('li').filter({ hasText: interludeTitle });
         await expect(interludeItemA).toBeVisible();
 
-        await interludeItemA.getByRole('button', { name: 'Remove item' }).click({ force: true});
+        await interludeItemA.getByRole('button', { name: "Supprimer l'élément" }).click({ force: true});
 
         await expect(interludeItemA).toBeHidden();
-        await expect(page.getByText('This setlist is empty')).toBeVisible();
+        await expect(page.getByText('Cette setlist est vide')).toBeVisible();
 
         await page.goto(`/setlist/${setlistB_Id}`);
         const interludeItemB = page.locator('li').filter({ hasText: interludeTitle });

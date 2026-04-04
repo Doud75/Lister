@@ -15,14 +15,14 @@ test.describe('Create New Setlist Page', () => {
     test.beforeEach(async ({ page }) => {
         await login(page);
         await page.goto(NEW_SETLIST_URL);
-        await expect(page.getByRole('heading', { name: 'Create a New Setlist' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Créer une nouvelle setlist' })).toBeVisible();
     });
 
     test('should successfully create a new setlist and redirect', async ({ page }) => {
         const newSetlistName = `My Awesome Setlist ${Date.now()}`;
 
-        await page.getByLabel('Setlist Name').fill(newSetlistName);
-        await page.getByRole('button', { name: 'Create Setlist' }).click();
+        await page.getByLabel('Nom de la setlist').fill(newSetlistName);
+        await page.getByRole('button', { name: 'Créer la setlist' }).click();
 
         await page.waitForURL(/\/setlist\/\d+/);
 
@@ -30,19 +30,19 @@ test.describe('Create New Setlist Page', () => {
     });
 
     test('should not submit and should stay on the page if the setlist name is empty', async ({ page }) => {
-        await page.getByRole('button', { name: 'Create Setlist' }).click();
+        await page.getByRole('button', { name: 'Créer la setlist' }).click();
 
         await page.waitForTimeout(500);
 
         await expect(page).toHaveURL(NEW_SETLIST_URL);
 
-        const nameInput = page.getByLabel('Setlist Name');
+        const nameInput = page.getByLabel('Nom de la setlist');
         const isInvalid = await nameInput.evaluate(element => !(element as HTMLInputElement).checkValidity());
         expect(isInvalid).toBe(true);
     });
 
     test('should navigate back to home when cancel is clicked', async ({ page }) => {
-        await page.getByRole('link', { name: 'Cancel' }).click();
+        await page.getByRole('link', { name: 'Annuler' }).click();
 
         await page.waitForURL('/');
         await expect(page.getByRole('heading', { name: 'The Testers' })).toBeVisible();
