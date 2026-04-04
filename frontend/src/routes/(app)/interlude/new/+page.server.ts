@@ -5,11 +5,13 @@ export const actions: Actions = {
     default: async ({ request, fetch, url }) => {
         const data = await request.formData();
 
+        const min = parseInt(data.get('dur_min')?.toString() || '0') || 0;
+        const sec = parseInt(data.get('dur_sec')?.toString() || '0') || 0;
         const payload = {
             title: data.get('title'),
             speaker: data.get('speaker') || null,
             script: data.get('script') || null,
-            duration_seconds: Number(data.get('duration_seconds')) || null
+            duration_seconds: (min === 0 && sec === 0) ? null : min * 60 + sec
         };
 
         const response = await fetch('/api/interlude', {

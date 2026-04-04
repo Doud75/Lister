@@ -66,10 +66,12 @@ export const actions: Actions = {
             body: JSON.stringify({ notes: scriptForNotes })
         });
 
+        const min = parseInt(data.get('dur_min')?.toString() || '0') || 0;
+        const sec = parseInt(data.get('dur_sec')?.toString() || '0') || 0;
         const interludeGlobalPayload = {
             title: data.get('title'),
             speaker: data.get('speaker') || null,
-            duration_seconds: Number(data.get('duration')) || null
+            duration_seconds: (min === 0 && sec === 0) ? null : min * 60 + sec
         };
 
         const updateInterludePromise = fetch(`/api/interlude/${interludeId}`, {

@@ -12,7 +12,8 @@
         title: string;
         album_name: string;
         song_key: string;
-        duration_seconds: string;
+        dur_min: string;
+        dur_sec: string;
         tempo: string;
         lyrics: string;
         links: string;
@@ -34,11 +35,13 @@
 
 
     function getFormValues(s: Partial<Song>): FormSong {
+        const totalSec = s?.duration_seconds ?? null;
         return {
             title: s?.title ?? '',
             album_name: s?.album_name ?? '',
             song_key: s?.song_key ?? '',
-            duration_seconds: s?.duration_seconds?.toString() ?? '',
+            dur_min: totalSec != null ? Math.floor(totalSec / 60).toString() : '',
+            dur_sec: totalSec != null ? (totalSec % 60).toString() : '',
             tempo: s?.tempo?.toString() ?? '',
             lyrics: s?.lyrics ?? '',
             links: s?.links ?? ''
@@ -76,13 +79,34 @@
     </div>
 
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <Input
-                label="Duration (seconds)"
-                id="duration_seconds"
-                name="duration_seconds"
-                type="number"
-                bind:value={formData.duration_seconds}
-        />
+        <div>
+            <label class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
+                Duration (optional)
+            </label>
+            <div class="mt-2 flex items-center gap-2">
+                <input
+                        type="number"
+                        id="dur_min"
+                        name="dur_min"
+                        min="0"
+                        placeholder="0"
+                        bind:value={formData.dur_min}
+                        class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500"
+                />
+                <span class="text-slate-500 dark:text-slate-400 shrink-0">min</span>
+                <input
+                        type="number"
+                        id="dur_sec"
+                        name="dur_sec"
+                        min="0"
+                        max="59"
+                        placeholder="00"
+                        bind:value={formData.dur_sec}
+                        class="block w-full rounded-md border-0 bg-white/5 py-2 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:focus:ring-indigo-500"
+                />
+                <span class="text-slate-500 dark:text-slate-400 shrink-0">sec</span>
+            </div>
+        </div>
         <Input label="Tempo (BPM)" id="tempo" name="tempo" type="number" bind:value={formData.tempo} />
     </div>
 

@@ -67,6 +67,7 @@ describe('calculateTotalDuration', () => {
     });
 });
 
+
 describe('getSongNumber', () => {
     const song1 = { id: 1, item_type: 'song' } as SetlistItem;
     const interlude1 = { id: 2, item_type: 'interlude' } as SetlistItem;
