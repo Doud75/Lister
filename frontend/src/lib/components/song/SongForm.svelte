@@ -59,21 +59,21 @@
     {#if hiddenFrom}
         <input type="hidden" name="from" value={hiddenFrom} />
     {/if}
-    <Input label="Song Title" id="title" name="title" bind:value={formData.title} required />
+    <Input label="Titre de la chanson" id="title" name="title" bind:value={formData.title} required />
 
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <Input
-                label="Album Name (optional)"
+                label="Nom de l'album (optionnel)"
                 id="album_name"
                 name="album_name"
-                placeholder="e.g., Abbey Road"
+                placeholder="ex : Abbey Road"
                 bind:value={formData.album_name}
         />
         <Input
-                label="Key (optional)"
+                label="Tonalité (optionnelle)"
                 id="song_key"
                 name="song_key"
-                placeholder="e.g., Am"
+                placeholder="ex : Lam"
                 bind:value={formData.song_key}
         />
     </div>
@@ -81,7 +81,7 @@
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
             <label class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
-                Duration (optional)
+                Durée (optionnelle)
             </label>
             <div class="mt-2 flex items-center gap-2">
                 <input
@@ -111,7 +111,7 @@
     </div>
 
     <Input
-            label="Link (optional)"
+            label="Lien (optionnel)"
             id="links"
             name="links"
             type="text"
@@ -121,7 +121,7 @@
 
     <div>
         <div class="mt-2">
-            <Textarea label="Lyrics (optional)" id="lyrics" name="lyrics" rows={8} bind:value={formData.lyrics} />
+            <Textarea label="Paroles (optionnelles)" id="lyrics" name="lyrics" rows={8} bind:value={formData.lyrics} />
         </div>
     </div>
 
@@ -134,10 +134,10 @@
                 href={cancelHref}
                 class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
         >
-            {#if isEditing}Annuler{:else}Cancel{/if}
+            Annuler
         </a>
         <Button isLoading={$navigating?.type === 'form'} autoWidth>
-            {#if isEditing}Sauvegarder{:else}Create Song{/if}
+            {#if isEditing}Sauvegarder{:else}Créer la chanson{/if}
         </Button>
     </div>
 </form>

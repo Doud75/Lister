@@ -25,10 +25,10 @@
 
 <div class="container mx-auto max-w-2xl px-4 sm:px-6">
     <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-        Add a New Interlude
+        Ajouter un nouvel interlude
     </h1>
     <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
-        This will add the interlude to your global library.
+        Cela ajoutera l'interlude à votre bibliothèque.
     </p>
 
     <form
@@ -36,12 +36,12 @@
             use:enhance
             class="mt-8 space-y-6 rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800"
     >
-        <Input label="Interlude Title" id="title" name="title" required />
+        <Input label="Titre de l'interlude" id="title" name="title" required />
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <Input label="Speaker (optional)" id="speaker" name="speaker" placeholder="e.g., Lead Singer" />
+            <Input label="Intervenant (optionnel)" id="speaker" name="speaker" placeholder="ex : Chanteur principal" />
             <div>
                 <label class="block text-sm font-medium leading-6 text-slate-900 dark:text-slate-200">
-                    Duration (optional)
+                    Durée (optionnelle)
                 </label>
                 <div class="mt-2 flex items-center gap-2">
                     <input
@@ -69,7 +69,7 @@
 
         <div>
             <div class="mt-2">
-                <Textarea label="Script / Notes (optional)" id="script" name="script" rows={4} />
+                <Textarea label="Script / Notes (optionnel)" id="script" name="script" rows={4} />
             </div>
         </div>
 
@@ -82,9 +82,9 @@
                     href={cancelHref}
                     class="flex w-auto justify-center rounded-md bg-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
             >
-                Cancel
+                Annuler
             </a>
-            <Button isLoading={$navigating?.type === 'form'} autoWidth>Create Interlude</Button>
+            <Button isLoading={$navigating?.type === 'form'} autoWidth>Créer l'interlude</Button>
         </div>
     </form>
 </div>

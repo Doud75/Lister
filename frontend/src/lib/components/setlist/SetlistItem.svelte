@@ -20,7 +20,7 @@
             use:longPressDragHandle
             use:dragHandle
             class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
-            aria-label="Drag to reorder"
+            aria-label="Glisser pour réorganiser"
     >
         <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +39,7 @@
             onclick={() => onEdit(item)}
             type="button"
             class="rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-            aria-label="Edit item"
+            aria-label="Modifier l'élément"
     ><svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -59,7 +59,7 @@
         <button
                 type="submit"
                 class="rounded-md p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-                aria-label="Remove item"
+                aria-label="Supprimer l'élément"
         ><svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

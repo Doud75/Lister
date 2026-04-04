@@ -28,9 +28,9 @@
 
 <div class="flex h-[85vh] flex-col rounded-xl bg-white shadow-lg dark:bg-slate-800 lg:order-last">
     <div class="flex items-baseline justify-between p-6 pb-4">
-        <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Current Setlist</h2>
+        <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Setlist actuelle</h2>
         <span class="text-sm font-medium text-slate-500 dark:text-slate-400">
-			Total: {formatDuration(totalDurationSeconds)}
+			Total : {formatDuration(totalDurationSeconds)}
 		</span>
     </div>
     <div class="flex-grow overflow-y-auto px-6 pb-6">
@@ -60,7 +60,7 @@
                                     use:longPressDragHandle
                                     use:dragHandle
                                     class="cursor-grab rounded-md p-2 text-slate-400 hover:bg-slate-100 active:cursor-grabbing dark:hover:bg-slate-700"
-                                    aria-label="Drag to reorder"
+                                    aria-label="Glisser pour réorganiser"
                             >
                                 <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +114,7 @@
         {:else}
             <div class="flex h-full items-center justify-center">
                 <p class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-                    Add items from your library to get started.
+                    Ajoutez des éléments depuis votre bibliothèque pour commencer.
                 </p>
             </div>
         {/if}

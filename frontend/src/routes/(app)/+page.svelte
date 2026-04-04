@@ -24,18 +24,18 @@
                     {data.userInfo.band_name}
                 </h1>
                 <p class="mt-1 text-lg text-slate-600 dark:text-slate-400">
-                    Welcome back, <span class="font-semibold">{data.userInfo.username}</span>!
+                    Bon retour, <span class="font-semibold">{data.userInfo.username}</span> !
                 </p>
             </div>
             <a href="/setlist/new" class="flex w-auto justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500">
-                + Create New Setlist
+                + Créer une setlist
             </a>
         </div>
     </header>
 
     <div class="space-y-8">
         <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
-            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Your Setlists</h2>
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">Vos setlists</h2>
             <div class="mt-4">
                 <Tabs {tabs} bind:activeTab />
             </div>
@@ -50,7 +50,7 @@
                                         <div>
                                             <h3 class="font-semibold text-slate-900 dark:text-white">{setlist.name}</h3>
                                             <p class="text-sm text-slate-500 dark:text-slate-400">
-                                                Created: {new Date(setlist.created_at).toLocaleDateString()}
+                                                Créée le {new Date(setlist.created_at).toLocaleDateString('fr-FR')}
                                             </p>
                                         </div>
                                     </div>

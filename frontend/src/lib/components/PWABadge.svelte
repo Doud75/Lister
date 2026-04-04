@@ -39,13 +39,13 @@
     <div class="pwa-toast" role="alert">
         <div class="message">
             {#if needRefresh}
-                <span>New content available, click on reload button to update.</span>
+                <span>Nouveau contenu disponible, cliquez sur recharger pour mettre à jour.</span>
             {/if}
         </div>
         {#if needRefresh}
-            <button onclick={handleRefresh}>Reload</button>
+            <button onclick={handleRefresh}>Recharger</button>
         {/if}
-        <button onclick={close}>Close</button>
+        <button onclick={close}>Fermer</button>
     </div>
 {/if}
 

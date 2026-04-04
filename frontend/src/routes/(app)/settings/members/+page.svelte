@@ -66,7 +66,7 @@
             Gérer les membres du groupe
         </h1>
         <div class="mt-2 flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-            <a href="/" class="hover:underline">&larr; Back to Home</a>
+            <a href="/" class="hover:underline">&larr; Retour à l'accueil</a>
         </div>
     </header>
 
@@ -74,7 +74,7 @@
         <div class="lg:col-span-2">
             <div class="rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
                 <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">
-                    Membres actuels ({members.length})
+                    Membres ({members.length})
                 </h2>
                 {#if members.length > 0}
                     <ul class="mt-4 divide-y divide-slate-200 dark:divide-slate-700">
