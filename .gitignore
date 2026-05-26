@@ -65,3 +65,6 @@ frontend/test-results
 test-results
 
 CLAUDE.md
+
+k6/*
+scripts/*
