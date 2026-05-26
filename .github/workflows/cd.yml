@@ -6,8 +6,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ghcr.io/doud75/lister-backend
-  IMAGE_FRONTEND: ghcr.io/doud75/lister-frontend
+  IMAGE_BACKEND: ghcr.io/doud75/setly-backend
+  IMAGE_FRONTEND: ghcr.io/doud75/setly-frontend
 
 jobs:
   build-and-push:
@@ -102,7 +102,7 @@ jobs:
             set -e
 
             echo "🚀 [$(date)] Starting deployment (sha: ${{ github.sha }})"
-            cd /home/deploy/Lister
+            cd /home/deploy/Setly
 
             echo "� Pulling latest code (for migrations)..."
             git pull
@@ -111,14 +111,14 @@ jobs:
             docker compose up --build migrator
 
             echo "�📦 Pulling latest Docker images..."
-            docker compose -f docker-compose.yml -f /home/deploy/Lister/docker-compose.prod.yml pull
+            docker compose -f docker-compose.yml -f /home/deploy/Setly/docker-compose.prod.yml pull
 
             echo "🔄 Restarting services..."
-            docker compose -f docker-compose.yml -f /home/deploy/Lister/docker-compose.prod.yml up -d --remove-orphans
+            docker compose -f docker-compose.yml -f /home/deploy/Setly/docker-compose.prod.yml up -d --remove-orphans
 
             echo "🏥 Checking service health..."
             sleep 10
-            docker compose -f docker-compose.yml -f /home/deploy/Lister/docker-compose.prod.yml ps
+            docker compose -f docker-compose.yml -f /home/deploy/Setly/docker-compose.prod.yml ps
 
             echo "✅ [$(date)] Deployment completed successfully!"
           EOF
@@ -130,9 +130,9 @@ jobs:
           SSH_PORT: ${{ secrets.SSH_PORT }}
         run: |
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" << 'EOF'
-            cd /home/deploy/Lister
+            cd /home/deploy/Setly
             echo "--- Recent backend logs ---"
-            docker compose -f docker-compose.yml -f /home/deploy/Lister/docker-compose.prod.yml logs backend --tail=20
+            docker compose -f docker-compose.yml -f /home/deploy/Setly/docker-compose.prod.yml logs backend --tail=20
             echo "--- Recent frontend logs ---"
-            docker compose -f docker-compose.yml -f /home/deploy/Lister/docker-compose.prod.yml logs frontend --tail=20
+            docker compose -f docker-compose.yml -f /home/deploy/Setly/docker-compose.prod.yml logs frontend --tail=20
           EOF

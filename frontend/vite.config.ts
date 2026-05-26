@@ -13,8 +13,9 @@ export default defineConfig({
 			includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'web-app-manifest-192x192.png', 'web-app-manifest-512x512.png'],
 
 			manifest: {
-				name: 'lister',
-				short_name: 'Lister',
+				name: 'Setly',
+				short_name: 'Setly',
+				id: 'fr.setly.app',
 				description: 'Une application pour gérer les setlists de votre groupe',
 				start_url: '/',
 				scope: '/',

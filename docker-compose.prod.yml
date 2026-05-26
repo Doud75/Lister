@@ -1,10 +1,10 @@
 services:
   backend:
-    image: ghcr.io/doud75/lister-backend:latest
+    image: ghcr.io/doud75/setly-backend:latest
     build: null
 
   frontend:
-    image: ghcr.io/doud75/lister-frontend:latest
+    image: ghcr.io/doud75/setly-frontend:latest
     build: null
     environment:
       - ADDRESS_HEADER=X-Forwarded-For
