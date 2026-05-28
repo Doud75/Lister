@@ -67,4 +67,4 @@ test-results
 CLAUDE.md
 
 k6/*
-scripts/*
+**/scripts/*
