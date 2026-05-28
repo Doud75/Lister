@@ -95,17 +95,24 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 		event.respondWith(networkFirstApi(request));
 		return;
 	}
+
+	// Fallback : assets pré-cachés non couverts (manifest.webmanifest, favicon, etc.)
+	event.respondWith(cacheFirst(request));
 });
 
 async function cacheFirst(request: Request): Promise<Response> {
 	const cached = await caches.match(request);
 	if (cached) return cached;
-	const response = await fetch(request);
-	if (response.ok) {
-		const cache = await caches.open(STATIC_CACHE);
-		await cache.put(request, response.clone());
+	try {
+		const response = await fetch(request);
+		if (response.ok) {
+			const cache = await caches.open(STATIC_CACHE);
+			await cache.put(request, response.clone());
+		}
+		return response;
+	} catch {
+		return Response.error();
 	}
-	return response;
 }
 
 async function networkFirstNavigation(request: Request): Promise<Response> {
@@ -136,15 +143,10 @@ async function networkFirstData(request: Request): Promise<Response> {
 		}
 		return response;
 	} catch {
-		const cached = await cache.match(request);
+		// ignoreSearch: SvelteKit varies ?x-sveltekit-invalidated params between navigations
+		const cached = await cache.match(request, { ignoreSearch: true });
 		console.warn('[SW] data offline, cache hit:', !!cached, request.url);
-		return (
-			cached ??
-			new Response('{"offline":true}', {
-				status: 503,
-				headers: { 'Content-Type': 'application/json' }
-			})
-		);
+		return cached ?? Response.error();
 	}
 }
 

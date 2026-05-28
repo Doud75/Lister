@@ -6,7 +6,6 @@
     import type {Snippet} from "svelte";
     import ProfileDropdown from "$lib/components/ui/ProfileDropdown.svelte";
     import Toast from '$lib/components/ui/Toast.svelte';
-    import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 
     let { children, data }: { children: Snippet; data: PageData } = $props();
 
@@ -67,7 +66,6 @@
     });
 </script>
 
-<OfflineIndicator />
 <Toast />
 <div class="min-h-screen bg-slate-100 dark:bg-slate-900">
     <header class="bg-white shadow-sm dark:bg-slate-800">
