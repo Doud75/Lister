@@ -50,7 +50,8 @@ test.describe('Mode hors-ligne', () => {
 
         // Navigation client-side vers un détail de chanson jamais visité
         // (le détail utilise un client load qui appelle /api/song/:id → SW retourne 503 → toast)
-        const songLink = page.locator('a[href^="/song/"]').first();
+        // On exclut /song/new qui n'a pas de load et ne déclencherait pas d'erreur
+        const songLink = page.locator('a[href^="/song/"]:not([href="/song/new"])').first();
         await songLink.click();
 
         await expect(page.getByText('Pas de connexion réseau')).toBeVisible();
