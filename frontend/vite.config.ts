@@ -9,7 +9,6 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
-
 			includeAssets: [
 				'apple-touch-icon.png',
 				'web-app-manifest-192x192.png',
@@ -17,7 +16,6 @@ export default defineConfig({
 				'web-app-manifest-512x512.png',
 				'web-app-manifest-512x512-maskable.png'
 			],
-
 			manifest: {
 				name: 'Setly',
 				short_name: 'Setly',
@@ -28,6 +26,33 @@ export default defineConfig({
 				theme_color: '#333333',
 				background_color: '#000000',
 				display: 'standalone',
+				display_override: ['standalone'],
+				orientation: 'portrait',
+				categories: ['music', 'productivity'],
+				shortcuts: [
+					{
+						name: 'Mes chansons',
+						short_name: 'Chansons',
+						description: 'Accéder à la bibliothèque de chansons',
+						url: '/song',
+					},
+					{
+						name: 'Nouvelle setlist',
+						short_name: 'Setlist',
+						description: 'Créer une nouvelle setlist',
+						url: '/setlist/new',
+					},
+				],
+				screenshots: [
+					{ src: 'screenshots/mobile-dashboard.png', sizes: '390x844',  type: 'image/png', form_factor: 'narrow', label: 'Tableau de bord' },
+					{ src: 'screenshots/mobile-songs.png',     sizes: '390x844',  type: 'image/png', form_factor: 'narrow', label: 'Liste des chansons' },
+					{ src: 'screenshots/mobile-setlist.png',   sizes: '390x844',  type: 'image/png', form_factor: 'narrow', label: 'Détail setlist' },
+					{ src: 'screenshots/mobile-song.png',      sizes: '390x844',  type: 'image/png', form_factor: 'narrow', label: 'Détail chanson' },
+					{ src: 'screenshots/desktop-dashboard.png', sizes: '1280x800', type: 'image/png', form_factor: 'wide',   label: 'Tableau de bord' },
+					{ src: 'screenshots/desktop-songs.png',     sizes: '1280x800', type: 'image/png', form_factor: 'wide',   label: 'Liste des chansons' },
+					{ src: 'screenshots/desktop-setlist.png',   sizes: '1280x800', type: 'image/png', form_factor: 'wide',   label: 'Détail setlist' },
+					{ src: 'screenshots/desktop-song.png',      sizes: '1280x800', type: 'image/png', form_factor: 'wide',   label: 'Détail chanson' },
+				],
 				icons: [
 					{
 						src: 'web-app-manifest-192x192.png',

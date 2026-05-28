@@ -14,7 +14,8 @@
 		"lint": "npm run lint:prettier && npm run lint:eslint",
 		"lint:prettier": "prettier --check .",
 		"lint:eslint": "eslint .",
-		"generate-icons": "node scripts/generate-icons.mjs"
+		"generate-icons": "node scripts/generate-icons.mjs",
+		"generate-screenshots": "node scripts/generate-screenshots.mjs"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
