@@ -80,6 +80,9 @@ test-leave-band: test-up run-playwright-leave-band test-down
 test-default-band: test-up run-playwright-default-band test-down
 	@echo "✅ Default band E2E test finished."
 
+test-offline: test-up run-playwright-offline test-down
+	@echo "✅ Offline E2E tests finished."
+
 # --- Cibles de test par fichier spécifique (granulaire) ---
 
 # NOUVELLE CIBLE POUR LES ACTIONS D'ADMINISTRATION
@@ -260,6 +263,10 @@ run-playwright-interlude-behavior:
 	@echo "--- Running INTERLUDE BEHAVIOR Playwright tests ---"
 	@cd frontend && npx playwright test tests/interlude/behavior.spec.ts
 
+run-playwright-offline:
+	@echo "--- Running OFFLINE Playwright tests ---"
+	@cd frontend && npx playwright test tests/offline/
+
 # --- Déclaration .PHONY pour toutes les cibles ---
 .PHONY: test-all test-unit test-unit-watch test-backend test-backend-cover \
 		test test-setlist test-song test-settings test-interlude \
@@ -278,4 +285,5 @@ run-playwright-interlude-behavior:
 		run-playwright-settings run-playwright-settings-account run-playwright-settings-members \
 		run-playwright-interlude run-playwright-interlude-new run-playwright-interlude-behavior \
 		run-playwright-auth run-playwright-auth-login run-playwright-auth-signup \
-		run-playwright-invitation run-playwright-invitation-join
+		run-playwright-invitation run-playwright-invitation-join \
+		test-offline run-playwright-offline

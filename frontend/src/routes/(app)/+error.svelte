@@ -11,7 +11,10 @@
         }
 
         if ($page.status !== 404) {
-            toastStore.error('Une erreur est survenue. Veuillez réessayer.');
+            const message = $page.status === 503 && !navigator.onLine
+                ? 'Pas de connexion réseau. Cette page n\'est pas disponible hors ligne.'
+                : 'Une erreur est survenue. Veuillez réessayer.';
+            toastStore.error(message);
             if (window.history.length > 1) {
                 history.back();
             } else {

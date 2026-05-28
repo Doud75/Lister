@@ -8,6 +8,9 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit(),
 		SvelteKitPWA({
+			strategies: 'injectManifest',
+			srcDir: 'src',
+			filename: 'service-worker.ts',
 			registerType: 'autoUpdate',
 			includeAssets: [
 				'apple-touch-icon.png',
@@ -79,22 +82,6 @@ export default defineConfig({
 						purpose: 'maskable'
 					}
 				]
-			},
-			workbox: {
-				runtimeCaching: [
-					{
-						urlPattern: ({ url }) => {
-							return url.pathname.startsWith('/login') || url.pathname.startsWith('/signup');
-						},
-						handler: 'NetworkOnly',
-					},
-					{
-						urlPattern: ({ url }) => {
-							return url.pathname.startsWith('/api/auth');
-						},
-						handler: 'NetworkOnly',
-					},
-				],
 			},
 			devOptions: {
 				enabled: true,
