@@ -10,7 +10,13 @@ export default defineConfig({
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
 
-			includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'web-app-manifest-192x192.png', 'web-app-manifest-512x512.png'],
+			includeAssets: [
+				'apple-touch-icon.png',
+				'web-app-manifest-192x192.png',
+				'web-app-manifest-192x192-maskable.png',
+				'web-app-manifest-512x512.png',
+				'web-app-manifest-512x512-maskable.png'
+			],
 
 			manifest: {
 				name: 'Setly',
@@ -20,7 +26,7 @@ export default defineConfig({
 				start_url: '/',
 				scope: '/',
 				theme_color: '#333333',
-				background_color: '#ffffff',
+				background_color: '#000000',
 				display: 'standalone',
 				icons: [
 					{
@@ -30,7 +36,7 @@ export default defineConfig({
 						purpose: 'any'
 					},
 					{
-						src: 'web-app-manifest-192x192.png',
+						src: 'web-app-manifest-192x192-maskable.png',
 						sizes: '192x192',
 						type: 'image/png',
 						purpose: 'maskable'
@@ -42,7 +48,7 @@ export default defineConfig({
 						purpose: 'any'
 					},
 					{
-						src: 'web-app-manifest-512x512.png',
+						src: 'web-app-manifest-512x512-maskable.png',
 						sizes: '512x512',
 						type: 'image/png',
 						purpose: 'maskable'
