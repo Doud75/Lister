@@ -43,12 +43,15 @@ test.describe('Mode hors-ligne', () => {
     test('affiche un toast "pas de connexion réseau" pour une page jamais visitée', async ({ page, context }) => {
         await login(page);
         await page.goto('/song');
+        await expect(page.getByRole('heading', { name: 'Bibliothèque de chansons' })).toBeVisible();
         await waitForServiceWorker(page);
 
         await context.setOffline(true);
 
-        // /settings/account n'a pas été visité dans ce test
-        await page.goto('/settings/account');
+        // Navigation client-side vers un détail de chanson jamais visité
+        // (le détail utilise un client load qui appelle /api/song/:id → SW retourne 503 → toast)
+        const songLink = page.locator('a[href^="/song/"]').first();
+        await songLink.click();
 
         await expect(page.getByText('Pas de connexion réseau')).toBeVisible();
     });

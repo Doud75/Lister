@@ -11,7 +11,7 @@
         }
 
         if ($page.status !== 404) {
-            const message = $page.status === 503 && !navigator.onLine
+            const message = !navigator.onLine
                 ? 'Pas de connexion réseau. Cette page n\'est pas disponible hors ligne.'
                 : 'Une erreur est survenue. Veuillez réessayer.';
             toastStore.error(message);
