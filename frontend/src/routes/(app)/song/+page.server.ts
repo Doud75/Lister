@@ -1,24 +1,5 @@
-import { error, fail } from '@sveltejs/kit';
-import type { PageServerLoad, Actions } from './$types';
-
-export const load: PageServerLoad = async ({ fetch }) => {
-    const fetchSongs = async () => {
-        const res = await fetch('/api/song');
-        if (!res.ok) {
-            throw error(res.status, 'Failed to fetch song library.');
-        }
-        return res.json();
-    };
-
-    try {
-        return {
-            songs: await fetchSongs()
-        };
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
-    } catch (err: any) {
-        throw error(err.status || 500, err.body?.message || 'Could not load song library.');
-    }
-};
+import { fail } from '@sveltejs/kit';
+import type { Actions } from './$types';
 
 export const actions: Actions = {
     deleteSong: async ({ request, fetch }) => {

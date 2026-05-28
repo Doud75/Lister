@@ -2,6 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import PWABadge from '$lib/components/PWABadge.svelte';
+	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import { modalStore } from '$lib/stores/modalStore';
 	import Modal from '$lib/components/ui/Modal.svelte';
 
@@ -13,6 +14,7 @@
 </svelte:head>
 
 <PWABadge/>
+<OfflineIndicator />
 
 {@render children?.()}
 

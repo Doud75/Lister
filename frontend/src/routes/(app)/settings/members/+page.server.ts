@@ -1,25 +1,5 @@
-import { error, fail, redirect } from '@sveltejs/kit';
-import type { PageServerLoad, Actions } from './$types';
-import type { BandMember } from '$lib/types';
-
-export const load: PageServerLoad = async ({ fetch, locals }) => {
-    if (locals.user?.role !== 'admin') {
-        throw redirect(303, '/');
-    }
-
-    const bandId = locals.activeBandId;
-    if (!bandId) {
-        throw error(400, 'Active band not selected');
-    }
-    const res = await fetch(`/api/bands/${bandId}/members`);
-
-    if (!res.ok) {
-        throw error(res.status, 'Failed to fetch members.');
-    }
-
-    const members: BandMember[] = await res.json();
-    return { members };
-};
+import { fail } from '@sveltejs/kit';
+import type { Actions } from './$types';
 
 export const actions: Actions = {
     removeMember: async ({ request, fetch, locals }) => {
