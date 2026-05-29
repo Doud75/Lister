@@ -22,12 +22,25 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 		caches
 			.open(STATIC_CACHE)
 			.then(async (cache) => {
-				// Pre-cache offline fallback first so it's always available
 				await cache.add(OFFLINE_URL).catch((err) => console.warn('[SW] Failed to cache offline page:', err));
 				const urls = [...new Set(self.__WB_MANIFEST.map((e) => e.url))];
 				await Promise.allSettled(
 					urls.map((url) =>
 						cache.add(url).catch((err) => console.warn('[SW] Failed to cache:', url, err))
+					)
+				);
+			})
+			.then(async () => {
+				const pagesCache = await caches.open(PAGES_CACHE);
+				await Promise.allSettled(
+					['/login', '/signup'].map((url) =>
+						fetch(url)
+							.then((res) => {
+								if (res.ok || res.type === 'opaqueredirect') {
+									return pagesCache.put(url, cleanResponse(res));
+								}
+							})
+							.catch((err) => console.warn('[SW] Failed to cache auth page:', url, err))
 					)
 				);
 			})
@@ -59,23 +72,14 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
 	const path = url.pathname;
 
-	// Version check: réseau uniquement, échoue silencieusement hors-ligne
 	if (path === '/_app/version.json') return;
 
-	// Chunks JS/CSS pré-cachés : cache-first (contenu adressé)
 	if (path.startsWith('/_app/')) {
 		event.respondWith(cacheFirst(request));
 		return;
 	}
 
-	// Auth et routes publiques : toujours réseau, jamais de cache
-	if (
-		path.startsWith('/api/auth') ||
-		path.startsWith('/login') ||
-		path.startsWith('/signup') ||
-		path === '/logout'
-	)
-		return;
+	if (path.startsWith('/api/auth') || path === '/logout') return;
 
 	if (request.mode === 'navigate') {
 		event.respondWith(networkFirstNavigation(request));
@@ -92,7 +96,6 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 		return;
 	}
 
-	// Fallback : assets pré-cachés non couverts (manifest.webmanifest, favicon, etc.)
 	event.respondWith(cacheFirst(request));
 });
 
@@ -111,12 +114,21 @@ async function cacheFirst(request: Request): Promise<Response> {
 	}
 }
 
+function cleanResponse(response: Response): Response {
+	if (!response.redirected) return response;
+	return new Response(response.body, {
+		status: response.status,
+		statusText: response.statusText,
+		headers: response.headers
+	});
+}
+
 async function networkFirstNavigation(request: Request): Promise<Response> {
 	const cache = await caches.open(PAGES_CACHE);
 	try {
 		const response = await fetch(request);
 		if (response.ok) {
-			await cache.put(request, response.clone());
+			await cache.put(request, cleanResponse(response.clone()));
 		}
 		return response;
 	} catch {
