@@ -40,7 +40,7 @@ test.describe('Mode hors-ligne', () => {
         await expect(page.getByRole('heading', { name: 'Bibliothèque de chansons' })).toBeVisible();
     });
 
-    test('affiche un toast "pas de connexion réseau" pour une page jamais visitée', async ({ page, context }) => {
+    test('redirige vers la page hors-ligne pour une page jamais visitée', async ({ page, context }) => {
         await login(page);
         await page.goto('/song');
         await expect(page.getByRole('heading', { name: 'Bibliothèque de chansons' })).toBeVisible();
@@ -49,11 +49,11 @@ test.describe('Mode hors-ligne', () => {
         await context.setOffline(true);
 
         // Navigation client-side vers un détail de chanson jamais visité
-        // (le détail utilise un client load qui appelle /api/song/:id → SW retourne 503 → toast)
+        // (le détail utilise un client load qui appelle /api/song/:id → SW retourne 503)
         // On exclut /song/new qui n'a pas de load et ne déclencherait pas d'erreur
         const songLink = page.locator('a[href^="/song/"]:not([href="/song/new"])').first();
         await songLink.click();
 
-        await expect(page.getByText('Pas de connexion réseau')).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Vous êtes hors ligne' })).toBeVisible();
     });
 });
