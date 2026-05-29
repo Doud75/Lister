@@ -33,7 +33,7 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 			.then(async () => {
 				const pagesCache = await caches.open(PAGES_CACHE);
 				await Promise.allSettled(
-					['/login', '/signup'].map((url) =>
+					['/', '/login', '/signup'].map((url) =>
 						fetch(url)
 							.then((res) => {
 								if (res.ok || res.type === 'opaqueredirect') {
