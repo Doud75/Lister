@@ -13,17 +13,18 @@ declare global {
 const STATIC_CACHE = 'static-v1';
 const PAGES_CACHE = 'pages-v1';
 const API_CACHE = 'api-v1';
+const OFFLINE_URL = '/offline';
 
 const ALL_CACHES = [STATIC_CACHE, PAGES_CACHE, API_CACHE];
 
 self.addEventListener('install', (event: ExtendableEvent) => {
-	console.log('[SW] Installing...');
 	event.waitUntil(
 		caches
 			.open(STATIC_CACHE)
 			.then(async (cache) => {
+				// Pre-cache offline fallback first so it's always available
+				await cache.add(OFFLINE_URL).catch((err) => console.warn('[SW] Failed to cache offline page:', err));
 				const urls = [...new Set(self.__WB_MANIFEST.map((e) => e.url))];
-				console.log('[SW] Pre-caching', urls.length, 'assets');
 				await Promise.allSettled(
 					urls.map((url) =>
 						cache.add(url).catch((err) => console.warn('[SW] Failed to cache:', url, err))
@@ -31,14 +32,12 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 				);
 			})
 			.then(() => {
-				console.log('[SW] Install complete, skipping waiting');
 				return self.skipWaiting();
 			})
 	);
 });
 
 self.addEventListener('activate', (event: ExtendableEvent) => {
-	console.log('[SW] Activating...');
 	event.waitUntil(
 		caches
 			.keys()
@@ -46,7 +45,6 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
 				Promise.all(keys.filter((k) => !ALL_CACHES.includes(k)).map((k) => caches.delete(k)))
 			)
 			.then(() => {
-				console.log('[SW] Activated, claiming clients');
 				return self.clients.claim();
 			})
 	);
@@ -78,8 +76,6 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 		path === '/logout'
 	)
 		return;
-
-	// console.log('[SW] fetch', request.mode, path); // décommenter pour debug verbeux
 
 	if (request.mode === 'navigate') {
 		event.respondWith(networkFirstNavigation(request));
@@ -116,25 +112,22 @@ async function cacheFirst(request: Request): Promise<Response> {
 }
 
 async function networkFirstNavigation(request: Request): Promise<Response> {
-	console.log('[SW] navigate ->', request.url);
 	const cache = await caches.open(PAGES_CACHE);
 	try {
 		const response = await fetch(request);
 		if (response.ok) {
 			await cache.put(request, response.clone());
 		}
-		console.log('[SW] navigate network ok');
 		return response;
 	} catch {
 		const cached = await cache.match(request);
-		console.warn('[SW] navigate offline, cache hit:', !!cached, request.url);
 		if (cached) return cached;
-		return Response.error();
+		const offline = await caches.match(OFFLINE_URL);
+		return offline ?? Response.error();
 	}
 }
 
 async function networkFirstData(request: Request): Promise<Response> {
-	console.log('[SW] data ->', request.url);
 	const cache = await caches.open(PAGES_CACHE);
 	try {
 		const response = await fetch(request);
@@ -143,15 +136,12 @@ async function networkFirstData(request: Request): Promise<Response> {
 		}
 		return response;
 	} catch {
-		// ignoreSearch: SvelteKit varies ?x-sveltekit-invalidated params between navigations
 		const cached = await cache.match(request, { ignoreSearch: true });
-		console.warn('[SW] data offline, cache hit:', !!cached, request.url);
 		return cached ?? Response.error();
 	}
 }
 
 async function networkFirstApi(request: Request): Promise<Response> {
-	console.log('[SW] api ->', request.url);
 	const cache = await caches.open(API_CACHE);
 	try {
 		const response = await fetch(request);
@@ -161,7 +151,6 @@ async function networkFirstApi(request: Request): Promise<Response> {
 		return response;
 	} catch {
 		const cached = await cache.match(request);
-		console.warn('[SW] api offline, cache hit:', !!cached, request.url);
 		return (
 			cached ??
 			new Response('{"error":"Hors ligne"}', {
