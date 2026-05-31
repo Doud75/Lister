@@ -22,7 +22,11 @@ self.addEventListener('install', (event: ExtendableEvent) => {
 		caches
 			.open(STATIC_CACHE)
 			.then(async (cache) => {
-				await cache.add(OFFLINE_URL).catch((err) => console.warn('[SW] Failed to cache offline page:', err));
+				// Pré-cacher la page offline ET ses données SvelteKit
+				await Promise.allSettled([
+					cache.add(OFFLINE_URL),
+					cache.add('/offline/__data.json')
+				]).catch((err) => console.warn('[SW] Failed to cache offline assets:', err));
 				const urls = [...new Set(self.__WB_MANIFEST.map((e) => e.url))];
 				await Promise.allSettled(
 					urls.map((url) =>
@@ -134,8 +138,8 @@ async function networkFirstNavigation(request: Request): Promise<Response> {
 	} catch {
 		const cached = await cache.match(request);
 		if (cached) return cached;
-		const offline = await caches.match(OFFLINE_URL);
-		return offline ?? Response.error();
+		// Rediriger vers /offline pour que SvelteKit puisse hydrater correctement
+		return Response.redirect(new URL('/offline', self.location.origin).href, 302);
 	}
 }
 
@@ -149,7 +153,13 @@ async function networkFirstData(request: Request): Promise<Response> {
 		return response;
 	} catch {
 		const cached = await cache.match(request, { ignoreSearch: true });
-		return cached ?? Response.error();
+		if (cached) return cached;
+		// Retourner un redirect SvelteKit natif vers /offline
+		// SvelteKit comprend ce format et fait une navigation client-side
+		return new Response(
+			JSON.stringify({ type: 'redirect', location: '/offline', status: 307 }),
+			{ status: 200, headers: { 'Content-Type': 'application/json' } }
+		);
 	}
 }
 
