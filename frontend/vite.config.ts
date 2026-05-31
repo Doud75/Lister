@@ -28,9 +28,17 @@ export default defineConfig({
 				scope: '/',
 				theme_color: '#333333',
 				background_color: '#000000',
+				dir: 'ltr',
 				display: 'standalone',
-				display_override: ['standalone'],
+				display_override: ['window-controls-overlay', 'standalone'],
 				orientation: 'portrait',
+				prefer_related_applications: false,
+				launch_handler: {
+					client_mode: 'focus-existing'
+				},
+				edge_side_panel: {
+					preferred_width: 400
+				},
 				categories: ['music', 'productivity'],
 				shortcuts: [
 					{
