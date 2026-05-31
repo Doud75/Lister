@@ -1,10 +1,11 @@
 <script lang="ts">
     import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
     import { onMount } from 'svelte';
 
     onMount(() => {
         if ($page.status !== 404 && $page.status !== 403 && !navigator.onLine) {
-            window.location.replace('/offline');
+            goto('/offline', { replaceState: true });
         }
     });
 </script>

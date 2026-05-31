@@ -10,13 +10,14 @@ type UserPayload = {
 const BACKEND_URL = env.BACKEND_INTERNAL_URL || 'http://backend:8089/api';
 
 const AUTH_ROUTES = ['/login', '/signup'];
+const PUBLIC_ROUTES = ['/offline'];
 
 export const handle: Handle = async ({ event, resolve }) => {
     if (event.url.pathname === '/logout') {
         return resolve(event);
     }
 
-    if (AUTH_ROUTES.some((r) => event.url.pathname.startsWith(r))) {
+    if (AUTH_ROUTES.some((r) => event.url.pathname.startsWith(r)) || PUBLIC_ROUTES.includes(event.url.pathname)) {
         return resolve(event);
     }
 
