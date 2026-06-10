@@ -68,6 +68,9 @@ test-interlude: test-up run-playwright-interlude test-down
 test-multi-group: test-up run-playwright-multi-group test-down
 	@echo "✅ Multi-group E2E test finished."
 
+test-cross-band: test-up run-playwright-cross-band test-down
+	@echo "✅ Cross-band security E2E test finished."
+
 test-duplicate-band: test-up run-playwright-duplicate-band test-down
 	@echo "✅ Duplicate band name E2E test finished."
 
@@ -223,6 +226,10 @@ run-playwright-multi-group:
 	@echo "--- Running MULTI-GROUP Playwright test ---"
 	@cd frontend && npx playwright test tests/group/multi-group.spec.ts
 
+run-playwright-cross-band:
+	@echo "--- Running CROSS-BAND SECURITY Playwright test ---"
+	@cd frontend && npx playwright test tests/group/cross-band-security.spec.ts
+
 run-playwright-duplicate-band:
 	@echo "--- Running DUPLICATE BAND NAME Playwright test ---"
 	@cd frontend && npx playwright test tests/group/duplicate-band-name.spec.ts
@@ -270,7 +277,7 @@ run-playwright-offline:
 # --- Déclaration .PHONY pour toutes les cibles ---
 .PHONY: test-all test-unit test-unit-watch test-backend test-backend-cover \
 		test test-setlist test-song test-settings test-interlude \
-		test-multi-group test-duplicate-band test-dashboard test-leave-band test-default-band \
+		test-multi-group test-cross-band test-duplicate-band test-dashboard test-leave-band test-default-band \
 		test-auth test-auth-login test-auth-signup \
 		test-invitation test-invitation-join \
 		test-setlist-actions test-setlist-detail test-setlist-add test-setlist-new test-setlist-duplicate \
@@ -281,7 +288,7 @@ run-playwright-offline:
 		run-playwright run-playwright-setlist-actions run-playwright-setlist run-playwright-setlist-detail \
 		run-playwright-setlist-add run-playwright-setlist-new run-playwright-setlist-duplicate \
 		run-playwright-song run-playwright-song-list run-playwright-song-new run-playwright-song-edit run-playwright-song-detail \
-		run-playwright-multi-group run-playwright-duplicate-band run-playwright-dashboard run-playwright-leave-band run-playwright-default-band \
+		run-playwright-multi-group run-playwright-cross-band run-playwright-duplicate-band run-playwright-dashboard run-playwright-leave-band run-playwright-default-band \
 		run-playwright-settings run-playwright-settings-account run-playwright-settings-members \
 		run-playwright-interlude run-playwright-interlude-new run-playwright-interlude-behavior \
 		run-playwright-auth run-playwright-auth-login run-playwright-auth-signup \

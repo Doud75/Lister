@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"setlist/api/model"
@@ -128,4 +129,168 @@ func TestSetlistService_Duplicate(t *testing.T) {
 	if result.ID != newSetlist.ID {
 		t.Errorf("expected new ID %d, got %d", newSetlist.ID, result.ID)
 	}
+}
+
+func TestSetlistService_AddItem(t *testing.T) {
+	ctx := context.Background()
+	setlistID := 10
+	bandID := 1
+	ownedSetlist := model.Setlist{ID: setlistID, BandID: bandID}
+
+	t.Run("rejects setlist from another band", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo}
+
+		// Setlist does not belong to the band: repo returns no row.
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(model.Setlist{}, errors.New("no rows"))
+		// No AddItemToSetlist call expected.
+
+		_, err := svc.AddItem(ctx, setlistID, bandID, AddItemPayload{ItemType: "song", ItemID: 5})
+		if !errors.Is(err, ErrSetlistNotFound) {
+			t.Fatalf("expected ErrSetlistNotFound, got %v", err)
+		}
+	})
+
+	t.Run("rejects song from another band", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		mockSongRepo := mocks.NewMockSongRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo, SongRepo: mockSongRepo}
+
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(ownedSetlist, nil)
+		mockSongRepo.EXPECT().GetSongByID(ctx, 5, bandID).Return(model.Song{}, errors.New("no rows"))
+
+		_, err := svc.AddItem(ctx, setlistID, bandID, AddItemPayload{ItemType: "song", ItemID: 5})
+		if !errors.Is(err, ErrItemNotFound) {
+			t.Fatalf("expected ErrItemNotFound, got %v", err)
+		}
+	})
+
+	t.Run("rejects interlude from another band", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		mockInterludeRepo := mocks.NewMockInterludeRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo, InterludeRepo: mockInterludeRepo}
+
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(ownedSetlist, nil)
+		mockInterludeRepo.EXPECT().GetInterludeByID(ctx, 7, bandID).Return(model.Interlude{}, errors.New("no rows"))
+
+		_, err := svc.AddItem(ctx, setlistID, bandID, AddItemPayload{ItemType: "interlude", ItemID: 7})
+		if !errors.Is(err, ErrItemNotFound) {
+			t.Fatalf("expected ErrItemNotFound, got %v", err)
+		}
+	})
+
+	t.Run("rejects invalid item type", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo}
+
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(ownedSetlist, nil)
+
+		_, err := svc.AddItem(ctx, setlistID, bandID, AddItemPayload{ItemType: "video", ItemID: 5})
+		if !errors.Is(err, ErrInvalidItemType) {
+			t.Fatalf("expected ErrInvalidItemType, got %v", err)
+		}
+	})
+
+	t.Run("adds a song owned by the band", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		mockSongRepo := mocks.NewMockSongRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo, SongRepo: mockSongRepo}
+
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(ownedSetlist, nil)
+		mockSongRepo.EXPECT().GetSongByID(ctx, 5, bandID).Return(model.Song{ID: 5, BandID: bandID}, nil)
+		mockRepo.EXPECT().AddItemToSetlist(ctx, gomock.Any()).DoAndReturn(
+			func(_ context.Context, item model.SetlistItem) (model.SetlistItem, error) {
+				if item.SetlistID != setlistID || item.ItemType != "song" || item.SongID == nil || *item.SongID != 5 {
+					t.Errorf("unexpected item passed to repo: %+v", item)
+				}
+				item.ID = 1
+				return item, nil
+			})
+
+		created, err := svc.AddItem(ctx, setlistID, bandID, AddItemPayload{ItemType: "song", ItemID: 5})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if created.ID != 1 {
+			t.Errorf("expected created item ID 1, got %d", created.ID)
+		}
+	})
+
+	t.Run("adds an interlude owned by the band", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		mockInterludeRepo := mocks.NewMockInterludeRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo, InterludeRepo: mockInterludeRepo}
+
+		script := "Talk to the crowd"
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(ownedSetlist, nil)
+		mockInterludeRepo.EXPECT().GetInterludeByID(ctx, 7, bandID).Return(model.Interlude{ID: 7, BandID: bandID, Script: &script}, nil)
+		mockRepo.EXPECT().AddItemToSetlist(ctx, gomock.Any()).DoAndReturn(
+			func(_ context.Context, item model.SetlistItem) (model.SetlistItem, error) {
+				if item.InterludeID == nil || *item.InterludeID != 7 || item.Notes == nil || *item.Notes != script {
+					t.Errorf("unexpected item passed to repo: %+v", item)
+				}
+				return item, nil
+			})
+
+		_, err := svc.AddItem(ctx, setlistID, bandID, AddItemPayload{ItemType: "interlude", ItemID: 7})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+}
+
+func TestSetlistService_UpdateOrder(t *testing.T) {
+	ctx := context.Background()
+	setlistID := 10
+	bandID := 1
+
+	t.Run("rejects setlist from another band", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo}
+
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(model.Setlist{}, errors.New("no rows"))
+		// No UpdateItemOrder call expected.
+
+		err := svc.UpdateOrder(ctx, setlistID, bandID, UpdateOrderPayload{ItemIDs: []int{3, 1, 2}})
+		if !errors.Is(err, ErrSetlistNotFound) {
+			t.Fatalf("expected ErrSetlistNotFound, got %v", err)
+		}
+	})
+
+	t.Run("reorders items of an owned setlist", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSetlistRepository(ctrl)
+		svc := SetlistService{SetlistRepo: mockRepo}
+
+		itemIDs := []int{3, 1, 2}
+		mockRepo.EXPECT().GetSetlistByID(ctx, setlistID, bandID).Return(model.Setlist{ID: setlistID, BandID: bandID}, nil)
+		mockRepo.EXPECT().UpdateItemOrder(ctx, setlistID, itemIDs).Return(nil)
+
+		if err := svc.UpdateOrder(ctx, setlistID, bandID, UpdateOrderPayload{ItemIDs: itemIDs}); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
 }

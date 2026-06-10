@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"setlist/api/apierror"
 	"setlist/api/model"
@@ -114,6 +115,11 @@ func (h SetlistHandler) GetSetlistDetails(w http.ResponseWriter, r *http.Request
 }
 
 func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
+
 	setlistID, err := GetIntParam(r, "id")
 	if err != nil {
 		return apierror.InvalidRequest("Identifiant de setlist invalide.")
@@ -124,9 +130,18 @@ func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	item, err := h.SetlistService.AddItem(r.Context(), setlistID, payload)
+	item, err := h.SetlistService.AddItem(r.Context(), setlistID, bandID, payload)
 	if err != nil {
-		return apierror.InternalError("ajout d'élément à la setlist")
+		switch {
+		case errors.Is(err, service.ErrSetlistNotFound):
+			return apierror.NotFound("Setlist")
+		case errors.Is(err, service.ErrItemNotFound):
+			return apierror.NotFound("Élément")
+		case errors.Is(err, service.ErrInvalidItemType):
+			return apierror.InvalidRequest("Type d'élément invalide.")
+		default:
+			return apierror.InternalError("ajout d'élément à la setlist")
+		}
 	}
 
 	RespondCreated(w, item)
@@ -134,6 +149,11 @@ func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) error {
+	bandID, err := GetBandID(r)
+	if err != nil {
+		return err
+	}
+
 	setlistID, err := GetIntParam(r, "id")
 	if err != nil {
 		return apierror.InvalidRequest("Identifiant de setlist invalide.")
@@ -144,7 +164,10 @@ func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	if err := h.SetlistService.UpdateOrder(r.Context(), setlistID, payload); err != nil {
+	if err := h.SetlistService.UpdateOrder(r.Context(), setlistID, bandID, payload); err != nil {
+		if errors.Is(err, service.ErrSetlistNotFound) {
+			return apierror.NotFound("Setlist")
+		}
 		return apierror.InternalError("mise à jour de l'ordre")
 	}
 
