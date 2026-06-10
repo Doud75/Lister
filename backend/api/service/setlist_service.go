@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"setlist/api/middleware"
 	"setlist/api/model"
 	"setlist/api/repository"
 	"setlist/cache"
@@ -20,8 +19,15 @@ const setlistCacheTTL = 30 * time.Minute
 type SetlistService struct {
 	SetlistRepo   repository.SetlistRepository
 	InterludeRepo repository.InterludeRepository
+	SongRepo      repository.SongRepository
 	Cache         *redis.Client
 }
+
+var (
+	ErrSetlistNotFound = errors.New("setlist not found or does not belong to the user's band")
+	ErrItemNotFound    = errors.New("song or interlude not found or does not belong to the user's band")
+	ErrInvalidItemType = errors.New("invalid item type")
+)
 
 type CreateSetlistPayload struct {
 	Name  string `json:"name"`
@@ -155,7 +161,11 @@ func (s SetlistService) GetDetails(ctx context.Context, id int, bandID int) (Set
 	return SetlistDetails{Setlist: setlist, Items: items}, nil
 }
 
-func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddItemPayload) (model.SetlistItem, error) {
+func (s SetlistService) AddItem(ctx context.Context, setlistID int, bandID int, payload AddItemPayload) (model.SetlistItem, error) {
+	if _, err := s.SetlistRepo.GetSetlistByID(ctx, setlistID, bandID); err != nil {
+		return model.SetlistItem{}, ErrSetlistNotFound
+	}
+
 	var notes *string
 	if payload.Notes != "" {
 		notes = &payload.Notes
@@ -169,25 +179,27 @@ func (s SetlistService) AddItem(ctx context.Context, setlistID int, payload AddI
 	if payload.ItemType == "song" {
 		itemID := int32(payload.ItemID)
 		item.SongID = &itemID
+		if _, err := s.SongRepo.GetSongByID(ctx, payload.ItemID, bandID); err != nil {
+			return model.SetlistItem{}, ErrItemNotFound
+		}
 	} else if payload.ItemType == "interlude" {
 		itemID := int32(payload.ItemID)
 		item.InterludeID = &itemID
-		bandID, ok := ctx.Value(middleware.BandIDKey).(int)
-		if !ok {
-			return model.SetlistItem{}, errors.New("band ID not found in context")
-		}
 		interlude, err := s.InterludeRepo.GetInterludeByID(ctx, payload.ItemID, bandID)
 		if err != nil {
-			return model.SetlistItem{}, fmt.Errorf("could not retrieve interlude: %w", err)
+			return model.SetlistItem{}, ErrItemNotFound
 		}
 		item.Notes = interlude.Script
 	} else {
-		return model.SetlistItem{}, errors.New("invalid item type")
+		return model.SetlistItem{}, ErrInvalidItemType
 	}
 	return s.SetlistRepo.AddItemToSetlist(ctx, item)
 }
 
-func (s SetlistService) UpdateOrder(ctx context.Context, setlistID int, payload UpdateOrderPayload) error {
+func (s SetlistService) UpdateOrder(ctx context.Context, setlistID int, bandID int, payload UpdateOrderPayload) error {
+	if _, err := s.SetlistRepo.GetSetlistByID(ctx, setlistID, bandID); err != nil {
+		return ErrSetlistNotFound
+	}
 	if len(payload.ItemIDs) == 0 {
 		return nil
 	}

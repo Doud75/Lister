@@ -43,13 +43,13 @@ func main() {
 	infoRepo := &repository.PgInfoRepository{DB: dbPool}
 	infoHandler := handler.InfoHandler{InfoRepo: infoRepo, UserRepo: userRepo, Cache: redisClient}
 
-	setlistRepo := &repository.PgSetlistRepository{DB: dbPool}
-	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo, Cache: redisClient}
-	setlistHandler := handler.SetlistHandler{SetlistService: setlistService}
-
 	songRepo := &repository.PgSongRepository{DB: dbPool}
 	songService := service.SongService{SongRepo: songRepo, Cache: redisClient}
 	songHandler := handler.SongHandler{SongService: songService}
+
+	setlistRepo := &repository.PgSetlistRepository{DB: dbPool}
+	setlistService := service.SetlistService{SetlistRepo: setlistRepo, InterludeRepo: interludeRepo, SongRepo: songRepo, Cache: redisClient}
+	setlistHandler := handler.SetlistHandler{SetlistService: setlistService}
 
 	invitationRepo := &repository.PgInvitationRepository{DB: dbPool}
 	invitationService := service.InvitationService{InvitationRepo: invitationRepo, UserRepo: userRepo}
