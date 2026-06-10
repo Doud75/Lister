@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -168,11 +169,8 @@ func TestInvitationService_AcceptInvitation(t *testing.T) {
 			Return(true, nil)
 
 		_, err := svc.AcceptInvitation(ctx, "testtoken", 42)
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if err.Error() != "conflict: user is already a member" {
-			t.Errorf("unexpected error message: %v", err)
+		if !errors.Is(err, ErrAlreadyBandMember) {
+			t.Errorf("expected ErrAlreadyBandMember, got %v", err)
 		}
 	})
 }

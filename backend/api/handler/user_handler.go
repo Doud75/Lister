@@ -13,6 +13,29 @@ type UserHandler struct {
 	UserService service.UserService
 }
 
+// mapUserError translates the user service's sentinel errors into typed API
+// errors; anything else is reported as an internal error on the operation.
+func mapUserError(err error, operation string) error {
+	var ve *service.ValidationError
+	switch {
+	case errors.Is(err, repository.ErrDuplicateUsername):
+		return apierror.UsernameTaken()
+	case errors.Is(err, service.ErrInvalidCredentials):
+		return apierror.InvalidCredentials()
+	case errors.Is(err, service.ErrWrongCurrentPassword):
+		return apierror.WrongCurrentPassword()
+	case errors.Is(err, service.ErrUserNotFound):
+		return apierror.NotFound("Utilisateur")
+	case errors.As(err, &ve):
+		return apierror.ValidationFailed(ve.Msg)
+	default:
+		if appErr := asAppError(err); appErr != nil {
+			return appErr
+		}
+		return apierror.InternalError(operation)
+	}
+}
+
 func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 	payload, err := DecodeJSON[service.AuthPayload](r)
 	if err != nil {
@@ -21,13 +44,7 @@ func (h UserHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 
 	response, err := h.UserService.Signup(r.Context(), payload)
 	if err != nil {
-		if errors.Is(err, repository.ErrDuplicateUsername) {
-			return apierror.UsernameTaken()
-		}
-		if appErr := asAppError(err); appErr != nil {
-			return appErr
-		}
-		return apierror.InternalError("inscription")
+		return mapUserError(err, "inscription")
 	}
 
 	RespondCreated(w, response)
@@ -42,7 +59,7 @@ func (h UserHandler) Login(w http.ResponseWriter, r *http.Request) error {
 
 	response, err := h.UserService.Login(r.Context(), payload)
 	if err != nil {
-		return apierror.InvalidCredentials()
+		return mapUserError(err, "connexion")
 	}
 
 	RespondOK(w, response)
@@ -65,13 +82,7 @@ func (h UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) erro
 	}
 
 	if err := h.UserService.UpdatePassword(r.Context(), userID, payload); err != nil {
-		if err.Error() == "invalid current password" {
-			return apierror.WrongCurrentPassword()
-		}
-		if appErr := asAppError(err); appErr != nil {
-			return appErr
-		}
-		return apierror.InternalError("mise à jour du mot de passe")
+		return mapUserError(err, "mise à jour du mot de passe")
 	}
 
 	RespondOK(w, map[string]string{"message": "Mot de passe mis à jour avec succès."})

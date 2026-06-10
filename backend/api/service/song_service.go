@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"setlist/api/model"
 	"setlist/api/repository"
 	"setlist/cache"
@@ -12,6 +13,11 @@ import (
 )
 
 const songCacheTTL = time.Hour
+
+var (
+	ErrSongNotFound      = errors.New("song not found or does not belong to the user's band")
+	ErrSongTitleRequired = errors.New("song title cannot be empty")
+)
 
 type CreateSongPayload struct {
 	Title           string           `json:"title"`
@@ -59,6 +65,10 @@ func (s SongService) buildSong(bandID int, payload CreateSongPayload) model.Song
 }
 
 func (s SongService) Create(ctx context.Context, payload CreateSongPayload, bandID int) (model.Song, error) {
+	if payload.Title == "" {
+		return model.Song{}, ErrSongTitleRequired
+	}
+
 	song := s.buildSong(bandID, payload)
 
 	created, err := s.SongRepo.CreateSong(ctx, song)
@@ -94,16 +104,24 @@ func (s SongService) GetAllForBand(ctx context.Context, bandID int) ([]model.Son
 }
 
 func (s SongService) GetByID(ctx context.Context, id int, bandID int) (model.Song, error) {
-	return s.SongRepo.GetSongByID(ctx, id, bandID)
+	song, err := s.SongRepo.GetSongByID(ctx, id, bandID)
+	if err != nil {
+		return model.Song{}, mapNotFound(err, ErrSongNotFound)
+	}
+	return song, nil
 }
 
 func (s SongService) Update(ctx context.Context, id int, bandID int, payload UpdateSongPayload) (model.Song, error) {
+	if payload.Title == "" {
+		return model.Song{}, ErrSongTitleRequired
+	}
+
 	song := s.buildSong(bandID, payload)
 	song.ID = id
 
 	updated, err := s.SongRepo.UpdateSong(ctx, song)
 	if err != nil {
-		return model.Song{}, err
+		return model.Song{}, mapNotFound(err, ErrSongNotFound)
 	}
 
 	cache.Delete(ctx, s.Cache, cache.SongKey(bandID))
@@ -113,7 +131,7 @@ func (s SongService) Update(ctx context.Context, id int, bandID int, payload Upd
 
 func (s SongService) SoftDelete(ctx context.Context, id int, bandID int) error {
 	if err := s.SongRepo.SoftDeleteSong(ctx, id, bandID); err != nil {
-		return err
+		return mapNotFound(err, ErrSongNotFound)
 	}
 
 	cache.Delete(ctx, s.Cache, cache.SongKey(bandID))

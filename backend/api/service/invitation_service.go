@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
 	"setlist/api/model"
 	"setlist/api/repository"
 	"time"
@@ -78,7 +77,7 @@ func (s InvitationService) AcceptInvitation(ctx context.Context, token string, u
 		return nil, err
 	}
 	if isMember {
-		return invitation, errors.New("conflict: user is already a member")
+		return nil, ErrAlreadyBandMember
 	}
 
 	err = s.UserRepo.AddUserToBand(ctx, userID, invitation.BandID, invitation.Role)

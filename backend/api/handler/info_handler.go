@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"setlist/api/apierror"
 	"setlist/api/repository"
 	"setlist/cache"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -17,6 +20,15 @@ type InfoHandler struct {
 	InfoRepo repository.InfoRepository
 	UserRepo repository.UserRepository
 	Cache    *redis.Client
+}
+
+// notFoundOrInternal returns a 404 for the given entity only when the error is
+// a driver-level "no rows"; anything else is reported as an internal error.
+func notFoundOrInternal(err error, entity, operation string) error {
+	if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, sql.ErrNoRows) {
+		return apierror.NotFound(entity)
+	}
+	return apierror.InternalError(operation)
 }
 
 type userInfoResponse struct {
@@ -35,7 +47,7 @@ func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) 
 
 	user, err := h.InfoRepo.GetUserByID(r.Context(), userID)
 	if err != nil {
-		return apierror.NotFound("Utilisateur")
+		return notFoundOrInternal(err, "Utilisateur", "récupération de l'utilisateur")
 	}
 
 	if !hasBand {
@@ -58,12 +70,12 @@ func (h InfoHandler) GetCurrentUserInfo(w http.ResponseWriter, r *http.Request) 
 
 	band, err := h.InfoRepo.GetBandByID(r.Context(), bandID)
 	if err != nil {
-		return apierror.NotFound("Groupe")
+		return notFoundOrInternal(err, "Groupe", "récupération du groupe")
 	}
 
 	role, err := h.UserRepo.GetUserRoleInBand(r.Context(), userID, bandID)
 	if err != nil {
-		return apierror.NotFound("Rôle utilisateur")
+		return notFoundOrInternal(err, "Rôle utilisateur", "récupération du rôle")
 	}
 
 	info := userInfoResponse{
