@@ -1,14 +1,49 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"setlist/api/apierror"
 	"setlist/api/model"
+	"setlist/api/repository"
 	"setlist/api/service"
 )
 
 type BandHandler struct {
 	UserService service.UserService
+}
+
+// mapBandError translates the user service's band-related sentinel errors
+// into typed API errors; anything else is reported as an internal error.
+func mapBandError(err error, operation string) error {
+	var ve *service.ValidationError
+	switch {
+	case errors.Is(err, repository.ErrDuplicateUsername):
+		return apierror.UsernameTaken()
+	case errors.Is(err, service.ErrAlreadyBandMember):
+		return apierror.NewUserError(apierror.ErrInvalidRequest, "Cet utilisateur est déjà membre du groupe.", http.StatusConflict)
+	case errors.Is(err, service.ErrLastAdmin):
+		return apierror.NewUserError(
+			apierror.ErrInvalidRequest,
+			"Impossible de quitter : vous êtes le dernier administrateur. Supprimez le groupe ou promouvez un autre membre.",
+			http.StatusConflict,
+		)
+	case errors.Is(err, service.ErrNotBandMember):
+		return apierror.InvalidRequest("Vous n'êtes pas membre de ce groupe.")
+	case errors.Is(err, service.ErrBandNameRequired):
+		return apierror.ValidationFailed("Le nom du groupe est requis.")
+	case errors.Is(err, service.ErrUserPasswordRequired):
+		return apierror.ValidationFailed("Utilisateur introuvable : un mot de passe est requis pour le créer.")
+	case errors.Is(err, service.ErrBandNotFoundOrNotMember):
+		return apierror.NotFound("Groupe")
+	case errors.As(err, &ve):
+		return apierror.ValidationFailed(ve.Msg)
+	default:
+		if appErr := asAppError(err); appErr != nil {
+			return appErr
+		}
+		return apierror.InternalError(operation)
+	}
 }
 
 func (h BandHandler) GetMembers(w http.ResponseWriter, r *http.Request) error {
@@ -42,10 +77,7 @@ func (h BandHandler) InviteMember(w http.ResponseWriter, r *http.Request) error 
 
 	user, err := h.UserService.InviteMember(r.Context(), bandID, payload)
 	if err != nil {
-		if appErr := asAppError(err); appErr != nil {
-			return appErr
-		}
-		return apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest)
+		return mapBandError(err, "invitation d'un membre")
 	}
 
 	RespondCreated(w, user)
@@ -64,7 +96,7 @@ func (h BandHandler) RemoveMember(w http.ResponseWriter, r *http.Request) error 
 	}
 
 	if err := h.UserService.RemoveMember(r.Context(), bandID, userID); err != nil {
-		return apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest)
+		return mapBandError(err, "retrait d'un membre")
 	}
 
 	RespondNoContent(w)
@@ -103,10 +135,7 @@ func (h BandHandler) CreateBand(w http.ResponseWriter, r *http.Request) error {
 
 	band, err := h.UserService.CreateBand(r.Context(), payload.Name, userID)
 	if err != nil {
-		if appErr := asAppError(err); appErr != nil {
-			return appErr
-		}
-		return apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest)
+		return mapBandError(err, "création du groupe")
 	}
 
 	RespondCreated(w, band)
@@ -125,14 +154,7 @@ func (h BandHandler) LeaveBand(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if err := h.UserService.LeaveBand(r.Context(), userID, bandID); err != nil {
-		if err.Error() == "last_admin" {
-			return apierror.NewUserError(
-				apierror.ErrInvalidRequest,
-				"Impossible de quitter : vous êtes le dernier administrateur. Supprimez le groupe ou promouvez un autre membre.",
-				http.StatusConflict,
-			)
-		}
-		return apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest)
+		return mapBandError(err, "départ du groupe")
 	}
 
 	RespondNoContent(w)
@@ -155,7 +177,7 @@ func (h BandHandler) SetDefaultBand(w http.ResponseWriter, r *http.Request) erro
 	}
 
 	if err := h.UserService.SetDefaultBand(r.Context(), userID, payload.BandID); err != nil {
-		return apierror.NewUserError(apierror.ErrInvalidRequest, err.Error(), http.StatusBadRequest)
+		return mapBandError(err, "définition du groupe par défaut")
 	}
 
 	RespondNoContent(w)

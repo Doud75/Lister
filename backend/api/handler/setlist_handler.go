@@ -12,6 +12,25 @@ type SetlistHandler struct {
 	SetlistService service.SetlistService
 }
 
+// mapSetlistError translates the setlist service's sentinel errors into typed
+// API errors; anything else is reported as an internal error on the operation.
+func mapSetlistError(err error, operation string) error {
+	switch {
+	case errors.Is(err, service.ErrSetlistNotFound):
+		return apierror.NotFound("Setlist")
+	case errors.Is(err, service.ErrItemNotFound):
+		return apierror.NotFound("Élément")
+	case errors.Is(err, service.ErrInvalidItemType):
+		return apierror.InvalidRequest("Type d'élément invalide.")
+	case errors.Is(err, service.ErrSetlistNameRequired):
+		return apierror.ValidationFailed("Le nom de la setlist est requis.")
+	case errors.Is(err, service.ErrInvalidColor):
+		return apierror.ValidationFailed("Le format de la couleur est invalide.")
+	default:
+		return apierror.InternalError(operation)
+	}
+}
+
 func (h SetlistHandler) CreateSetlist(w http.ResponseWriter, r *http.Request) error {
 	bandID, err := GetBandID(r)
 	if err != nil {
@@ -25,7 +44,7 @@ func (h SetlistHandler) CreateSetlist(w http.ResponseWriter, r *http.Request) er
 
 	setlist, err := h.SetlistService.Create(r.Context(), payload, bandID)
 	if err != nil {
-		return apierror.InternalError("création de setlist")
+		return mapSetlistError(err, "création de setlist")
 	}
 
 	RespondCreated(w, setlist)
@@ -50,7 +69,7 @@ func (h SetlistHandler) UpdateSetlist(w http.ResponseWriter, r *http.Request) er
 
 	setlist, err := h.SetlistService.Update(r.Context(), id, bandID, payload)
 	if err != nil {
-		return apierror.InternalError("mise à jour de setlist")
+		return mapSetlistError(err, "mise à jour de setlist")
 	}
 
 	RespondOK(w, setlist)
@@ -69,7 +88,7 @@ func (h SetlistHandler) DeleteSetlist(w http.ResponseWriter, r *http.Request) er
 	}
 
 	if err := h.SetlistService.Delete(r.Context(), id, bandID); err != nil {
-		return apierror.InternalError("suppression de setlist")
+		return mapSetlistError(err, "suppression de setlist")
 	}
 
 	RespondNoContent(w)
@@ -107,7 +126,7 @@ func (h SetlistHandler) GetSetlistDetails(w http.ResponseWriter, r *http.Request
 
 	details, err := h.SetlistService.GetDetails(r.Context(), id, bandID)
 	if err != nil {
-		return apierror.NotFound("Setlist")
+		return mapSetlistError(err, "récupération de la setlist")
 	}
 
 	RespondOK(w, details)
@@ -132,16 +151,7 @@ func (h SetlistHandler) AddItem(w http.ResponseWriter, r *http.Request) error {
 
 	item, err := h.SetlistService.AddItem(r.Context(), setlistID, bandID, payload)
 	if err != nil {
-		switch {
-		case errors.Is(err, service.ErrSetlistNotFound):
-			return apierror.NotFound("Setlist")
-		case errors.Is(err, service.ErrItemNotFound):
-			return apierror.NotFound("Élément")
-		case errors.Is(err, service.ErrInvalidItemType):
-			return apierror.InvalidRequest("Type d'élément invalide.")
-		default:
-			return apierror.InternalError("ajout d'élément à la setlist")
-		}
+		return mapSetlistError(err, "ajout d'élément à la setlist")
 	}
 
 	RespondCreated(w, item)
@@ -165,10 +175,7 @@ func (h SetlistHandler) UpdateItemOrder(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.SetlistService.UpdateOrder(r.Context(), setlistID, bandID, payload); err != nil {
-		if errors.Is(err, service.ErrSetlistNotFound) {
-			return apierror.NotFound("Setlist")
-		}
-		return apierror.InternalError("mise à jour de l'ordre")
+		return mapSetlistError(err, "mise à jour de l'ordre")
 	}
 
 	RespondNoContent(w)
@@ -193,7 +200,7 @@ func (h SetlistHandler) UpdateItem(w http.ResponseWriter, r *http.Request) error
 
 	item, err := h.SetlistService.UpdateItem(r.Context(), itemID, bandID, payload)
 	if err != nil {
-		return apierror.InternalError("mise à jour d'élément")
+		return mapSetlistError(err, "mise à jour d'élément")
 	}
 
 	RespondOK(w, item)
@@ -212,7 +219,7 @@ func (h SetlistHandler) DeleteItem(w http.ResponseWriter, r *http.Request) error
 	}
 
 	if err := h.SetlistService.DeleteItem(r.Context(), itemID, bandID); err != nil {
-		return apierror.InternalError("suppression d'élément")
+		return mapSetlistError(err, "suppression d'élément")
 	}
 
 	RespondNoContent(w)
@@ -237,7 +244,7 @@ func (h SetlistHandler) DuplicateSetlist(w http.ResponseWriter, r *http.Request)
 
 	newSetlist, err := h.SetlistService.Duplicate(r.Context(), originalSetlistID, bandID, payload.Name, payload.Color)
 	if err != nil {
-		return apierror.InternalError("duplication de setlist")
+		return mapSetlistError(err, "duplication de setlist")
 	}
 
 	RespondCreated(w, newSetlist)

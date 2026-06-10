@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"setlist/api/apierror"
 	"setlist/api/service"
@@ -8,6 +9,19 @@ import (
 
 type SongHandler struct {
 	SongService service.SongService
+}
+
+// mapSongError translates the song service's sentinel errors into typed API
+// errors; anything else is reported as an internal error on the operation.
+func mapSongError(err error, operation string) error {
+	switch {
+	case errors.Is(err, service.ErrSongNotFound):
+		return apierror.NotFound("Chanson")
+	case errors.Is(err, service.ErrSongTitleRequired):
+		return apierror.ValidationFailed("Le titre de la chanson est requis.")
+	default:
+		return apierror.InternalError(operation)
+	}
 }
 
 func (h SongHandler) CreateSong(w http.ResponseWriter, r *http.Request) error {
@@ -23,7 +37,7 @@ func (h SongHandler) CreateSong(w http.ResponseWriter, r *http.Request) error {
 
 	createdSong, err := h.SongService.Create(r.Context(), payload, bandID)
 	if err != nil {
-		return apierror.InternalError("création de chanson")
+		return mapSongError(err, "création de chanson")
 	}
 
 	RespondCreated(w, createdSong)
@@ -58,7 +72,7 @@ func (h SongHandler) GetSong(w http.ResponseWriter, r *http.Request) error {
 
 	song, err := h.SongService.GetByID(r.Context(), id, bandID)
 	if err != nil {
-		return apierror.NotFound("Chanson")
+		return mapSongError(err, "récupération de la chanson")
 	}
 
 	RespondOK(w, song)
@@ -83,7 +97,7 @@ func (h SongHandler) UpdateSong(w http.ResponseWriter, r *http.Request) error {
 
 	updatedSong, err := h.SongService.Update(r.Context(), id, bandID, payload)
 	if err != nil {
-		return apierror.InternalError("mise à jour de chanson")
+		return mapSongError(err, "mise à jour de chanson")
 	}
 
 	RespondOK(w, updatedSong)
@@ -102,7 +116,7 @@ func (h SongHandler) DeleteSong(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if err := h.SongService.SoftDelete(r.Context(), id, bandID); err != nil {
-		return apierror.NotFound("Chanson")
+		return mapSongError(err, "suppression de chanson")
 	}
 
 	RespondNoContent(w)

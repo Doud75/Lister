@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"regexp"
 	"setlist/api/model"
 	"setlist/api/repository"
@@ -24,9 +23,11 @@ type SetlistService struct {
 }
 
 var (
-	ErrSetlistNotFound = errors.New("setlist not found or does not belong to the user's band")
-	ErrItemNotFound    = errors.New("song or interlude not found or does not belong to the user's band")
-	ErrInvalidItemType = errors.New("invalid item type")
+	ErrSetlistNotFound     = errors.New("setlist not found or does not belong to the user's band")
+	ErrItemNotFound        = errors.New("song or interlude not found or does not belong to the user's band")
+	ErrInvalidItemType     = errors.New("invalid item type")
+	ErrSetlistNameRequired = errors.New("setlist name cannot be empty")
+	ErrInvalidColor        = errors.New("invalid color format")
 )
 
 type CreateSetlistPayload struct {
@@ -68,10 +69,10 @@ var hexColorRegex = regexp.MustCompile(`^#(?:[0-9a-fA-F]{3}){1,2}$`)
 
 func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload, bandID int) (model.Setlist, error) {
 	if payload.Name == "" {
-		return model.Setlist{}, errors.New("setlist name cannot be empty")
+		return model.Setlist{}, ErrSetlistNameRequired
 	}
 	if payload.Color == "" || !hexColorRegex.MatchString(payload.Color) {
-		return model.Setlist{}, fmt.Errorf("invalid color format: %s", payload.Color)
+		return model.Setlist{}, ErrInvalidColor
 	}
 
 	created, err := s.SetlistRepo.CreateSetlist(ctx, s.SetlistRepo.GetDB(), payload.Name, payload.Color, bandID)
@@ -86,18 +87,18 @@ func (s SetlistService) Create(ctx context.Context, payload CreateSetlistPayload
 func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload UpdateSetlistPayload) (model.Setlist, error) {
 	setlist, err := s.SetlistRepo.GetSetlistByID(ctx, id, bandID)
 	if err != nil {
-		return model.Setlist{}, errors.New("setlist not found or does not belong to user's band")
+		return model.Setlist{}, mapNotFound(err, ErrSetlistNotFound)
 	}
 
 	if payload.Name != nil {
 		if *payload.Name == "" {
-			return model.Setlist{}, errors.New("setlist name cannot be empty")
+			return model.Setlist{}, ErrSetlistNameRequired
 		}
 		setlist.Name = *payload.Name
 	}
 	if payload.Color != nil {
 		if *payload.Color == "" || !hexColorRegex.MatchString(*payload.Color) {
-			return model.Setlist{}, fmt.Errorf("invalid color format")
+			return model.Setlist{}, ErrInvalidColor
 		}
 		setlist.Color = *payload.Color
 	}
@@ -117,7 +118,7 @@ func (s SetlistService) Update(ctx context.Context, id int, bandID int, payload 
 func (s SetlistService) Delete(ctx context.Context, setlistID int, bandID int) error {
 	_, err := s.SetlistRepo.GetSetlistByID(ctx, setlistID, bandID)
 	if err != nil {
-		return errors.New("setlist not found or does not belong to the user's band")
+		return mapNotFound(err, ErrSetlistNotFound)
 	}
 	if err := s.SetlistRepo.DeleteSetlist(ctx, setlistID, bandID); err != nil {
 		return err
@@ -152,7 +153,7 @@ func (s SetlistService) GetAllForBand(ctx context.Context, bandID int) ([]model.
 func (s SetlistService) GetDetails(ctx context.Context, id int, bandID int) (SetlistDetails, error) {
 	setlist, err := s.SetlistRepo.GetSetlistByID(ctx, id, bandID)
 	if err != nil {
-		return SetlistDetails{}, err
+		return SetlistDetails{}, mapNotFound(err, ErrSetlistNotFound)
 	}
 	items, err := s.SetlistRepo.GetSetlistItemsBySetlistID(ctx, id)
 	if err != nil {
@@ -163,7 +164,7 @@ func (s SetlistService) GetDetails(ctx context.Context, id int, bandID int) (Set
 
 func (s SetlistService) AddItem(ctx context.Context, setlistID int, bandID int, payload AddItemPayload) (model.SetlistItem, error) {
 	if _, err := s.SetlistRepo.GetSetlistByID(ctx, setlistID, bandID); err != nil {
-		return model.SetlistItem{}, ErrSetlistNotFound
+		return model.SetlistItem{}, mapNotFound(err, ErrSetlistNotFound)
 	}
 
 	var notes *string
@@ -180,14 +181,14 @@ func (s SetlistService) AddItem(ctx context.Context, setlistID int, bandID int, 
 		itemID := int32(payload.ItemID)
 		item.SongID = &itemID
 		if _, err := s.SongRepo.GetSongByID(ctx, payload.ItemID, bandID); err != nil {
-			return model.SetlistItem{}, ErrItemNotFound
+			return model.SetlistItem{}, mapNotFound(err, ErrItemNotFound)
 		}
 	} else if payload.ItemType == "interlude" {
 		itemID := int32(payload.ItemID)
 		item.InterludeID = &itemID
 		interlude, err := s.InterludeRepo.GetInterludeByID(ctx, payload.ItemID, bandID)
 		if err != nil {
-			return model.SetlistItem{}, ErrItemNotFound
+			return model.SetlistItem{}, mapNotFound(err, ErrItemNotFound)
 		}
 		item.Notes = interlude.Script
 	} else {
@@ -198,7 +199,7 @@ func (s SetlistService) AddItem(ctx context.Context, setlistID int, bandID int, 
 
 func (s SetlistService) UpdateOrder(ctx context.Context, setlistID int, bandID int, payload UpdateOrderPayload) error {
 	if _, err := s.SetlistRepo.GetSetlistByID(ctx, setlistID, bandID); err != nil {
-		return ErrSetlistNotFound
+		return mapNotFound(err, ErrSetlistNotFound)
 	}
 	if len(payload.ItemIDs) == 0 {
 		return nil
@@ -211,14 +212,28 @@ func (s SetlistService) UpdateItem(ctx context.Context, itemID int, bandID int, 
 	if payload.Notes != "" {
 		notes = &payload.Notes
 	}
-	return s.SetlistRepo.UpdateSetlistItem(ctx, itemID, bandID, notes)
+	item, err := s.SetlistRepo.UpdateSetlistItem(ctx, itemID, bandID, notes)
+	if err != nil {
+		return model.SetlistItem{}, mapNotFound(err, ErrItemNotFound)
+	}
+	return item, nil
 }
 
 func (s SetlistService) DeleteItem(ctx context.Context, itemID int, bandID int) error {
-	return s.SetlistRepo.DeleteSetlistItem(ctx, itemID, bandID)
+	if err := s.SetlistRepo.DeleteSetlistItem(ctx, itemID, bandID); err != nil {
+		return mapNotFound(err, ErrItemNotFound)
+	}
+	return nil
 }
 
 func (s SetlistService) Duplicate(ctx context.Context, originalSetlistID int, bandID int, newName, newColor string) (model.Setlist, error) {
+	if newName == "" {
+		return model.Setlist{}, ErrSetlistNameRequired
+	}
+	if newColor == "" || !hexColorRegex.MatchString(newColor) {
+		return model.Setlist{}, ErrInvalidColor
+	}
+
 	tx, err := s.SetlistRepo.BeginTx(ctx)
 	if err != nil {
 		return model.Setlist{}, err
@@ -227,7 +242,7 @@ func (s SetlistService) Duplicate(ctx context.Context, originalSetlistID int, ba
 
 	_, err = s.SetlistRepo.GetSetlistByID(ctx, originalSetlistID, bandID)
 	if err != nil {
-		return model.Setlist{}, errors.New("original setlist not found or does not belong to the user's band")
+		return model.Setlist{}, mapNotFound(err, ErrSetlistNotFound)
 	}
 
 	originalItems, err := s.SetlistRepo.GetSetlistItemsBySetlistID(ctx, originalSetlistID)

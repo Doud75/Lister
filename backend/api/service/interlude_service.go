@@ -7,6 +7,11 @@ import (
 	"setlist/api/repository"
 )
 
+var (
+	ErrInterludeNotFound      = errors.New("interlude not found or does not belong to the user's band")
+	ErrInterludeTitleRequired = errors.New("interlude title cannot be empty")
+)
+
 type CreateInterludePayload struct {
 	Title           string  `json:"title"`
 	Speaker         *string `json:"speaker"`
@@ -27,7 +32,7 @@ type InterludeService struct {
 
 func (s InterludeService) Create(ctx context.Context, payload CreateInterludePayload, bandID int) (model.Interlude, error) {
 	if payload.Title == "" {
-		return model.Interlude{}, errors.New("interlude title cannot be empty")
+		return model.Interlude{}, ErrInterludeTitleRequired
 	}
 
 	interlude := model.Interlude{
@@ -48,13 +53,13 @@ func (s InterludeService) GetAllForBand(ctx context.Context, bandID int) ([]mode
 func (s InterludeService) Update(ctx context.Context, id int, bandID int, payload UpdateInterludePayload) (model.Interlude, error) {
 	interlude, err := s.InterludeRepo.GetInterludeByID(ctx, id, bandID)
 	if err != nil {
-		return model.Interlude{}, errors.New("interlude not found")
+		return model.Interlude{}, mapNotFound(err, ErrInterludeNotFound)
 	}
 
 	if payload.Title != "" {
 		interlude.Title = payload.Title
 	} else {
-		return model.Interlude{}, errors.New("interlude title cannot be empty")
+		return model.Interlude{}, ErrInterludeTitleRequired
 	}
 
 	if payload.Speaker != nil {

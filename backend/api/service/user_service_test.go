@@ -9,6 +9,7 @@ import (
 	"setlist/api/repository/mocks"
 	"setlist/auth"
 
+	"github.com/jackc/pgx/v5"
 	"go.uber.org/mock/gomock"
 )
 
@@ -224,8 +225,8 @@ func TestUserService_CreateBand(t *testing.T) {
 	t.Run("EmptyName", func(t *testing.T) {
 		band, err := svc.CreateBand(ctx, "", 1)
 
-		if err == nil {
-			t.Fatal("expected error for empty band name, got nil")
+		if !errors.Is(err, ErrBandNameRequired) {
+			t.Fatalf("expected ErrBandNameRequired, got %v", err)
 		}
 		if band.ID != 0 {
 			t.Errorf("expected zero Band on error, got ID=%d", band.ID)
@@ -260,11 +261,8 @@ func TestUserService_LeaveBand(t *testing.T) {
 		mockUserRepo.EXPECT().GetAdminCountInBand(ctx, bandID).Return(1, nil)
 
 		err := svc.LeaveBand(ctx, userID, bandID)
-		if err == nil {
-			t.Fatal("expected error for last admin, got nil")
-		}
-		if err.Error() != "last_admin" {
-			t.Errorf("expected 'last_admin' error, got: %v", err)
+		if !errors.Is(err, ErrLastAdmin) {
+			t.Errorf("expected ErrLastAdmin, got: %v", err)
 		}
 	})
 
@@ -282,11 +280,176 @@ func TestUserService_LeaveBand(t *testing.T) {
 	})
 
 	t.Run("NotMember_Error", func(t *testing.T) {
-		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("", errors.New("not found"))
+		mockUserRepo.EXPECT().GetUserRoleInBand(ctx, userID, bandID).Return("", pgx.ErrNoRows)
 
 		err := svc.LeaveBand(ctx, userID, bandID)
-		if err == nil {
-			t.Fatal("expected error for non-member, got nil")
+		if !errors.Is(err, ErrNotBandMember) {
+			t.Errorf("expected ErrNotBandMember, got %v", err)
 		}
 	})
+}
+
+func TestUserService_Signup_Validation(t *testing.T) {
+	svc := UserService{}
+	ctx := context.Background()
+
+	_, err := svc.Signup(ctx, AuthPayload{Username: "ab", Password: "Password123!"})
+
+	var ve *ValidationError
+	if !errors.As(err, &ve) {
+		t.Fatalf("expected *ValidationError, got %v", err)
+	}
+}
+
+func TestUserService_Login_Errors(t *testing.T) {
+	ctx := context.Background()
+	payload := LoginPayload{Username: "testuser", Password: "Password123!"}
+
+	t.Run("unknown user -> ErrInvalidCredentials", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockUserRepo := mocks.NewMockUserRepository(ctrl)
+		svc := UserService{UserRepo: mockUserRepo, JWTSecret: "testsecret"}
+
+		mockUserRepo.EXPECT().FindUserByUsername(ctx, payload.Username).Return(model.User{}, pgx.ErrNoRows)
+
+		_, err := svc.Login(ctx, payload)
+		if !errors.Is(err, ErrInvalidCredentials) {
+			t.Fatalf("expected ErrInvalidCredentials, got %v", err)
+		}
+	})
+
+	t.Run("wrong password -> ErrInvalidCredentials", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockUserRepo := mocks.NewMockUserRepository(ctrl)
+		svc := UserService{UserRepo: mockUserRepo, JWTSecret: "testsecret"}
+
+		hashedPw, _ := hashPasswordForTest("Password123!")
+		mockUserRepo.EXPECT().FindUserByUsername(ctx, payload.Username).
+			Return(model.User{ID: 1, Username: "testuser", PasswordHash: hashedPw}, nil)
+
+		_, err := svc.Login(ctx, LoginPayload{Username: "testuser", Password: "wrongpassword"})
+		if !errors.Is(err, ErrInvalidCredentials) {
+			t.Fatalf("expected ErrInvalidCredentials, got %v", err)
+		}
+	})
+
+	t.Run("propagates unexpected repository errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockUserRepo := mocks.NewMockUserRepository(ctrl)
+		svc := UserService{UserRepo: mockUserRepo, JWTSecret: "testsecret"}
+
+		dbErr := errors.New("connection lost")
+		mockUserRepo.EXPECT().FindUserByUsername(ctx, payload.Username).Return(model.User{}, dbErr)
+
+		_, err := svc.Login(ctx, payload)
+		if !errors.Is(err, dbErr) {
+			t.Fatalf("expected raw db error, got %v", err)
+		}
+	})
+}
+
+func TestUserService_UpdatePassword_Errors(t *testing.T) {
+	ctx := context.Background()
+	const userID = 1
+
+	t.Run("user not found -> ErrUserNotFound", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockUserRepo := mocks.NewMockUserRepository(ctrl)
+		svc := UserService{UserRepo: mockUserRepo}
+
+		mockUserRepo.EXPECT().FindUserByID(ctx, userID).Return(model.User{}, pgx.ErrNoRows)
+
+		err := svc.UpdatePassword(ctx, userID, UpdatePasswordPayload{CurrentPassword: "x", NewPassword: "Password123!"})
+		if !errors.Is(err, ErrUserNotFound) {
+			t.Fatalf("expected ErrUserNotFound, got %v", err)
+		}
+	})
+
+	t.Run("wrong current password -> ErrWrongCurrentPassword", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockUserRepo := mocks.NewMockUserRepository(ctrl)
+		svc := UserService{UserRepo: mockUserRepo}
+
+		hashedPw, _ := hashPasswordForTest("Password123!")
+		mockUserRepo.EXPECT().FindUserByID(ctx, userID).
+			Return(model.User{ID: userID, PasswordHash: hashedPw}, nil)
+
+		err := svc.UpdatePassword(ctx, userID, UpdatePasswordPayload{CurrentPassword: "wrong", NewPassword: "NewPassword123!"})
+		if !errors.Is(err, ErrWrongCurrentPassword) {
+			t.Fatalf("expected ErrWrongCurrentPassword, got %v", err)
+		}
+	})
+}
+
+func TestUserService_InviteMember_Errors(t *testing.T) {
+	ctx := context.Background()
+	const bandID = 5
+
+	t.Run("already member -> ErrAlreadyBandMember", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockUserRepo := mocks.NewMockUserRepository(ctrl)
+		svc := UserService{UserRepo: mockUserRepo}
+
+		existing := model.User{ID: 42, Username: "member"}
+		mockUserRepo.EXPECT().FindUserByUsername(ctx, "member").Return(existing, nil)
+		mockUserRepo.EXPECT().IsUserInBand(ctx, existing.ID, bandID).Return(true, nil)
+
+		_, err := svc.InviteMember(ctx, bandID, InviteMemberPayload{Username: "member"})
+		if !errors.Is(err, ErrAlreadyBandMember) {
+			t.Fatalf("expected ErrAlreadyBandMember, got %v", err)
+		}
+	})
+
+	t.Run("unknown user without password -> ErrUserPasswordRequired", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockUserRepo := mocks.NewMockUserRepository(ctrl)
+		svc := UserService{UserRepo: mockUserRepo}
+
+		mockUserRepo.EXPECT().FindUserByUsername(ctx, "newuser").Return(model.User{}, pgx.ErrNoRows)
+
+		_, err := svc.InviteMember(ctx, bandID, InviteMemberPayload{Username: "newuser"})
+		if !errors.Is(err, ErrUserPasswordRequired) {
+			t.Fatalf("expected ErrUserPasswordRequired, got %v", err)
+		}
+	})
+
+	t.Run("empty username -> ValidationError", func(t *testing.T) {
+		svc := UserService{}
+
+		_, err := svc.InviteMember(ctx, bandID, InviteMemberPayload{Username: ""})
+
+		var ve *ValidationError
+		if !errors.As(err, &ve) {
+			t.Fatalf("expected *ValidationError, got %v", err)
+		}
+	})
+}
+
+func TestUserService_SetDefaultBand_NotMember(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserRepo := mocks.NewMockUserRepository(ctrl)
+	svc := UserService{UserRepo: mockUserRepo}
+	ctx := context.Background()
+
+	mockUserRepo.EXPECT().IsUserInBand(ctx, 1, 5).Return(false, nil)
+
+	if err := svc.SetDefaultBand(ctx, 1, 5); !errors.Is(err, ErrBandNotFoundOrNotMember) {
+		t.Fatalf("expected ErrBandNotFoundOrNotMember, got %v", err)
+	}
 }

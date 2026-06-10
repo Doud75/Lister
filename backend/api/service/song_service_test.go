@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"setlist/api/model"
 	"setlist/api/repository/mocks"
 
+	"github.com/jackc/pgx/v5"
 	"go.uber.org/mock/gomock"
 )
 
@@ -167,5 +169,90 @@ func TestSongService_GetAllForBand(t *testing.T) {
 	}
 	if len(songs) != 2 {
 		t.Errorf("expected 2 songs, got %d", len(songs))
+	}
+}
+
+func TestSongService_Create_Validation(t *testing.T) {
+	svc := SongService{}
+	ctx := context.Background()
+
+	_, err := svc.Create(ctx, CreateSongPayload{Title: ""}, 1)
+	if !errors.Is(err, ErrSongTitleRequired) {
+		t.Fatalf("expected ErrSongTitleRequired, got %v", err)
+	}
+}
+
+func TestSongService_GetByID_NotFoundSentinel(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockSongRepository(ctrl)
+	svc := SongService{SongRepo: mockRepo}
+	ctx := context.Background()
+
+	mockRepo.EXPECT().GetSongByID(ctx, 10, 1).Return(model.Song{}, pgx.ErrNoRows)
+
+	_, err := svc.GetByID(ctx, 10, 1)
+	if !errors.Is(err, ErrSongNotFound) {
+		t.Fatalf("expected ErrSongNotFound, got %v", err)
+	}
+}
+
+func TestSongService_Update_Errors(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("rejects empty title", func(t *testing.T) {
+		svc := SongService{}
+		_, err := svc.Update(ctx, 10, 1, UpdateSongPayload{Title: ""})
+		if !errors.Is(err, ErrSongTitleRequired) {
+			t.Fatalf("expected ErrSongTitleRequired, got %v", err)
+		}
+	})
+
+	t.Run("returns ErrSongNotFound when song is not in band", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSongRepository(ctrl)
+		svc := SongService{SongRepo: mockRepo}
+
+		mockRepo.EXPECT().UpdateSong(ctx, gomock.Any()).Return(model.Song{}, pgx.ErrNoRows)
+
+		_, err := svc.Update(ctx, 10, 1, UpdateSongPayload{Title: "Title"})
+		if !errors.Is(err, ErrSongNotFound) {
+			t.Fatalf("expected ErrSongNotFound, got %v", err)
+		}
+	})
+
+	t.Run("propagates unexpected repository errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockRepo := mocks.NewMockSongRepository(ctrl)
+		svc := SongService{SongRepo: mockRepo}
+
+		dbErr := errors.New("connection lost")
+		mockRepo.EXPECT().UpdateSong(ctx, gomock.Any()).Return(model.Song{}, dbErr)
+
+		_, err := svc.Update(ctx, 10, 1, UpdateSongPayload{Title: "Title"})
+		if !errors.Is(err, dbErr) {
+			t.Fatalf("expected raw db error, got %v", err)
+		}
+	})
+}
+
+func TestSongService_SoftDelete_NotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockSongRepository(ctrl)
+	svc := SongService{SongRepo: mockRepo}
+	ctx := context.Background()
+
+	// The repository signals a missing row with database/sql's sentinel.
+	mockRepo.EXPECT().SoftDeleteSong(ctx, 10, 1).Return(sql.ErrNoRows)
+
+	if err := svc.SoftDelete(ctx, 10, 1); !errors.Is(err, ErrSongNotFound) {
+		t.Fatalf("expected ErrSongNotFound, got %v", err)
 	}
 }

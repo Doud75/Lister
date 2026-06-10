@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+var (
+	ErrInvalidCredentials      = errors.New("invalid credentials")
+	ErrUserNotFound            = errors.New("user not found")
+	ErrWrongCurrentPassword    = errors.New("invalid current password")
+	ErrAlreadyBandMember       = errors.New("user is already a member of this band")
+	ErrUserPasswordRequired    = errors.New("user not found, and password is required to create a new one")
+	ErrNotBandMember           = errors.New("you are not a member of this band")
+	ErrLastAdmin               = errors.New("cannot leave: user is the last admin of the band")
+	ErrBandNameRequired        = errors.New("band name cannot be empty")
+	ErrBandNotFoundOrNotMember = errors.New("band not found or user is not a member")
+)
+
 type UserService struct {
 	UserRepo         repository.UserRepository
 	RefreshTokenRepo repository.RefreshTokenRepository
@@ -95,11 +107,11 @@ func (s UserService) Signup(ctx context.Context, payload AuthPayload) (*AuthResp
 func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResponse, error) {
 	user, err := s.UserRepo.FindUserByUsername(ctx, payload.Username)
 	if err != nil {
-		return nil, errors.New("invalid credentials")
+		return nil, mapNotFound(err, ErrInvalidCredentials)
 	}
 
 	if !auth.CheckPasswordHash(payload.Password, user.PasswordHash) {
-		return nil, errors.New("invalid credentials")
+		return nil, ErrInvalidCredentials
 	}
 
 	bands, err := s.UserRepo.FindBandsWithRoleByUserID(ctx, user.ID)
@@ -148,11 +160,11 @@ func (s UserService) Login(ctx context.Context, payload LoginPayload) (*AuthResp
 func (s UserService) UpdatePassword(ctx context.Context, userID int, payload UpdatePasswordPayload) error {
 	user, err := s.UserRepo.FindUserByID(ctx, userID)
 	if err != nil {
-		return errors.New("user not found")
+		return mapNotFound(err, ErrUserNotFound)
 	}
 
 	if !auth.CheckPasswordHash(payload.CurrentPassword, user.PasswordHash) {
-		return errors.New("invalid current password")
+		return ErrWrongCurrentPassword
 	}
 
 	if err := ValidatePassword(payload.NewPassword); err != nil {
@@ -161,7 +173,7 @@ func (s UserService) UpdatePassword(ctx context.Context, userID int, payload Upd
 
 	newHashedPassword, err := auth.HashPassword(payload.NewPassword)
 	if err != nil {
-		return errors.New("failed to hash new password")
+		return err
 	}
 
 	return s.UserRepo.UpdatePassword(ctx, userID, newHashedPassword)
@@ -173,7 +185,7 @@ func (s UserService) GetBandMembers(ctx context.Context, bandID int) ([]model.Ba
 
 func (s UserService) InviteMember(ctx context.Context, bandID int, payload InviteMemberPayload) (model.User, error) {
 	if payload.Username == "" {
-		return model.User{}, errors.New("username is required")
+		return model.User{}, &ValidationError{Msg: "le nom d'utilisateur est requis"}
 	}
 	if err := ValidateUsername(payload.Username); err != nil {
 		return model.User{}, err
@@ -187,7 +199,7 @@ func (s UserService) InviteMember(ctx context.Context, bandID int, payload Invit
 			return model.User{}, err
 		}
 		if isMember {
-			return model.User{}, errors.New("user is already a member of this band")
+			return model.User{}, ErrAlreadyBandMember
 		}
 
 		err = s.UserRepo.AddUserToBand(ctx, existingUser.ID, bandID, "member")
@@ -202,7 +214,7 @@ func (s UserService) InviteMember(ctx context.Context, bandID int, payload Invit
 	}
 
 	if payload.Password == nil || *payload.Password == "" {
-		return model.User{}, errors.New("user not found, and password is required to create a new one")
+		return model.User{}, ErrUserPasswordRequired
 	}
 	if err := ValidatePassword(*payload.Password); err != nil {
 		return model.User{}, err
@@ -228,7 +240,7 @@ func (s UserService) RemoveMember(ctx context.Context, bandID int, userID int) e
 func (s UserService) LeaveBand(ctx context.Context, userID int, bandID int) error {
 	role, err := s.UserRepo.GetUserRoleInBand(ctx, userID, bandID)
 	if err != nil {
-		return errors.New("you are not a member of this band")
+		return mapNotFound(err, ErrNotBandMember)
 	}
 
 	if role == "admin" {
@@ -237,7 +249,7 @@ func (s UserService) LeaveBand(ctx context.Context, userID int, bandID int) erro
 			return err
 		}
 		if count <= 1 {
-			return errors.New("last_admin")
+			return ErrLastAdmin
 		}
 	}
 
@@ -278,7 +290,7 @@ func (s UserService) SearchUsers(ctx context.Context, query string) ([]model.Use
 
 func (s UserService) CreateBand(ctx context.Context, name string, ownerUserID int) (model.Band, error) {
 	if name == "" {
-		return model.Band{}, errors.New("band name cannot be empty")
+		return model.Band{}, ErrBandNameRequired
 	}
 	band, err := s.UserRepo.CreateBand(ctx, name, ownerUserID)
 	if err != nil {
@@ -299,8 +311,11 @@ func (s UserService) GetUserBands(ctx context.Context, userID int) ([]model.Band
 
 func (s UserService) SetDefaultBand(ctx context.Context, userID int, bandID int) error {
 	isMember, err := s.UserRepo.IsUserInBand(ctx, userID, bandID)
-	if err != nil || !isMember {
-		return errors.New("band not found or you are not a member")
+	if err != nil {
+		return err
+	}
+	if !isMember {
+		return ErrBandNotFoundOrNotMember
 	}
 	return s.UserRepo.SetDefaultBand(ctx, userID, bandID)
 }
