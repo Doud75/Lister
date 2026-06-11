@@ -75,6 +75,15 @@ func (s AuthService) RevokeRefreshToken(ctx context.Context, refreshToken string
 	if err != nil {
 		return err
 	}
+
+	ownerID, _, err := s.RefreshTokenRepo.FindRefreshToken(ctx, hash)
+	if err != nil {
+		return err
+	}
+	if ownerID != userID {
+		return errors.New("refresh token does not belong to user")
+	}
+
 	return s.RefreshTokenRepo.DeleteRefreshToken(ctx, hash)
 }
 

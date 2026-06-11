@@ -92,7 +92,7 @@ func validateJWT(w http.ResponseWriter, r *http.Request, jwtSecret string) (*aut
 	claims := &auth.JWTClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
-	})
+	}, jwt.WithValidMethods([]string{"HS256"}))
 	if err != nil || !token.Valid {
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return nil, false
